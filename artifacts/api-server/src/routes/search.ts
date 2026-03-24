@@ -1,7 +1,6 @@
 import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
 import { busRoutesTable, busStopsTable, routeStopsTable, busFrequencyTable } from "@workspace/db";
-import { eq } from "drizzle-orm";
 import { busState, getCrowdLevel } from "./buses.js";
 
 const router: IRouter = Router();
@@ -20,8 +19,8 @@ router.get("/", async (req, res) => {
     const allRouteStops = await db.select().from(routeStopsTable);
     const allFreq = await db.select().from(busFrequencyTable);
 
-    const sourceLower = source.toLowerCase();
-    const destLower = destination.toLowerCase();
+    const sourceLower = source.toLowerCase().trim();
+    const destLower = destination.toLowerCase().trim();
 
     const matchingSourceStops = allStops.filter(
       (s) =>
@@ -34,16 +33,36 @@ router.get("/", async (req, res) => {
         destLower.includes(s.name.toLowerCase().split(" ")[0])
     );
 
-    const results = [];
+    const results: Array<{
+      routeId: string;
+      routeNumber: string;
+      routeName: string;
+      routeColor: string | null;
+      sourceStop: string;
+      destinationStop: string;
+      etaMinutes: number;
+      crowdLevel: string;
+      isLastBus: boolean;
+      frequency: number;
+      stopCount: number;
+      tags: string[];
+      isRecommended: boolean;
+      isFastest: boolean;
+      isLeastCrowded: boolean;
+      score: number;
+      type: "direct";
+    }> = [];
+
     const now = new Date();
     const dayType =
       now.getDay() === 0 || now.getDay() === 6 ? "weekend" : "weekday";
+    const hour = now.getHours();
 
     for (const route of allRoutes) {
-      const routeStopIds = allRouteStops
+      const routeStopEntries = allRouteStops
         .filter((rs) => rs.routeId === route.id)
-        .sort((a, b) => a.order - b.order)
-        .map((rs) => rs.stopId);
+        .sort((a, b) => a.order - b.order);
+      const routeStopIds = routeStopEntries.map((rs) => rs.stopId);
 
       for (const srcStop of matchingSourceStops) {
         if (!routeStopIds.includes(srcStop.id)) continue;
@@ -55,11 +74,12 @@ router.get("/", async (req, res) => {
           const dstIdx = routeStopIds.indexOf(dstStop.id);
           if (srcIdx >= dstIdx) continue;
 
+          const stopsInBetween = dstIdx - srcIdx;
+
           const freqData = allFreq.find(
             (f) => f.routeId === route.id && f.dayType === dayType
           );
 
-          const hour = now.getHours();
           let frequency = 4;
           if (freqData) {
             if (hour >= 6 && hour < 10) frequency = freqData.morning;
@@ -72,10 +92,11 @@ router.get("/", async (req, res) => {
             (b) => b.routeId === route.id
           );
 
-          const etaMinutes =
-            routeBuses.length > 0
-              ? Math.max(2, Math.min(20, Math.round(Math.random() * 15 + 3)))
-              : Math.round(60 / Math.max(frequency, 1));
+          // More realistic ETA: base on stops + live bus proximity
+          const baseEta = stopsInBetween * 4 + Math.round(Math.random() * 5 + 2);
+          const etaMinutes = routeBuses.length > 0
+            ? Math.max(1, Math.min(baseEta, 35))
+            : Math.round(60 / Math.max(frequency, 1));
 
           const level = getCrowdLevel(route.id, srcIdx);
 
@@ -88,6 +109,11 @@ router.get("/", async (req, res) => {
             return diff > 0 && diff < 45 * 60 * 1000;
           })();
 
+          // Scoring: lower is better (faster + less crowded + more frequent)
+          const crowdPenalty = level === "High" ? 15 : level === "Medium" ? 5 : 0;
+          const freqBonus = Math.round(60 / Math.max(frequency, 1));
+          const score = etaMinutes + crowdPenalty + freqBonus;
+
           results.push({
             routeId: route.id,
             routeNumber: route.number,
@@ -99,6 +125,13 @@ router.get("/", async (req, res) => {
             crowdLevel: level,
             isLastBus,
             frequency,
+            stopCount: stopsInBetween,
+            tags: [],
+            isRecommended: false,
+            isFastest: false,
+            isLeastCrowded: false,
+            score,
+            type: "direct",
           });
           break;
         }
@@ -106,7 +139,54 @@ router.get("/", async (req, res) => {
       }
     }
 
-    results.sort((a, b) => a.etaMinutes - b.etaMinutes);
+    if (results.length === 0) {
+      res.json([]);
+      return;
+    }
+
+    // Sort by score (best overall)
+    results.sort((a, b) => a.score - b.score);
+
+    // Tag: Best / Recommended (best overall score)
+    results[0].isRecommended = true;
+    results[0].tags.push("Recommended");
+
+    // Tag: Fastest (lowest ETA)
+    const fastestIdx = results.reduce(
+      (bestIdx, r, idx) => (r.etaMinutes < results[bestIdx].etaMinutes ? idx : bestIdx),
+      0
+    );
+    if (!results[fastestIdx].isRecommended) {
+      results[fastestIdx].isFastest = true;
+      results[fastestIdx].tags.push("Fastest");
+    } else {
+      results[fastestIdx].tags.push("Fastest");
+    }
+
+    // Tag: Least Crowded (lowest crowd penalty)
+    const crowdOrder = { Low: 0, Medium: 1, High: 2 };
+    const leastCrowdedIdx = results.reduce(
+      (bestIdx, r, idx) =>
+        (crowdOrder[r.crowdLevel as keyof typeof crowdOrder] ?? 1) <
+        (crowdOrder[results[bestIdx].crowdLevel as keyof typeof crowdOrder] ?? 1)
+          ? idx
+          : bestIdx,
+      0
+    );
+    if (!results[leastCrowdedIdx].isRecommended && !results[leastCrowdedIdx].isFastest) {
+      results[leastCrowdedIdx].isLeastCrowded = true;
+      results[leastCrowdedIdx].tags.push("Less Crowded");
+    } else {
+      results[leastCrowdedIdx].tags.push("Less Crowded");
+    }
+
+    // Mark remaining as Alternative
+    results.forEach((r, idx) => {
+      if (idx > 0 && r.tags.length === 0) {
+        r.tags.push("Alternative");
+      }
+    });
+
     res.json(results);
   } catch (err) {
     req.log.error({ err }, "Error searching routes");
