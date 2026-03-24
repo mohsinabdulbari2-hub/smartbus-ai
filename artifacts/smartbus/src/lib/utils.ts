@@ -12,3 +12,17 @@ export function formatMinutes(minutes: number): string {
   const mins = minutes % 60;
   return `${hrs}h ${mins}m`;
 }
+
+export function getCrowdColor(level: string | undefined): string {
+  if (!level) return "bg-muted text-muted-foreground";
+  switch (level.toLowerCase()) {
+    case "low":
+      return "text-success bg-success/15 border-success/30";
+    case "medium":
+      return "text-warning-foreground bg-warning/20 border-warning/40";
+    case "high":
+      return "text-destructive bg-destructive/15 border-destructive/30";
+    default:
+      return "bg-muted text-muted-foreground border-border";
+  }
+}
