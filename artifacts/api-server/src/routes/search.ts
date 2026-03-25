@@ -38,6 +38,7 @@ router.get("/", async (req, res) => {
       routeNumber: string;
       routeName: string;
       routeColor: string | null;
+      busType: string;
       sourceStop: string;
       destinationStop: string;
       etaMinutes: number;
@@ -119,6 +120,7 @@ router.get("/", async (req, res) => {
             routeNumber: route.number,
             routeName: route.name,
             routeColor: route.color,
+            busType: route.busType ?? "Ordinary",
             sourceStop: srcStop.name,
             destinationStop: dstStop.name,
             etaMinutes,

@@ -6,12 +6,16 @@ async function get<T>(path: string): Promise<T> {
   return res.json();
 }
 
+export type BusType = "Ordinary" | "Vajra" | "Volvo" | "Airport" | "MetroFeeder" | "Night";
+
 export type LiveBus = {
   id: string;
   routeId: string;
   routeNumber: string;
   routeName: string;
   routeColor: string;
+  busType: BusType;
+  depot: string | null;
   lat: number;
   lng: number;
   speed: number;
@@ -38,6 +42,9 @@ export type Route = {
   color: string;
   totalStops: number;
   lastBusTime?: string;
+  busType: BusType;
+  depot?: string;
+  distance?: number;
 };
 
 export type RouteDetail = Route & {

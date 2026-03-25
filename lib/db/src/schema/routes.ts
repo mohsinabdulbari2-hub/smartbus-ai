@@ -1,4 +1,4 @@
-import { pgTable, text, real, integer, boolean, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, real, integer } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
@@ -11,6 +11,9 @@ export const busRoutesTable = pgTable("bus_routes", {
   color: text("color").notNull().default("#3B82F6"),
   totalStops: integer("total_stops").notNull().default(0),
   lastBusTime: text("last_bus_time"),
+  busType: text("bus_type").notNull().default("Ordinary"),
+  depot: text("depot"),
+  distance: real("distance_km"),
 });
 
 export const busStopsTable = pgTable("bus_stops", {
@@ -18,6 +21,7 @@ export const busStopsTable = pgTable("bus_stops", {
   name: text("name").notNull(),
   lat: real("lat").notNull(),
   lng: real("lng").notNull(),
+  zone: text("zone"),
 });
 
 export const routeStopsTable = pgTable("route_stops", {

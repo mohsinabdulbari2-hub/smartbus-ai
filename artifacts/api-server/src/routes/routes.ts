@@ -16,6 +16,10 @@ router.get("/", async (req, res) => {
       to: r.to,
       color: r.color,
       totalStops: r.totalStops,
+      lastBusTime: r.lastBusTime,
+      busType: r.busType,
+      depot: r.depot,
+      distance: r.distance,
     })));
   } catch (err) {
     req.log.error({ err }, "Error fetching routes");
@@ -76,14 +80,12 @@ router.get("/:routeId", async (req, res) => {
       .where(eq(routeStopsTable.routeId, routeId))
       .orderBy(routeStopsTable.order);
 
-    const now = new Date();
-    const hour = now.getHours();
     let isLastBus = false;
     if (route.lastBusTime) {
       const [h, m] = route.lastBusTime.split(":").map(Number);
       const lastBus = new Date();
       lastBus.setHours(h, m, 0, 0);
-      const diffMs = lastBus.getTime() - now.getTime();
+      const diffMs = lastBus.getTime() - new Date().getTime();
       isLastBus = diffMs > 0 && diffMs < 45 * 60 * 1000;
     }
 
@@ -94,15 +96,20 @@ router.get("/:routeId", async (req, res) => {
       from: route.from,
       to: route.to,
       color: route.color,
+      totalStops: route.totalStops,
+      lastBusTime: route.lastBusTime,
+      busType: route.busType,
+      depot: route.depot,
+      distance: route.distance,
+      isLastBus,
       stops: stops.map((s) => ({
         id: s.stop.id,
         name: s.stop.name,
         lat: s.stop.lat,
         lng: s.stop.lng,
+        zone: s.stop.zone,
         routeIds: [routeId],
       })),
-      lastBusTime: route.lastBusTime,
-      isLastBus,
     });
   } catch (err) {
     req.log.error({ err }, "Error fetching route");

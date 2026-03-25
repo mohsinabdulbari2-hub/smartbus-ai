@@ -11,6 +11,8 @@ interface BusPosition {
   routeNumber: string;
   routeName: string;
   routeColor: string;
+  busType: string;
+  depot: string | null;
   lat: number;
   lng: number;
   speed: number;
@@ -84,6 +86,12 @@ async function initializeBuses() {
       const nextStopIdx = Math.min(stopIndex + 1, stops.length - 1);
       const nextStop = stops[nextStopIdx].stop;
 
+      // Speed varies by bus type
+      const speedByType: Record<string, number> = {
+        Ordinary: 22, Vajra: 30, Volvo: 35, Airport: 55, MetroFeeder: 25, Night: 28,
+      };
+      const baseSpeed = speedByType[(route as any).busType ?? "Ordinary"] ?? 25;
+
       const busId = `${route.id}-bus-${i}`;
       busState.set(busId, {
         id: busId,
@@ -91,9 +99,11 @@ async function initializeBuses() {
         routeNumber: route.number,
         routeName: route.name,
         routeColor: route.color,
+        busType: (route as any).busType ?? "Ordinary",
+        depot: (route as any).depot ?? null,
         lat: currentStop.lat,
         lng: currentStop.lng,
-        speed: 25 + Math.random() * 15,
+        speed: baseSpeed + Math.random() * 10,
         heading: 0,
         nextStop: nextStop.name,
         nextStopId: nextStop.id,
