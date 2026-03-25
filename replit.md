@@ -31,13 +31,33 @@ SmartBus AI is a live bus tracking and crowd prediction system inspired by Rapid
 - **Route Detail** — stops list + frequency chart
 - **Stop Detail** — upcoming buses with ETA and crowd level
 
+## Mobile App (Expo React Native)
+
+- **Location**: `artifacts/smartbus-mobile/`
+- **Port**: 19356, preview at `/mobile/`
+- **Framework**: Expo Router v6 + React Native
+- **API**: Direct fetch to `https://$EXPO_PUBLIC_DOMAIN/api`
+- **Screens**: Live Fleet (Home), Search/Journey Planner, Routes Directory, Route Detail, Stop Detail
+- **Fonts**: Inter (via @expo-google-fonts/inter)
+- **Theme**: Dark navy #0a0f1e, orange #f97316 primary
+
+Key files:
+- `artifacts/smartbus-mobile/lib/api.ts` — custom fetch-based API client
+- `artifacts/smartbus-mobile/constants/colors.ts` — dark theme palette
+- `artifacts/smartbus-mobile/app/(tabs)/index.tsx` — Live fleet tab
+- `artifacts/smartbus-mobile/app/(tabs)/search.tsx` — Journey planner
+- `artifacts/smartbus-mobile/app/(tabs)/routes.tsx` — Routes grid
+- `artifacts/smartbus-mobile/app/route/[id].tsx` — Route detail
+- `artifacts/smartbus-mobile/app/stop/[id].tsx` — Stop arrivals
+
 ## Structure
 
 ```text
 artifacts-monorepo/
 ├── artifacts/
-│   ├── api-server/         # Express API server
-│   └── smartbus/           # React+Vite frontend (SmartBus AI)
+│   ├── api-server/         # Express API server (port 8080)
+│   ├── smartbus/           # React+Vite frontend (port 19337)
+│   └── smartbus-mobile/    # Expo React Native mobile app (port 19356)
 ├── lib/
 │   ├── api-spec/           # OpenAPI spec + Orval codegen config
 │   ├── api-client-react/   # Generated React Query hooks
