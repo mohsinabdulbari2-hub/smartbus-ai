@@ -52,7 +52,7 @@ export type Route = {
 };
 
 export type RouteDetail = Route & {
-  stops: { id: string; name: string }[];
+  stops: { id: string; name: string; lat: number; lng: number }[];
 };
 
 export type FrequencyData = {
@@ -103,7 +103,8 @@ export const api = {
   getLiveBuses: () => get<LiveBus[]>("/buses/live"),
   getRoutes: () => get<Route[]>("/routes"),
   getRoute: (id: string) => get<RouteDetail>(`/routes/${id}`),
-  getRouteFrequency: (id: string) => get<FrequencyData>(`/routes/${id}/frequency`),
+  getRouteFrequency: (id: string, dayType: "weekday" | "weekend" = "weekday") =>
+    get<FrequencyData>(`/routes/${id}/frequency?dayType=${dayType}`),
   getStops: () => get<BusStop[]>("/stops"),
   getStopEta: (id: string) => get<EtaEntry[]>(`/stops/${id}/eta`),
   getStopCrowd: (id: string) => get<CrowdInfo>(`/stops/${id}/crowd`),

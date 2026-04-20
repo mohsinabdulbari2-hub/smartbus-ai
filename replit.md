@@ -15,10 +15,12 @@ SmartBus AI is a live bus tracking and crowd prediction system inspired by Rapid
 - **Validation**: Zod (`zod/v4`), `drizzle-zod`
 - **API codegen**: Orval (from OpenAPI spec)
 - **Build**: esbuild (CJS bundle)
-- **Frontend**: React + Vite + Tailwind CSS v4
-- **Map**: react-leaflet + OpenStreetMap (no API key needed)
+- **Frontend (web)**: React + Vite + Tailwind CSS v4
+- **Mobile**: Expo / React Native (Expo Router, react-query, react-native-svg, expo-blur, expo-haptics, expo-linear-gradient, react-native-reanimated 4)
+- **Map**: react-leaflet (web) + custom SVG mini-map (mobile, no API key)
 - **Charts**: Recharts (frequency bar charts)
-- **Animations**: framer-motion
+- **Animations**: framer-motion (web), react-native-reanimated (mobile)
+- **Mobile UI theme**: Premium dark palette — bg #0F172A, surface #1E293B, primary #2563EB, secondary #7C3AED. Reusable tokens in `artifacts/smartbus-mobile/constants/{colors,theme}.ts` and primitives in `artifacts/smartbus-mobile/components/ui/*` (Card, Badge, Button, PulseDot, AnimatedProgress, Skeleton, CrowdMeter, RouteMiniMap, SmartSuggestion).
 
 ## Features
 

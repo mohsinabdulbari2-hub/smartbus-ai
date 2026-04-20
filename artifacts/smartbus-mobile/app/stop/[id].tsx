@@ -1,7 +1,9 @@
 import { Feather } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
+import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import { router, useLocalSearchParams, useNavigation } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import React, { useEffect } from "react";
 import {
   FlatList,
@@ -10,60 +12,72 @@ import {
   Text,
   View,
 } from "react-native";
+import Animated, { FadeInDown } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+
 import { CrowdBadge, LastBusBadge } from "@/components/CrowdBadge";
+import { Card } from "@/components/ui/Card";
+import { Badge } from "@/components/ui/Badge";
+import { CrowdMeter } from "@/components/ui/CrowdMeter";
+import { PulseDot } from "@/components/ui/PulseDot";
+import { CardSkeleton } from "@/components/ui/Skeleton";
 import Colors from "@/constants/colors";
+import { Radius, Shadow, Spacing, Type } from "@/constants/theme";
 import { api, EtaEntry } from "@/lib/api";
 
 function EtaCard({ eta, index }: { eta: EtaEntry; index: number }) {
   const isNext = index === 0;
   return (
-    <Pressable
-      style={({ pressed }) => [
-        styles.etaCard,
-        isNext && styles.etaCardNext,
-        pressed && { opacity: 0.85 },
-      ]}
-      onPress={() => {
-        Haptics.selectionAsync();
-        router.push({ pathname: "/route/[id]", params: { id: eta.routeId } });
-      }}
-    >
-      {isNext && <View style={styles.nextBar} />}
-
-      <View style={styles.etaRow}>
-        <View style={[styles.routeBadge, { backgroundColor: eta.routeColor || Colors.primary }]}>
-          <Text style={styles.routeNumber}>{eta.routeNumber}</Text>
-        </View>
-        <View style={styles.etaInfo}>
-          <Text style={styles.routeName} numberOfLines={1}>{eta.routeName}</Text>
-          <View style={styles.badgeRow}>
-            <CrowdBadge level={eta.crowdLevel} />
-            {eta.isLastBus && <LastBusBadge />}
+    <Animated.View entering={FadeInDown.delay(index * 60).springify()}>
+      <Card
+        onPress={() => router.push({ pathname: "/route/[id]", params: { id: eta.routeId } })}
+        glow={isNext ? Colors.primaryGlow : undefined}
+        style={{ marginBottom: 10 }}
+      >
+        {isNext && (
+          <LinearGradient
+            colors={Colors.gradients.primary}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={{ height: 3 }}
+          />
+        )}
+        <View style={{ padding: 14, gap: isNext ? 12 : 0 }}>
+          <View style={styles.etaRow}>
+            <LinearGradient
+              colors={isNext ? Colors.gradients.primary : ["#475569", "#334155"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.etaBadge}
+            >
+              <Text style={styles.etaBadgeText} numberOfLines={1}>{eta.routeNumber}</Text>
+            </LinearGradient>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.etaName} numberOfLines={1}>{eta.routeName}</Text>
+              <View style={{ flexDirection: "row", gap: 5, marginTop: 5, flexWrap: "wrap" }}>
+                <CrowdBadge level={eta.crowdLevel} />
+                {eta.isLastBus && <LastBusBadge />}
+              </View>
+            </View>
+            <View style={{ alignItems: "flex-end" }}>
+              <Text style={[styles.etaMin, isNext && { color: Colors.primary, fontSize: 36 }]}>
+                {eta.etaMinutes}
+              </Text>
+              <Text style={styles.etaUnit}>{isNext ? "min away" : "min"}</Text>
+            </View>
           </View>
-        </View>
-        <View style={styles.etaTimeBox}>
-          {isNext ? (
-            <>
-              <Text style={styles.etaMinutes}>{eta.etaMinutes}</Text>
-              <Text style={styles.etaLabel}>min away</Text>
-            </>
-          ) : (
-            <>
-              <Text style={styles.etaMinutesAlt}>{eta.etaMinutes}</Text>
-              <Text style={styles.etaLabel}>min</Text>
-            </>
+
+          {isNext && (
+            <View style={styles.nextBanner}>
+              <PulseDot color={Colors.primary} size={8} />
+              <Text style={styles.nextBannerText}>
+                Arriving next — {eta.etaMinutes === 0 ? "At stop" : `${eta.etaMinutes} min`}
+              </Text>
+            </View>
           )}
         </View>
-      </View>
-
-      {isNext && (
-        <View style={styles.nextFooter}>
-          <Feather name="clock" size={12} color={Colors.primary} />
-          <Text style={styles.nextFooterText}>Arriving next — {eta.etaMinutes === 0 ? "At stop" : `${eta.etaMinutes} min`}</Text>
-        </View>
-      )}
-    </Pressable>
+      </Card>
+    </Animated.View>
   );
 }
 
@@ -94,69 +108,100 @@ export default function StopDetailScreen() {
   const stop = stops?.find((s) => s.id === id);
 
   useEffect(() => {
-    if (stop) navigation.setOptions({ title: stop.name });
-  }, [stop]);
-
-  const crowdColor =
-    crowd?.level === "High" ? Colors.danger
-    : crowd?.level === "Medium" ? Colors.warning
-    : Colors.success;
+    navigation.setOptions({ headerShown: false });
+  }, []);
 
   return (
-    <View style={[styles.container, { backgroundColor: Colors.dark.background }]}>
-      {/* Stop info hero */}
-      <View style={styles.hero}>
-        <View style={styles.heroTop}>
-          <View style={styles.stopIcon}>
-            <Feather name="map-pin" size={24} color={Colors.primary} />
-          </View>
-          <View style={styles.stopInfo}>
-            <Text style={styles.stopName} numberOfLines={2}>
-              {stop?.name ?? `Stop ${id}`}
-            </Text>
-            {stop?.routeIds && (
-              <Text style={styles.routeCount}>{stop.routeIds.length} routes serve this stop</Text>
-            )}
-          </View>
-        </View>
+    <View style={styles.root}>
+      <StatusBar style="light" />
+      <LinearGradient colors={["#1E293B", "#0F172A"]} style={StyleSheet.absoluteFillObject} />
 
-        {/* Crowd info */}
-        {crowd && (
-          <View style={[styles.crowdCard, { borderColor: crowdColor + "40" }]}>
-            <View style={styles.crowdLeft}>
-              <Feather name="users" size={16} color={crowdColor} />
-              <Text style={styles.crowdLabel}>Current Crowd</Text>
-            </View>
-            <View style={styles.crowdRight}>
-              <CrowdBadge level={crowd.level} />
-              <Text style={styles.crowdPassengers}>~{crowd.estimatedPassengers} passengers</Text>
-            </View>
-          </View>
-        )}
-      </View>
-
-      {/* Arrivals header */}
-      <View style={styles.arrivalsHeader}>
-        <Text style={styles.arrivalsTitle}>Upcoming Arrivals</Text>
-        <Pressable onPress={() => { Haptics.selectionAsync(); refetch(); }} style={styles.refreshBtn}>
-          <Feather name="refresh-cw" size={14} color={Colors.primary} />
-          <Text style={styles.refreshText}>{isRefetching ? "Updating..." : "Refresh"}</Text>
-        </Pressable>
-      </View>
+      <Pressable
+        onPress={() => { Haptics.selectionAsync(); router.back(); }}
+        style={[styles.backBtn, { top: insets.top + 12 }]}
+      >
+        <Feather name="arrow-left" size={20} color={Colors.dark.text} />
+      </Pressable>
 
       <FlatList
-        data={etas}
+        data={etas ?? []}
         keyExtractor={(e, i) => `${e.busId}-${i}`}
         renderItem={({ item, index }) => <EtaCard eta={item} index={index} />}
-        contentContainerStyle={[styles.list, { paddingBottom: insets.bottom + 20 }]}
+        contentContainerStyle={{
+          paddingTop: insets.top + 60,
+          paddingBottom: insets.bottom + 120,
+          paddingHorizontal: Spacing.lg,
+        }}
         showsVerticalScrollIndicator={false}
-        ListEmptyComponent={
-          <View style={styles.empty}>
-            <Feather name="clock" size={48} color={Colors.dark.textMuted} />
-            <Text style={styles.emptyTitle}>
-              {isLoading ? "Checking arrivals..." : "No buses expected soon"}
-            </Text>
+        ListHeaderComponent={
+          <View style={{ gap: 16, marginBottom: 16 }}>
+            <Card>
+              <View style={{ padding: 18, gap: 14 }}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
+                  <View style={styles.stopIcon}>
+                    <Feather name="map-pin" size={22} color={Colors.primary} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.eyebrow}>BUS STOP</Text>
+                    <Text style={styles.stopName} numberOfLines={2}>
+                      {stop?.name ?? "Loading…"}
+                    </Text>
+                    {stop?.routeIds && (
+                      <Text style={styles.routeCount}>
+                        {stop.routeIds.length} routes serve this stop
+                      </Text>
+                    )}
+                  </View>
+                </View>
+
+                {crowd && (
+                  <View style={{ gap: 8 }}>
+                    <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+                      <Text style={styles.crowdLabel}>Current crowd</Text>
+                      <Badge
+                        variant="neutral"
+                        icon="users"
+                        label={`~${crowd.estimatedPassengers} people`}
+                        size="sm"
+                      />
+                    </View>
+                    <CrowdMeter level={crowd.level} />
+                    {crowd.reason && (
+                      <Text style={styles.crowdReason}>{crowd.reason}</Text>
+                    )}
+                  </View>
+                )}
+              </View>
+            </Card>
+
+            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                <PulseDot color={Colors.success} size={9} />
+                <Text style={styles.sectionTitle}>Upcoming arrivals</Text>
+              </View>
+              <Pressable
+                onPress={() => { Haptics.selectionAsync(); refetch(); }}
+                style={styles.refreshBtn}
+              >
+                <Feather name={isRefetching ? "loader" : "refresh-cw"} size={13} color={Colors.primary} />
+                <Text style={styles.refreshText}>{isRefetching ? "Updating" : "Refresh"}</Text>
+              </Pressable>
+            </View>
           </View>
+        }
+        ListEmptyComponent={
+          isLoading ? (
+            <View style={{ gap: 12 }}>
+              <CardSkeleton />
+              <CardSkeleton />
+            </View>
+          ) : (
+            <View style={styles.empty}>
+              <Feather name="clock" size={36} color={Colors.dark.textMuted} />
+              <Text style={styles.emptyText}>No buses expected soon</Text>
+              <Text style={styles.emptySub}>Pull to refresh or check back in a few minutes</Text>
+            </View>
+          )
         }
       />
     </View>
@@ -164,100 +209,65 @@ export default function StopDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  hero: {
-    backgroundColor: "#ffffff",
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: "#e2e8f0",
+  root: { flex: 1, backgroundColor: Colors.dark.background },
+
+  backBtn: {
+    position: "absolute",
+    left: 16,
+    width: 40, height: 40, borderRadius: 20,
+    backgroundColor: "rgba(30,41,59,0.85)",
+    borderWidth: 1, borderColor: Colors.dark.cardBorder,
+    alignItems: "center", justifyContent: "center",
+    zIndex: 10,
+    ...Shadow.card,
   },
-  heroTop: { flexDirection: "row", gap: 16, marginBottom: 16, alignItems: "center" },
+
+  eyebrow: { ...Type.micro, color: Colors.primary, letterSpacing: 1.5 },
+  stopName: { ...Type.heading, color: Colors.dark.text, marginTop: 2 },
+  routeCount: { ...Type.caption, color: Colors.dark.textMuted, marginTop: 4 },
+
   stopIcon: {
-    width: 56,
-    height: 56,
-    borderRadius: 18,
-    backgroundColor: "rgba(37,99,235,0.1)",
-    borderWidth: 1,
-    borderColor: "rgba(37,99,235,0.2)",
-    alignItems: "center",
-    justifyContent: "center",
+    width: 52, height: 52, borderRadius: Radius.lg,
+    backgroundColor: "rgba(37,99,235,0.15)",
+    borderWidth: 1, borderColor: "rgba(37,99,235,0.3)",
+    alignItems: "center", justifyContent: "center",
   },
-  stopInfo: { flex: 1 },
-  stopName: { fontSize: 18, fontFamily: "Inter_700Bold", color: "#0f172a", marginBottom: 4 },
-  routeCount: { fontSize: 13, fontFamily: "Inter_400Regular", color: "#64748b" },
-  crowdCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: "#ffffff",
-    borderRadius: 16,
-    padding: 14,
-    borderWidth: 1,
+
+  crowdLabel: { ...Type.caption, color: Colors.dark.textMuted },
+  crowdReason: { ...Type.caption, color: Colors.dark.textFaint, fontStyle: "italic" },
+
+  sectionTitle: { ...Type.heading, color: Colors.dark.text },
+  refreshBtn: {
+    flexDirection: "row", alignItems: "center", gap: 5,
+    paddingHorizontal: 12, paddingVertical: 7,
+    backgroundColor: Colors.dark.surface,
+    borderRadius: Radius.pill,
+    borderWidth: 1, borderColor: Colors.dark.cardBorder,
   },
-  crowdLeft: { flexDirection: "row", alignItems: "center", gap: 8 },
-  crowdLabel: { fontSize: 14, fontFamily: "Inter_500Medium", color: "#94a3b8" },
-  crowdRight: { alignItems: "flex-end", gap: 4 },
-  crowdPassengers: { fontSize: 12, fontFamily: "Inter_400Regular", color: "#64748b" },
-  arrivalsHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: "#e2e8f0",
+  refreshText: { ...Type.caption, color: Colors.primary, fontFamily: "Inter_700Bold" },
+
+  etaRow: { flexDirection: "row", alignItems: "center", gap: 12 },
+  etaBadge: {
+    minWidth: 54, height: 48,
+    paddingHorizontal: 8,
+    borderRadius: Radius.md,
+    alignItems: "center", justifyContent: "center",
   },
-  arrivalsTitle: { fontSize: 16, fontFamily: "Inter_700Bold", color: "#0f172a" },
-  refreshBtn: { flexDirection: "row", alignItems: "center", gap: 6 },
-  refreshText: { fontSize: 13, fontFamily: "Inter_500Medium", color: Colors.primary },
-  list: { paddingHorizontal: 20, paddingTop: 16, gap: 12 },
-  etaCard: {
-    backgroundColor: "#ffffff",
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: "#e2e8f0",
-    overflow: "hidden",
+  etaBadgeText: { ...Type.subtitle, color: "#fff" },
+  etaName: { ...Type.subtitle, color: Colors.dark.text },
+  etaMin: { fontSize: 26, fontFamily: "Inter_700Bold", color: Colors.dark.text, lineHeight: 32 },
+  etaUnit: { ...Type.caption, color: Colors.dark.textMuted },
+
+  nextBanner: {
+    flexDirection: "row", alignItems: "center", gap: 8,
+    paddingHorizontal: 12, paddingVertical: 8,
+    backgroundColor: "rgba(37,99,235,0.12)",
+    borderRadius: Radius.md,
+    borderWidth: 1, borderColor: "rgba(37,99,235,0.25)",
   },
-  etaCardNext: {
-    borderColor: "rgba(37,99,235,0.4)",
-    shadowColor: "#2563eb",
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 4 },
-  },
-  nextBar: { height: 2, backgroundColor: Colors.primary },
-  etaRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 14,
-    padding: 16,
-  },
-  routeBadge: {
-    width: 52,
-    height: 52,
-    borderRadius: 16,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  routeNumber: { fontSize: 15, fontFamily: "Inter_700Bold", color: "#fff" },
-  etaInfo: { flex: 1 },
-  routeName: { fontSize: 14, fontFamily: "Inter_600SemiBold", color: "#0f172a", marginBottom: 6 },
-  badgeRow: { flexDirection: "row", gap: 6, alignItems: "center" },
-  etaTimeBox: { alignItems: "flex-end" },
-  etaMinutes: { fontSize: 36, fontFamily: "Inter_700Bold", color: Colors.primary, lineHeight: 40 },
-  etaMinutesAlt: { fontSize: 26, fontFamily: "Inter_700Bold", color: "#0f172a", lineHeight: 32 },
-  etaLabel: { fontSize: 12, fontFamily: "Inter_400Regular", color: "#64748b" },
-  nextFooter: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    backgroundColor: "rgba(37,99,235,0.06)",
-    borderTopWidth: 1,
-    borderTopColor: "rgba(37,99,235,0.15)",
-  },
-  nextFooterText: { fontSize: 12, fontFamily: "Inter_600SemiBold", color: Colors.primary },
-  empty: { alignItems: "center", justifyContent: "center", paddingTop: 60, gap: 16 },
-  emptyTitle: { fontSize: 16, fontFamily: "Inter_500Medium", color: Colors.dark.textMuted },
+  nextBannerText: { ...Type.caption, color: Colors.primary, fontFamily: "Inter_700Bold" },
+
+  empty: { alignItems: "center", paddingVertical: 60, gap: 8 },
+  emptyText: { ...Type.subtitle, color: Colors.dark.text, marginTop: 12 },
+  emptySub: { ...Type.caption, color: Colors.dark.textMuted },
 });
