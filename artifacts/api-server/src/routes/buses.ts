@@ -78,23 +78,54 @@ function isLastBus(lastBusTime: string | null): boolean {
   return diffMs > 0 && diffMs < 45 * 60 * 1000;
 }
 
+// Cache route stop sequences in-memory (built once from a single bulk query)
+let routeStopsCache: Map<string, Array<{ stop: typeof busStopsTable.$inferSelect; order: number }>> | null = null;
+
+async function getRouteStopsCache() {
+  if (routeStopsCache) return routeStopsCache;
+  const rows = await db
+    .select({ stop: busStopsTable, order: routeStopsTable.order, routeId: routeStopsTable.routeId })
+    .from(routeStopsTable)
+    .innerJoin(busStopsTable, eq(routeStopsTable.stopId, busStopsTable.id))
+    .orderBy(routeStopsTable.order);
+  const map = new Map<string, Array<{ stop: typeof busStopsTable.$inferSelect; order: number }>>();
+  for (const r of rows) {
+    let arr = map.get(r.routeId);
+    if (!arr) { arr = []; map.set(r.routeId, arr); }
+    arr.push({ stop: r.stop, order: r.order });
+  }
+  for (const arr of map.values()) arr.sort((a, b) => a.order - b.order);
+  routeStopsCache = map;
+  return map;
+}
+
+// How many routes do we simulate live buses for? With 4,200+ routes, simulating
+// every one would create thousands of buses. Cap to a representative sample.
+const MAX_LIVE_ROUTES = 80;
+const BUSES_PER_ROUTE = 3;
+
 async function initializeBuses() {
   if (initialized) return;
   initialized = true;
 
-  const routes = await db.select().from(busRoutesTable);
+  const allRoutes = await db.select().from(busRoutesTable);
+  const cache = await getRouteStopsCache();
 
-  for (const route of routes) {
-    const stops = await db
-      .select({ stop: busStopsTable, order: routeStopsTable.order })
-      .from(routeStopsTable)
-      .innerJoin(busStopsTable, eq(routeStopsTable.stopId, busStopsTable.id))
-      .where(eq(routeStopsTable.routeId, route.id))
-      .orderBy(routeStopsTable.order);
+  // Pick the routes with the most stops (the long, well-known city corridors)
+  const ranked = allRoutes
+    .map((r) => ({ route: r, len: cache.get(r.id)?.length ?? 0 }))
+    .filter((x) => x.len >= 5)
+    .sort((a, b) => b.len - a.len)
+    .slice(0, MAX_LIVE_ROUTES)
+    .map((x) => x.route);
 
+  console.log(`[buses] initializing ~${ranked.length * BUSES_PER_ROUTE} live buses across ${ranked.length} routes`);
+
+  for (const route of ranked) {
+    const stops = cache.get(route.id) ?? [];
     if (stops.length < 2) continue;
 
-    const numBuses = Math.max(2, Math.floor(stops.length / 3));
+    const numBuses = BUSES_PER_ROUTE;
     for (let i = 0; i < numBuses; i++) {
       const stopIndex = Math.floor((i / numBuses) * (stops.length - 1));
       const currentStop = stops[stopIndex].stop;
@@ -139,18 +170,7 @@ async function initializeBuses() {
 }
 
 async function updateBusPositions() {
-  const routes = await db.select().from(busRoutesTable);
-  const routeStopsCache = new Map<string, Array<{ stop: typeof busStopsTable.$inferSelect; order: number }>>();
-
-  for (const route of routes) {
-    const stops = await db
-      .select({ stop: busStopsTable, order: routeStopsTable.order })
-      .from(routeStopsTable)
-      .innerJoin(busStopsTable, eq(routeStopsTable.stopId, busStopsTable.id))
-      .where(eq(routeStopsTable.routeId, route.id))
-      .orderBy(routeStopsTable.order);
-    routeStopsCache.set(route.id, stops);
-  }
+  const routeStopsCache = await getRouteStopsCache();
 
   for (const [busId, bus] of busState) {
     const stops = routeStopsCache.get(bus.routeId);
