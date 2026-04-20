@@ -49,9 +49,11 @@ function PulseDot() {
 }
 
 function BusCard({ bus }: { bus: LiveBus }) {
-  const crowdBarPct = bus.crowdLevel === "High" ? 0.85 : bus.crowdLevel === "Medium" ? 0.5 : 0.22;
   const crowdColor = bus.crowdLevel === "High" ? Colors.danger : bus.crowdLevel === "Medium" ? Colors.warning : Colors.success;
-  const typeConf = BUS_TYPE_CONFIG[bus.busType] || BUS_TYPE_CONFIG.Ordinary;
+  const total = bus.totalStops ?? 1;
+  const covered = bus.stopsCovered ?? 0;
+  const remaining = bus.stopsRemaining ?? Math.max(0, total - 1 - covered);
+  const journeyPct = total > 1 ? Math.min(1, Math.max(0, covered / (total - 1))) : 0;
 
   return (
     <Pressable
@@ -79,14 +81,35 @@ function BusCard({ bus }: { bus: LiveBus }) {
             <Text style={s.speedUnit}>km/h</Text>
           </View>
         </View>
+
+        {/* Journey progress: stops covered / remaining */}
+        <View style={s.progressBlock}>
+          <View style={s.progressLabels}>
+            <View style={s.progressLeft}>
+              <Feather name="check-circle" size={11} color={Colors.success} />
+              <Text style={s.progressTextStrong}>{covered}</Text>
+              <Text style={s.progressText}>covered</Text>
+            </View>
+            <Text style={s.progressMid}>Stop {Math.min(covered + 1, total)} / {total}</Text>
+            <View style={s.progressRight}>
+              <Text style={s.progressText}>{remaining} left</Text>
+              <Feather name="flag" size={11} color={Colors.primary} />
+            </View>
+          </View>
+          <View style={s.progressBarTrack}>
+            <View style={[s.progressBarFill, { width: `${journeyPct * 100}%` as any, backgroundColor: bus.routeColor || Colors.primary }]} />
+          </View>
+        </View>
+
         <View style={s.cardBottom}>
           <View style={s.badgeRow}>
             <BusTypeBadge busType={bus.busType} />
             <CrowdBadge level={bus.crowdLevel} />
             {bus.isLastBus && <LastBusBadge />}
           </View>
-          <View style={s.crowdBarWrap}>
-            <View style={[s.crowdBar, { width: `${crowdBarPct * 100}%` as any, backgroundColor: crowdColor }]} />
+          <View style={s.crowdIndicator}>
+            <View style={[s.crowdDot, { backgroundColor: crowdColor }]} />
+            <Text style={[s.crowdHint, { color: crowdColor }]}>{bus.crowdLevel}</Text>
           </View>
         </View>
       </View>
@@ -103,6 +126,22 @@ export default function LiveScreen() {
     queryFn: api.getLiveBuses,
     refetchInterval: 3000,
   });
+
+  const refreshSpin = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    if (isRefetching) {
+      refreshSpin.setValue(0);
+      const loop = Animated.loop(
+        Animated.timing(refreshSpin, {
+          toValue: 1,
+          duration: 800,
+          useNativeDriver: Platform.OS !== "web",
+        })
+      );
+      loop.start();
+      return () => loop.stop();
+    }
+  }, [isRefetching]);
 
   const filtered = useMemo(() => {
     if (!buses) return [];
@@ -199,10 +238,16 @@ export default function LiveScreen() {
           {typeFilter === "All" ? "All Active Buses" : `${typeFilter === "MetroFeeder" ? "Metro Feeder" : typeFilter} Buses`}
           <Text style={{ color: Colors.dark.textMuted, fontSize: 13 }}> ({filtered.length})</Text>
         </Text>
-        <View style={s.refreshRow}>
-          <Ionicons name="refresh" size={11} color={Colors.dark.textMuted} />
-          <Text style={s.refreshText}>Live · 3s</Text>
-        </View>
+        <Pressable
+          onPress={() => { Haptics.selectionAsync(); refetch(); }}
+          style={({ pressed }) => [s.refreshBtn, pressed && { opacity: 0.7 }]}
+          hitSlop={8}
+        >
+          <Animated.View style={isRefetching ? { transform: [{ rotate: refreshSpin.interpolate({ inputRange: [0, 1], outputRange: ["0deg", "360deg"] }) }] } : undefined}>
+            <Ionicons name="refresh" size={13} color={Colors.primary} />
+          </Animated.View>
+          <Text style={s.refreshText}>{isRefetching ? "Updating..." : "Refresh"}</Text>
+        </Pressable>
       </View>
 
       <FlatList
@@ -303,8 +348,18 @@ const s = StyleSheet.create({
     marginBottom: 10,
   },
   sectionTitle: { fontSize: 15, fontFamily: "Inter_700Bold", color: "#0f172a" },
-  refreshRow: { flexDirection: "row", alignItems: "center", gap: 4 },
-  refreshText: { fontSize: 11, fontFamily: "Inter_400Regular", color: "#64748b" },
+  refreshBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    backgroundColor: "rgba(249,115,22,0.08)",
+    borderWidth: 1,
+    borderColor: "rgba(249,115,22,0.25)",
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 100,
+  },
+  refreshText: { fontSize: 11, fontFamily: "Inter_600SemiBold", color: Colors.primary },
   list: { paddingHorizontal: 20, gap: 10 },
   card: {
     backgroundColor: "#ffffff",
@@ -341,14 +396,28 @@ const s = StyleSheet.create({
     gap: 6,
   },
   badgeRow: { flexDirection: "row", gap: 5, alignItems: "center", flexWrap: "wrap" },
-  crowdBarWrap: {
-    height: 4,
-    width: 50,
+  progressBlock: { marginBottom: 10 },
+  progressLabels: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 5,
+  },
+  progressLeft: { flexDirection: "row", alignItems: "center", gap: 4 },
+  progressRight: { flexDirection: "row", alignItems: "center", gap: 4 },
+  progressText: { fontSize: 10, fontFamily: "Inter_500Medium", color: "#64748b" },
+  progressTextStrong: { fontSize: 11, fontFamily: "Inter_700Bold", color: Colors.success },
+  progressMid: { fontSize: 10, fontFamily: "Inter_600SemiBold", color: "#0f172a" },
+  progressBarTrack: {
+    height: 5,
     backgroundColor: "#e2e8f0",
-    borderRadius: 2,
+    borderRadius: 3,
     overflow: "hidden",
   },
-  crowdBar: { height: 4, borderRadius: 2 },
+  progressBarFill: { height: 5, borderRadius: 3 },
+  crowdIndicator: { flexDirection: "row", alignItems: "center", gap: 4 },
+  crowdDot: { width: 6, height: 6, borderRadius: 3 },
+  crowdHint: { fontSize: 10, fontFamily: "Inter_700Bold" },
   empty: { alignItems: "center", justifyContent: "center", paddingTop: 80, gap: 14 },
   emptyTitle: { fontSize: 16, fontFamily: "Inter_500Medium", color: "#64748b" },
 });

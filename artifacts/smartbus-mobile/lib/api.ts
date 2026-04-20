@@ -23,6 +23,10 @@ export type LiveBus = {
   nextStop: string;
   nextStopId: string;
   isLastBus: boolean;
+  totalStops: number;
+  stopsCovered: number;
+  stopsRemaining: number;
+  currentStop: string;
 };
 
 export type BusStop = {

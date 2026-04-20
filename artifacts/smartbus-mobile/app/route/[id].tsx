@@ -138,19 +138,39 @@ export default function RouteDetailScreen() {
             <View style={styles.liveIndicator} />
             {"  "}Live Buses on Route
           </Text>
-          {routeBuses.map((bus) => (
-            <View key={bus.id} style={styles.liveBusCard}>
-              <View style={styles.liveBusLeft}>
-                <View style={[styles.liveBusDot, { backgroundColor: Colors.success }]} />
-                <Text style={styles.liveBusNext}>→ {bus.nextStop}</Text>
+          {routeBuses.map((bus) => {
+            const total = bus.totalStops ?? 1;
+            const covered = bus.stopsCovered ?? 0;
+            const remaining = bus.stopsRemaining ?? 0;
+            const pct = total > 1 ? covered / (total - 1) : 0;
+            return (
+              <View key={bus.id} style={styles.liveBusCard}>
+                <View style={styles.liveBusHeader}>
+                  <View style={styles.liveBusLeft}>
+                    <View style={[styles.liveBusDot, { backgroundColor: Colors.success }]} />
+                    <Text style={styles.liveBusNext} numberOfLines={1}>→ {bus.nextStop}</Text>
+                  </View>
+                  <View style={styles.liveBusRight}>
+                    <Text style={styles.liveBusSpeed}>{Number(bus.speed).toFixed(0)} km/h</Text>
+                    <CrowdBadge level={bus.crowdLevel} />
+                    {bus.isLastBus && <LastBusBadge />}
+                  </View>
+                </View>
+                <View style={styles.liveProgressLabels}>
+                  <Text style={styles.liveProgressText}>
+                    <Text style={{ color: Colors.success, fontFamily: "Inter_700Bold" }}>{covered}</Text> covered
+                  </Text>
+                  <Text style={styles.liveProgressMid}>Stop {Math.min(covered + 1, total)} / {total}</Text>
+                  <Text style={styles.liveProgressText}>
+                    <Text style={{ color: Colors.primary, fontFamily: "Inter_700Bold" }}>{remaining}</Text> remaining
+                  </Text>
+                </View>
+                <View style={styles.liveProgressTrack}>
+                  <View style={[styles.liveProgressFill, { width: `${pct * 100}%` as any, backgroundColor: route.color || Colors.primary }]} />
+                </View>
               </View>
-              <View style={styles.liveBusRight}>
-                <Text style={styles.liveBusSpeed}>{Number(bus.speed).toFixed(1)} km/h</Text>
-                <CrowdBadge level={bus.crowdLevel} />
-                {bus.isLastBus && <LastBusBadge />}
-              </View>
-            </View>
-          ))}
+            );
+          })}
         </View>
       )}
 
@@ -287,17 +307,35 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 14,
     marginBottom: 10,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
     borderWidth: 1,
     borderColor: "#e2e8f0",
   },
-  liveBusLeft: { flexDirection: "row", alignItems: "center", gap: 10 },
+  liveBusHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  liveBusLeft: { flexDirection: "row", alignItems: "center", gap: 10, flex: 1 },
   liveBusDot: { width: 8, height: 8, borderRadius: 4 },
-  liveBusNext: { fontSize: 14, fontFamily: "Inter_500Medium", color: "#94a3b8" },
+  liveBusNext: { fontSize: 14, fontFamily: "Inter_500Medium", color: "#0f172a", flex: 1 },
   liveBusRight: { flexDirection: "row", alignItems: "center", gap: 8 },
   liveBusSpeed: { fontSize: 13, fontFamily: "Inter_600SemiBold", color: Colors.primary },
+  liveProgressLabels: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 6,
+  },
+  liveProgressText: { fontSize: 11, fontFamily: "Inter_500Medium", color: "#64748b" },
+  liveProgressMid: { fontSize: 11, fontFamily: "Inter_700Bold", color: "#0f172a" },
+  liveProgressTrack: {
+    height: 5,
+    backgroundColor: "#e2e8f0",
+    borderRadius: 3,
+    overflow: "hidden",
+  },
+  liveProgressFill: { height: 5, borderRadius: 3 },
   freqCard: {
     backgroundColor: "#ffffff",
     borderRadius: 20,

@@ -26,6 +26,10 @@ interface BusPosition {
   stopIndex: number;
   direction: number;
   progress: number;
+  totalStops: number;
+  stopsCovered: number;
+  stopsRemaining: number;
+  currentStop: string;
 }
 
 const busState = new Map<string, BusPosition>();
@@ -125,6 +129,10 @@ async function initializeBuses() {
         stopIndex,
         direction: 1,
         progress: Math.random(),
+        totalStops: stops.length,
+        stopsCovered: stopIndex,
+        stopsRemaining: stops.length - 1 - stopIndex,
+        currentStop: currentStop.name,
       });
     }
   }
@@ -173,8 +181,13 @@ async function updateBusPositions() {
 
     bus.nextStop = to.name;
     bus.nextStopId = to.id;
+    bus.currentStop = from.name;
     bus.distanceToNextStop = Math.round((1 - bus.progress) * 1200);
     bus.crowdLevel = getCrowdLevel(bus.routeId, currentIdx);
+    bus.totalStops = stops.length;
+    // Stops covered along the current direction of travel
+    bus.stopsCovered = bus.direction === 1 ? currentIdx : stops.length - 1 - currentIdx;
+    bus.stopsRemaining = stops.length - 1 - bus.stopsCovered;
 
     const route = routes.find((r) => r.id === bus.routeId);
     bus.isLastBus = isLastBus(route?.lastBusTime ?? null);
