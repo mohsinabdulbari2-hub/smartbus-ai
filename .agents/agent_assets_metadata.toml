@@ -6,3 +6,9 @@ id = "3riqRcziYObGYgf7364dX"
 uri = "file://smartbus-project.tar.gz"
 type = "unspecified"
 title = "SmartBus AI - Full Project Code"
+
+[[outputs]]
+id = "Sq0rriOVBktCfd_XnCKwu"
+uri = "file://smartbus-project.zip"
+type = "unspecified"
+title = "SmartBus AI - Full Project Code (ZIP)"
