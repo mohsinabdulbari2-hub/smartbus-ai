@@ -17,15 +17,16 @@ import {
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { CrowdBadge, BUS_TYPE_CONFIG, getBusTypeGradient, LastBusBadge } from "@/components/CrowdBadge";
+import { BUS_TYPE_CONFIG, getBusTypeGradient, LastBusBadge } from "@/components/CrowdBadge";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { PulseDot } from "@/components/ui/PulseDot";
 import { AnimatedProgress } from "@/components/ui/AnimatedProgress";
 import { CardSkeleton } from "@/components/ui/Skeleton";
 import { SmartSuggestion } from "@/components/ui/SmartSuggestion";
+import { CrowdRow } from "@/components/ui/CrowdRow";
 import Colors from "@/constants/colors";
-import { Radius, Shadow, Spacing, Type } from "@/constants/theme";
+import { MinTouch, Radius, Shadow, Spacing, Type } from "@/constants/theme";
 import { api, type LiveBus, type BusType } from "@/lib/api";
 
 const FILTERS: { key: BusType | "All"; label: string; emoji: string }[] = [
@@ -149,20 +150,21 @@ function Header({
       <Animated.View entering={FadeInUp.duration(450)}>
         <View style={styles.topRow}>
           <View style={{ flex: 1 }}>
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+            <Text style={styles.title}>Live Buses Near You</Text>
+            <View style={styles.liveStatusRow}>
               <PulseDot color={Colors.success} size={10} />
-              <Text style={styles.liveLabel}>LIVE TRACKING</Text>
+              <Text style={styles.liveStatusText}>
+                Updated {timeAgo(lastUpdate)}
+              </Text>
             </View>
-            <Text style={styles.title}>SmartBus AI</Text>
-            <Text style={styles.subtitle}>
-              {total} buses on road · Updated {timeAgo(lastUpdate)}
-            </Text>
           </View>
           <Pressable
             onPress={() => Haptics.selectionAsync()}
             style={styles.profileBtn}
+            accessibilityLabel="Profile"
+            hitSlop={8}
           >
-            <Feather name="user" size={18} color={Colors.dark.text} />
+            <Feather name="user" size={20} color={Colors.dark.text} />
           </Pressable>
         </View>
       </Animated.View>
@@ -171,21 +173,21 @@ function Header({
       <Animated.View entering={FadeInUp.delay(80).duration(450)}>
         <View style={styles.statsRow}>
           <StatCard
-            label="ON ROAD"
+            label="Buses on road"
             value={total}
             icon="🚍"
             gradient={Colors.gradients.primary}
             glow={Colors.primaryGlow}
           />
           <StatCard
-            label="EMPTY"
+            label="Less crowded"
             value={empty}
             icon="🟢"
             gradient={Colors.gradients.success}
             glow="rgba(34,197,94,0.3)"
           />
           <StatCard
-            label="CROWDED"
+            label="Crowded"
             value={crowded}
             icon="🔴"
             gradient={Colors.gradients.danger}
@@ -260,7 +262,7 @@ function BusCard({ bus }: { bus: LiveBus }) {
     <Card
       onPress={() => router.push(`/route/${bus.routeId}` as any)}
       glow={`${config.color}40`}
-      style={{ marginBottom: 12 }}
+      style={{ marginBottom: 14 }}
     >
       {/* Top bar accent */}
       <LinearGradient
@@ -270,8 +272,8 @@ function BusCard({ bus }: { bus: LiveBus }) {
         style={styles.busAccent}
       />
 
-      <View style={{ padding: 16, gap: 12 }}>
-        {/* Header row */}
+      <View style={{ padding: 18, gap: 14 }}>
+        {/* Header row — BIG route number + destination */}
         <View style={styles.busHeaderRow}>
           <LinearGradient
             colors={gradient}
@@ -279,20 +281,33 @@ function BusCard({ bus }: { bus: LiveBus }) {
             end={{ x: 1, y: 1 }}
             style={styles.busNumberBadge}
           >
-            <Text style={styles.busNumberText} numberOfLines={1}>{bus.routeNumber}</Text>
+            <Text style={styles.busNumberText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
+              {bus.routeNumber}
+            </Text>
           </LinearGradient>
 
           <View style={{ flex: 1 }}>
-            <Text style={styles.routeName} numberOfLines={1}>{bus.routeName}</Text>
-            <Text style={styles.routePath} numberOfLines={1}>
-              <Feather name="navigation" size={11} color={Colors.dark.textMuted} /> {bus.currentStop}
+            <Text style={styles.toLabel}>TO</Text>
+            <Text style={styles.destinationText} numberOfLines={1}>
+              {bus.routeName.split("⇔").pop()?.trim() || bus.routeName}
             </Text>
           </View>
+        </View>
 
+        {/* Next stop — highlighted */}
+        <View style={styles.nextStopRow}>
+          <View style={styles.nextStopIcon}>
+            <Feather name="map-pin" size={16} color={Colors.primary} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.nextStopLabel}>NEXT STOP</Text>
+            <Text style={styles.nextStopValue} numberOfLines={1}>
+              {bus.nextStop}
+            </Text>
+          </View>
           <View style={styles.speedPill}>
-            <Feather name="zap" size={11} color={Colors.warning} />
-            <Text style={styles.speedText}>{Math.round(bus.speed)}</Text>
-            <Text style={styles.speedUnit}>km/h</Text>
+            <Feather name="zap" size={12} color={Colors.warning} />
+            <Text style={styles.speedText}>{Math.round(bus.speed)} km/h</Text>
           </View>
         </View>
 
@@ -300,20 +315,22 @@ function BusCard({ bus }: { bus: LiveBus }) {
         <View>
           <View style={styles.progressMeta}>
             <Text style={styles.progressMetaText}>
-              {bus.stopsCovered} / {bus.totalStops} stops
+              Stop {bus.stopsCovered} of {bus.totalStops}
             </Text>
             <Text style={styles.progressMetaText}>
-              <Feather name="map-pin" size={10} color={Colors.dark.textMuted} /> {bus.nextStop}
+              {Math.round(progress * 100)}% complete
             </Text>
           </View>
-          <AnimatedProgress value={progress} gradient={gradient} height={5} />
+          <AnimatedProgress value={progress} gradient={gradient} height={6} />
         </View>
+
+        {/* Crowd row — descriptive icon + text + color */}
+        <CrowdRow level={bus.crowdLevel} />
 
         {/* Footer badges */}
         <View style={styles.busFooter}>
-          <Badge variant="primary" emoji={config.icon} label={config.label} size="sm" />
-          <CrowdBadge level={bus.crowdLevel} />
-          {bus.isLastBus && <LastBusBadge />}
+          <Badge variant="primary" emoji={config.icon} label={config.label} size="md" />
+          {bus.isLastBus && <LastBusBadge size="md" />}
         </View>
       </View>
     </Card>
@@ -324,79 +341,96 @@ const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: Colors.dark.background },
   bgGradient: { ...StyleSheet.absoluteFillObject },
 
-  topRow: { flexDirection: "row", alignItems: "flex-start", marginBottom: 18 },
-  liveLabel: { ...Type.micro, color: Colors.success, letterSpacing: 1.5 },
-  title: { ...Type.display, color: Colors.dark.text, marginTop: 2 },
-  subtitle: { ...Type.caption, color: Colors.dark.textMuted, marginTop: 2 },
+  topRow: { flexDirection: "row", alignItems: "flex-start", marginBottom: 20 },
+  title: { ...Type.title, color: Colors.dark.text, lineHeight: 32 },
+  liveStatusRow: { flexDirection: "row", alignItems: "center", gap: 8, marginTop: 6 },
+  liveStatusText: { ...Type.body, color: Colors.dark.textSecondary },
   profileBtn: {
-    width: 40, height: 40, borderRadius: 20,
+    width: MinTouch, height: MinTouch, borderRadius: MinTouch / 2,
     backgroundColor: Colors.dark.surface,
     borderWidth: 1, borderColor: Colors.dark.cardBorder,
     alignItems: "center", justifyContent: "center",
   },
 
-  statsRow: { flexDirection: "row", gap: 10, marginBottom: 16 },
+  statsRow: { flexDirection: "row", gap: 10, marginBottom: 18 },
   statCard: {
     flex: 1,
     borderRadius: Radius.lg,
-    paddingVertical: 14,
+    paddingVertical: 16,
     paddingHorizontal: 12,
     overflow: "hidden",
-    minHeight: 92,
+    minHeight: 110,
     justifyContent: "space-between",
   },
   statOverlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: "rgba(0,0,0,0.18)",
   },
-  statIcon: { fontSize: 18 },
-  statValue: { ...Type.title, color: "#fff", marginTop: 4 },
-  statLabel: { ...Type.micro, color: "rgba(255,255,255,0.85)", letterSpacing: 1 },
+  statIcon: { fontSize: 22 },
+  statValue: { fontSize: 32, fontFamily: "Inter_700Bold", color: "#fff", marginTop: 4, letterSpacing: -0.5 },
+  statLabel: { fontSize: 12, fontFamily: "Inter_700Bold", color: "rgba(255,255,255,0.95)", letterSpacing: 0.3 },
 
   chip: {
     flexDirection: "row", alignItems: "center", gap: 6,
-    paddingHorizontal: 14, paddingVertical: 9,
+    paddingHorizontal: 16, paddingVertical: 12,
     backgroundColor: Colors.dark.surface,
     borderRadius: Radius.pill,
     borderWidth: 1, borderColor: Colors.dark.cardBorder,
+    minHeight: 44,
   },
   chipActive: {
     backgroundColor: Colors.primary,
     borderColor: Colors.primary,
     ...Shadow.glow(Colors.primaryGlow),
   },
-  chipText: { ...Type.caption, color: Colors.dark.textSecondary },
+  chipText: { ...Type.body, color: Colors.dark.textSecondary },
   chipTextActive: { color: "#fff", fontFamily: "Inter_700Bold" },
 
-  sectionTitle: { ...Type.heading, color: Colors.dark.text, marginTop: 18, marginBottom: 8 },
+  sectionTitle: { ...Type.heading, color: Colors.dark.text, marginTop: 20, marginBottom: 10 },
 
-  busAccent: { height: 3, width: "100%" },
-  busHeaderRow: { flexDirection: "row", alignItems: "center", gap: 12 },
+  busAccent: { height: 4, width: "100%" },
+  busHeaderRow: { flexDirection: "row", alignItems: "center", gap: 14 },
   busNumberBadge: {
-    minWidth: 56, height: 44,
-    borderRadius: 12,
-    paddingHorizontal: 8,
+    minWidth: 78, height: 60,
+    borderRadius: 14,
+    paddingHorizontal: 10,
     alignItems: "center", justifyContent: "center",
   },
-  busNumberText: { ...Type.heading, color: "#fff", letterSpacing: 0.3 },
-  routeName: { ...Type.subtitle, color: Colors.dark.text },
-  routePath: { ...Type.caption, color: Colors.dark.textMuted, marginTop: 2 },
+  busNumberText: { fontSize: 22, fontFamily: "Inter_700Bold", color: "#fff", letterSpacing: 0.3 },
+  toLabel: { fontSize: 11, fontFamily: "Inter_700Bold", color: Colors.dark.textMuted, letterSpacing: 1.2 },
+  destinationText: { ...Type.subtitle, color: Colors.dark.text, marginTop: 2 },
+
+  nextStopRow: {
+    flexDirection: "row", alignItems: "center", gap: 12,
+    paddingHorizontal: 12, paddingVertical: 10,
+    backgroundColor: "rgba(37,99,235,0.10)",
+    borderRadius: Radius.md,
+    borderWidth: 1,
+    borderColor: "rgba(37,99,235,0.25)",
+  },
+  nextStopIcon: {
+    width: 32, height: 32, borderRadius: 16,
+    backgroundColor: "rgba(37,99,235,0.18)",
+    alignItems: "center", justifyContent: "center",
+  },
+  nextStopLabel: { fontSize: 11, fontFamily: "Inter_700Bold", color: Colors.primary, letterSpacing: 1.2 },
+  nextStopValue: { ...Type.body, fontFamily: "Inter_700Bold", color: Colors.dark.text, marginTop: 1 },
+
   speedPill: {
-    flexDirection: "row", alignItems: "center", gap: 3,
+    flexDirection: "row", alignItems: "center", gap: 4,
     paddingHorizontal: 10, paddingVertical: 6,
     backgroundColor: Colors.warningSoft,
     borderRadius: Radius.pill,
     borderWidth: 1, borderColor: "rgba(245,158,11,0.3)",
   },
-  speedText: { ...Type.caption, color: Colors.warning, fontFamily: "Inter_700Bold" },
-  speedUnit: { fontSize: 9, color: Colors.warning, fontFamily: "Inter_500Medium" },
+  speedText: { fontSize: 13, color: Colors.warning, fontFamily: "Inter_700Bold" },
 
   progressMeta: { flexDirection: "row", justifyContent: "space-between", marginBottom: 6 },
-  progressMetaText: { fontSize: 10, fontFamily: "Inter_500Medium", color: Colors.dark.textMuted },
+  progressMetaText: { fontSize: 13, fontFamily: "Inter_600SemiBold", color: Colors.dark.textSecondary },
 
-  busFooter: { flexDirection: "row", gap: 6, flexWrap: "wrap" },
+  busFooter: { flexDirection: "row", gap: 8, flexWrap: "wrap" },
 
   empty: { alignItems: "center", paddingVertical: 60, gap: 8 },
   emptyText: { ...Type.subtitle, color: Colors.dark.text, marginTop: 12 },
-  emptySub: { ...Type.caption, color: Colors.dark.textMuted },
+  emptySub: { ...Type.body, color: Colors.dark.textMuted },
 });

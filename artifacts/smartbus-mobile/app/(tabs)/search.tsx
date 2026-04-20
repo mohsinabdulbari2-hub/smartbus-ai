@@ -4,7 +4,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import * as Haptics from "expo-haptics";
 import { StatusBar } from "expo-status-bar";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -29,12 +29,12 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import { CrowdMeter } from "@/components/ui/CrowdMeter";
-import { CrowdBadge, BUS_TYPE_CONFIG, getBusTypeGradient } from "@/components/CrowdBadge";
+import { CrowdRow } from "@/components/ui/CrowdRow";
+import { getBusTypeGradient } from "@/components/CrowdBadge";
 import { CardSkeleton } from "@/components/ui/Skeleton";
 import { SmartSuggestion } from "@/components/ui/SmartSuggestion";
 import Colors from "@/constants/colors";
-import { Radius, Shadow, Spacing, Type } from "@/constants/theme";
+import { MinTouch, Radius, Shadow, Spacing, Type } from "@/constants/theme";
 import { api, type SearchResult } from "@/lib/api";
 
 const POPULAR_SEARCHES = [
@@ -77,8 +77,38 @@ export default function SearchScreen() {
     search.mutate({ s: from, d: to });
   };
 
-  const results = search.data ?? [];
-  const recommended = results.find((r) => r.isRecommended);
+  const allResults = search.data ?? [];
+  // Top 3 ranked: recommended first, then fastest, then least crowded
+  const { topResults, otherResults } = useMemo(() => {
+    const seen = new Set<string>();
+    const picks: Array<{ result: SearchResult; tag: { emoji: string; label: string; color: string } }> = [];
+    const recommended = allResults.find((r) => r.isRecommended);
+    const fastest = allResults.find((r) => r.isFastest && r.routeId !== recommended?.routeId);
+    const leastCrowded = allResults.find(
+      (r) => r.isLeastCrowded && r.routeId !== recommended?.routeId && r.routeId !== fastest?.routeId,
+    );
+    if (recommended) {
+      picks.push({ result: recommended, tag: { emoji: "⭐", label: "Recommended", color: Colors.success } });
+      seen.add(recommended.routeId);
+    }
+    if (fastest) {
+      picks.push({ result: fastest, tag: { emoji: "🚀", label: "Fastest", color: Colors.primary } });
+      seen.add(fastest.routeId);
+    }
+    if (leastCrowded) {
+      picks.push({ result: leastCrowded, tag: { emoji: "🧘", label: "Comfortable", color: Colors.secondary } });
+      seen.add(leastCrowded.routeId);
+    }
+    for (const r of allResults) {
+      if (picks.length >= 3) break;
+      if (!seen.has(r.routeId)) {
+        picks.push({ result: r, tag: { emoji: "🚌", label: "Option", color: Colors.dark.textSecondary } });
+        seen.add(r.routeId);
+      }
+    }
+    const others = allResults.filter((r) => !seen.has(r.routeId));
+    return { topResults: picks, otherResults: others };
+  }, [allResults]);
 
   return (
     <View style={styles.root}>
@@ -96,9 +126,8 @@ export default function SearchScreen() {
           >
             {/* Header */}
             <Animated.View entering={FadeInUp.duration(450)} style={{ marginTop: 8 }}>
-              <Text style={styles.eyebrow}>FIND BEST ROUTE</Text>
-              <Text style={styles.title}>Plan your journey</Text>
-              <Text style={styles.subtitle}>AI-powered routing across BMTC's network</Text>
+              <Text style={styles.title}>Plan Your Journey</Text>
+              <Text style={styles.subtitle}>Find the best bus to your destination</Text>
             </Animated.View>
 
             {/* Search card */}
@@ -112,12 +141,21 @@ export default function SearchScreen() {
                       <TextInput
                         value={source}
                         onChangeText={setSource}
-                        placeholder="Source stop or area"
+                        placeholder="Where are you?"
                         placeholderTextColor={Colors.dark.textFaint}
                         style={styles.input}
                         returnKeyType="next"
+                        accessibilityLabel="Starting stop"
                       />
                     </View>
+                    <Pressable
+                      onPress={() => Haptics.selectionAsync()}
+                      style={styles.micBtn}
+                      accessibilityLabel="Voice input"
+                      hitSlop={6}
+                    >
+                      <Feather name="mic" size={18} color={Colors.primary} />
+                    </Pressable>
                   </View>
 
                   <View style={styles.divider}>
@@ -147,13 +185,13 @@ export default function SearchScreen() {
                 </View>
 
                 <Button
-                  label="Find best route"
+                  label="Find My Bus"
                   icon="navigation"
                   onPress={onSearch}
                   disabled={!source.trim() || !destination.trim()}
                   loading={search.isPending}
                   size="lg"
-                  style={{ marginTop: 14 }}
+                  style={{ marginTop: 18, minHeight: 56 }}
                 />
               </Card>
             </Animated.View>
@@ -206,26 +244,36 @@ export default function SearchScreen() {
               </Animated.View>
             )}
 
-            {/* Results */}
-            {results.length > 0 && (
+            {/* Top 3 results */}
+            {topResults.length > 0 && (
               <View style={{ marginTop: 22 }}>
-                {recommended && (
-                  <Animated.View entering={FadeInDown.duration(450)}>
-                    <SummaryCard result={recommended} totalOptions={results.length} />
-                  </Animated.View>
-                )}
-
-                <Text style={[styles.sectionTitle, { marginTop: 18 }]}>
-                  All options ({results.length})
+                <Text style={styles.sectionTitle}>
+                  Top picks for you
                 </Text>
-                {results.map((r, i) => (
+                {topResults.map((entry, i) => (
                   <Animated.View
-                    key={r.routeId + i}
-                    entering={FadeInDown.delay(i * 50).springify()}
+                    key={entry.result.routeId + i}
+                    entering={FadeInDown.delay(i * 80).springify()}
                   >
-                    <ResultCard result={r} />
+                    <ResultCard result={entry.result} tag={entry.tag} highlight={i === 0} />
                   </Animated.View>
                 ))}
+
+                {otherResults.length > 0 && (
+                  <>
+                    <Text style={[styles.sectionTitle, { marginTop: 18 }]}>
+                      More options ({otherResults.length})
+                    </Text>
+                    {otherResults.map((r, i) => (
+                      <Animated.View
+                        key={r.routeId + i}
+                        entering={FadeInDown.delay(i * 40).springify()}
+                      >
+                        <ResultCard result={r} />
+                      </Animated.View>
+                    ))}
+                  </>
+                )}
               </View>
             )}
 
@@ -244,64 +292,42 @@ export default function SearchScreen() {
   );
 }
 
-function SummaryCard({ result, totalOptions }: { result: SearchResult; totalOptions: number }) {
-  return (
-    <Card glow="rgba(34,197,94,0.4)">
-      <LinearGradient
-        colors={["rgba(34,197,94,0.18)", "rgba(37,99,235,0.12)"]}
-        style={StyleSheet.absoluteFill}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-      />
-      <View style={{ padding: 18 }}>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-          <View style={styles.recommendDot}>
-            <Feather name="award" size={14} color="#fff" />
-          </View>
-          <Text style={styles.recommendLabel}>RECOMMENDED · {totalOptions} options found</Text>
-        </View>
-
-        <View style={{ flexDirection: "row", alignItems: "baseline", marginTop: 12, gap: 10 }}>
-          <Text style={styles.summaryEta}>{result.etaMinutes}</Text>
-          <Text style={styles.summaryUnit}>min</Text>
-          <View style={{ flex: 1 }} />
-          <Badge variant="success" emoji="✓" label="Best match" size="md" />
-        </View>
-
-        <Text style={styles.summaryRoute} numberOfLines={1}>
-          {result.routeNumber} · {result.routeName}
-        </Text>
-        <Text style={styles.summaryStops}>
-          {result.sourceStop} → {result.destinationStop} · {result.stopCount} stops · every {result.frequency} min
-        </Text>
-
-        <View style={{ flexDirection: "row", gap: 6, marginTop: 12, flexWrap: "wrap" }}>
-          {result.isFastest && <Badge variant="primary" icon="zap" label="Fastest" size="sm" />}
-          {result.isLeastCrowded && <Badge variant="success" icon="users" label="Least crowded" size="sm" />}
-          <CrowdBadge level={result.crowdLevel} />
-        </View>
-      </View>
-    </Card>
-  );
-}
-
-function ResultCard({ result }: { result: SearchResult }) {
+function ResultCard({
+  result,
+  tag,
+  highlight,
+}: {
+  result: SearchResult;
+  tag?: { emoji: string; label: string; color: string };
+  highlight?: boolean;
+}) {
   const gradient = getBusTypeGradient("Vajra");
 
   return (
     <Card
       onPress={() => router.push(`/route/${result.routeId}` as any)}
-      style={{ marginBottom: 10 }}
+      style={{ marginBottom: 12 }}
+      glow={highlight ? "rgba(34,197,94,0.4)" : undefined}
     >
-      <View style={{ padding: 14, gap: 12 }}>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+      {tag && (
+        <View style={[styles.tagStrip, { backgroundColor: tag.color + "22", borderBottomColor: tag.color + "40" }]}>
+          <Text style={{ fontSize: 14 }}>{tag.emoji}</Text>
+          <Text style={[styles.tagText, { color: tag.color }]}>{tag.label}</Text>
+        </View>
+      )}
+
+      <View style={{ padding: 16, gap: 14 }}>
+        {/* Top row: route number + ETA */}
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
           <LinearGradient
             colors={gradient}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.resultBadge}
           >
-            <Text style={styles.resultBadgeText} numberOfLines={1}>{result.routeNumber}</Text>
+            <Text style={styles.resultBadgeText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
+              {result.routeNumber}
+            </Text>
           </LinearGradient>
 
           <View style={{ flex: 1 }}>
@@ -317,16 +343,20 @@ function ResultCard({ result }: { result: SearchResult }) {
           </View>
         </View>
 
-        <View style={{ gap: 6 }}>
-          <CrowdMeter level={result.crowdLevel} compact />
-        </View>
+        {/* Crowd row */}
+        <CrowdRow level={result.crowdLevel} />
 
-        <View style={{ flexDirection: "row", gap: 5, flexWrap: "wrap" }}>
-          {result.tags?.slice(0, 3).map((t) => (
-            <Badge key={t} variant="neutral" label={t} size="sm" />
-          ))}
+        {/* Bottom meta */}
+        <View style={styles.metaRow}>
+          <View style={styles.metaItem}>
+            <Feather name="map-pin" size={14} color={Colors.dark.textMuted} />
+            <Text style={styles.metaText}>{result.stopCount} stops</Text>
+          </View>
           {result.frequency > 0 && (
-            <Badge variant="primary" icon="clock" label={`${result.frequency} min`} size="sm" />
+            <View style={styles.metaItem}>
+              <Feather name="clock" size={14} color={Colors.dark.textMuted} />
+              <Text style={styles.metaText}>Every {result.frequency} min</Text>
+            </View>
           )}
         </View>
       </View>
@@ -337,28 +367,35 @@ function ResultCard({ result }: { result: SearchResult }) {
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: Colors.dark.background },
 
-  eyebrow: { ...Type.micro, color: Colors.secondary, letterSpacing: 1.5 },
-  title: { ...Type.display, color: Colors.dark.text, marginTop: 2 },
-  subtitle: { ...Type.caption, color: Colors.dark.textMuted, marginTop: 4, marginBottom: 18 },
+  title: { ...Type.title, color: Colors.dark.text, marginTop: 2, lineHeight: 32 },
+  subtitle: { ...Type.body, color: Colors.dark.textSecondary, marginTop: 6, marginBottom: 20 },
 
-  searchCard: { padding: 16 },
+  searchCard: { padding: 18 },
   searchInputs: { gap: 0 },
-  inputRow: { flexDirection: "row", alignItems: "center", gap: 12 },
-  dot: { width: 10, height: 10, borderRadius: 5 },
+  inputRow: { flexDirection: "row", alignItems: "center", gap: 14 },
+  dot: { width: 12, height: 12, borderRadius: 6 },
   inputLabel: {
-    ...Type.micro,
+    fontSize: 12,
+    fontFamily: "Inter_700Bold",
     color: Colors.dark.textMuted,
-    letterSpacing: 1.2,
-    marginBottom: 2,
+    letterSpacing: 1.4,
+    marginBottom: 4,
   },
   input: {
     ...Type.subtitle,
     color: Colors.dark.text,
-    paddingVertical: 6,
+    paddingVertical: 10,
+    minHeight: 44,
+  },
+  micBtn: {
+    width: 44, height: 44, borderRadius: 22,
+    backgroundColor: "rgba(37,99,235,0.15)",
+    borderWidth: 1, borderColor: "rgba(37,99,235,0.35)",
+    alignItems: "center", justifyContent: "center",
   },
   divider: {
-    height: 24,
-    marginLeft: 4,
+    height: 28,
+    marginLeft: 5,
     marginVertical: 4,
     flexDirection: "row",
     alignItems: "center",
@@ -373,9 +410,9 @@ const styles = StyleSheet.create({
   },
   swapBtn: {
     marginLeft: "auto",
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: MinTouch,
+    height: MinTouch,
+    borderRadius: MinTouch / 2,
     backgroundColor: "rgba(37,99,235,0.15)",
     borderWidth: 1,
     borderColor: "rgba(37,99,235,0.35)",
@@ -383,59 +420,60 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
 
-  sectionTitle: { ...Type.heading, color: Colors.dark.text, marginBottom: 10 },
+  sectionTitle: { ...Type.heading, color: Colors.dark.text, marginBottom: 12 },
 
-  popularGrid: { gap: 8 },
+  popularGrid: { gap: 10 },
   popularChip: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
+    gap: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    minHeight: MinTouch,
     backgroundColor: Colors.dark.surface,
     borderRadius: Radius.lg,
     borderWidth: 1,
     borderColor: Colors.dark.cardBorder,
   },
-  popularText: { ...Type.body, color: Colors.dark.textSecondary, flex: 1 },
+  popularText: { ...Type.body, color: Colors.dark.text, flex: 1 },
 
-  recommendDot: {
-    width: 22, height: 22, borderRadius: 11,
-    backgroundColor: Colors.success,
-    alignItems: "center", justifyContent: "center",
+  tagStrip: {
+    flexDirection: "row", alignItems: "center", gap: 8,
+    paddingHorizontal: 14, paddingVertical: 8,
+    borderBottomWidth: 1,
   },
-  recommendLabel: { ...Type.micro, color: Colors.success, letterSpacing: 1.2 },
-  summaryEta: { ...Type.display, fontSize: 44, color: Colors.dark.text },
-  summaryUnit: { ...Type.subtitle, color: Colors.dark.textMuted },
-  summaryRoute: { ...Type.subtitle, color: Colors.dark.text, marginTop: 8 },
-  summaryStops: { ...Type.caption, color: Colors.dark.textMuted, marginTop: 2 },
+  tagText: { ...Type.body, fontFamily: "Inter_700Bold", letterSpacing: 0.3 },
 
   resultBadge: {
-    minWidth: 56, height: 44,
-    paddingHorizontal: 8,
-    borderRadius: 12,
+    minWidth: 78, height: 60,
+    paddingHorizontal: 10,
+    borderRadius: 14,
     alignItems: "center", justifyContent: "center",
   },
-  resultBadgeText: { ...Type.heading, color: "#fff" },
+  resultBadgeText: { fontSize: 22, fontFamily: "Inter_700Bold", color: "#fff" },
   resultName: { ...Type.subtitle, color: Colors.dark.text },
-  resultStops: { ...Type.caption, color: Colors.dark.textMuted, marginTop: 2 },
-  resultEta: { fontSize: 22, fontFamily: "Inter_700Bold", color: Colors.primary },
-  resultEtaUnit: { fontSize: 10, color: Colors.dark.textMuted, fontFamily: "Inter_500Medium" },
+  resultStops: { ...Type.body, color: Colors.dark.textSecondary, marginTop: 3 },
+  resultEta: { fontSize: 30, fontFamily: "Inter_700Bold", color: Colors.primary, letterSpacing: -0.5 },
+  resultEtaUnit: { fontSize: 13, color: Colors.dark.textMuted, fontFamily: "Inter_600SemiBold" },
+
+  metaRow: { flexDirection: "row", gap: 18, flexWrap: "wrap" },
+  metaItem: { flexDirection: "row", alignItems: "center", gap: 6 },
+  metaText: { ...Type.body, color: Colors.dark.textSecondary },
 
   errorCard: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
-    padding: 14,
+    gap: 12,
+    padding: 16,
     marginTop: 18,
     backgroundColor: Colors.dangerSoft,
     borderRadius: Radius.lg,
     borderWidth: 1,
     borderColor: "rgba(239,68,68,0.3)",
   },
-  errorText: { ...Type.caption, color: Colors.danger, flex: 1 },
+  errorText: { ...Type.body, color: Colors.danger, flex: 1 },
 
   empty: { alignItems: "center", paddingVertical: 60, gap: 8 },
   emptyText: { ...Type.subtitle, color: Colors.dark.text, marginTop: 12 },
-  emptySub: { ...Type.caption, color: Colors.dark.textMuted },
+  emptySub: { ...Type.body, color: Colors.dark.textMuted },
 });

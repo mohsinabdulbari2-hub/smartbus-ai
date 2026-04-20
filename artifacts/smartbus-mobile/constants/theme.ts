@@ -19,14 +19,17 @@ export const Radius = {
 };
 
 export const Type = {
-  display: { fontSize: 32, fontFamily: "Inter_700Bold", letterSpacing: -0.8 },
-  title: { fontSize: 24, fontFamily: "Inter_700Bold", letterSpacing: -0.4 },
-  heading: { fontSize: 18, fontFamily: "Inter_700Bold" },
-  subtitle: { fontSize: 15, fontFamily: "Inter_600SemiBold" },
-  body: { fontSize: 14, fontFamily: "Inter_500Medium" },
-  caption: { fontSize: 12, fontFamily: "Inter_500Medium" },
-  micro: { fontSize: 10, fontFamily: "Inter_600SemiBold" },
+  display: { fontSize: 34, fontFamily: "Inter_700Bold", letterSpacing: -0.8 },
+  title: { fontSize: 26, fontFamily: "Inter_700Bold", letterSpacing: -0.4 },
+  heading: { fontSize: 20, fontFamily: "Inter_700Bold" },
+  subtitle: { fontSize: 17, fontFamily: "Inter_600SemiBold" },
+  body: { fontSize: 16, fontFamily: "Inter_500Medium" },
+  caption: { fontSize: 14, fontFamily: "Inter_500Medium" },
+  micro: { fontSize: 11, fontFamily: "Inter_700Bold" },
 };
+
+// Minimum tappable size for accessibility (WCAG / Apple HIG: 44–48pt)
+export const MinTouch = 48;
 
 export const Shadow = {
   card: {
