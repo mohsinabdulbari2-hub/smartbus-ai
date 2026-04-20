@@ -473,8 +473,8 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   resultCardRecommended: {
-    borderColor: "rgba(249,115,22,0.4)",
-    shadowColor: "#f97316",
+    borderColor: "rgba(37,99,235,0.4)",
+    shadowColor: "#2563eb",
     shadowOpacity: 0.15,
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 4 },
@@ -537,9 +537,9 @@ const styles = StyleSheet.create({
     gap: 6,
     paddingHorizontal: 14,
     paddingVertical: 8,
-    backgroundColor: "rgba(249,115,22,0.06)",
+    backgroundColor: "rgba(37,99,235,0.06)",
     borderTopWidth: 1,
-    borderTopColor: "rgba(249,115,22,0.15)",
+    borderTopColor: "rgba(37,99,235,0.15)",
   },
   recommendedFooterText: { fontSize: 12, fontFamily: "Inter_600SemiBold", color: Colors.primary },
 });

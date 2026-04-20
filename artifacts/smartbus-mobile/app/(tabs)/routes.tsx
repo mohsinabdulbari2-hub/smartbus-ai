@@ -156,7 +156,7 @@ export default function RoutesScreen() {
                 key={t.key}
                 onPress={() => { setTypeFilter(t.key); Haptics.selectionAsync(); }}
                 style={[s.filterTab, isActive && {
-                  backgroundColor: cfg ? cfg.text + "22" : "rgba(249,115,22,0.15)",
+                  backgroundColor: cfg ? cfg.text + "22" : "rgba(37,99,235,0.15)",
                   borderColor: cfg ? cfg.text : Colors.primary,
                 }]}
               >

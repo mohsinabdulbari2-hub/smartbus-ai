@@ -1,10 +1,10 @@
-const ORANGE = "#f97316";
 const BLUE = "#2563eb";
+const TEAL = "#0d9488";
 const GREEN = "#16a34a";
 
 export const Colors = {
-  primary: ORANGE,
-  accent: BLUE,
+  primary: BLUE,
+  accent: TEAL,
   success: GREEN,
   warning: "#f59e0b",
   danger: "#dc2626",
@@ -22,8 +22,8 @@ export const Colors = {
     tabBar: "#ffffff",
     tabBarBorder: "#e2e8f0",
     tabIconDefault: "#94a3b8",
-    tabIconSelected: ORANGE,
-    tint: ORANGE,
+    tabIconSelected: BLUE,
+    tint: BLUE,
   },
 };
 

@@ -185,21 +185,25 @@ export default function LiveScreen() {
       {buses && buses.length > 0 && (
         <View style={s.statsRow}>
           <View style={s.statItem}>
+            <View style={[s.statDot, { backgroundColor: Colors.success }]} />
             <Text style={[s.statVal, { color: Colors.success }]}>{crowdCounts.Low}</Text>
-            <Text style={s.statLbl}>Low Crowd</Text>
+            <Text style={s.statLbl}>Empty</Text>
           </View>
           <View style={s.statDiv} />
           <View style={s.statItem}>
+            <View style={[s.statDot, { backgroundColor: Colors.warning }]} />
             <Text style={[s.statVal, { color: Colors.warning }]}>{crowdCounts.Medium}</Text>
-            <Text style={s.statLbl}>Medium</Text>
+            <Text style={s.statLbl}>Some seats</Text>
           </View>
           <View style={s.statDiv} />
           <View style={s.statItem}>
+            <View style={[s.statDot, { backgroundColor: Colors.danger }]} />
             <Text style={[s.statVal, { color: Colors.danger }]}>{crowdCounts.High}</Text>
-            <Text style={s.statLbl}>High</Text>
+            <Text style={s.statLbl}>Crowded</Text>
           </View>
           <View style={s.statDiv} />
           <View style={s.statItem}>
+            <Feather name="grid" size={10} color={Colors.accent} style={{ marginBottom: 2 }} />
             <Text style={[s.statVal, { color: Colors.accent }]}>{Object.keys(typeCounts).length}</Text>
             <Text style={s.statLbl}>Types</Text>
           </View>
@@ -217,7 +221,7 @@ export default function LiveScreen() {
               onPress={() => { setTypeFilter(t.key); Haptics.selectionAsync(); }}
               style={[
                 s.typeTab,
-                isActive && { backgroundColor: cfg ? cfg.text + "22" : "rgba(249,115,22,0.15)", borderColor: cfg ? cfg.text : Colors.primary },
+                isActive && { backgroundColor: cfg ? cfg.text + "22" : "rgba(37,99,235,0.15)", borderColor: cfg ? cfg.text : Colors.primary },
               ]}
             >
               <Text style={s.typeTabIcon}>{t.icon}</Text>
@@ -313,8 +317,9 @@ const s = StyleSheet.create({
     borderColor: "#e2e8f0",
   },
   statItem: { flex: 1, alignItems: "center" },
+  statDot: { width: 8, height: 8, borderRadius: 4, marginBottom: 4 },
   statVal: { fontSize: 20, fontFamily: "Inter_700Bold" },
-  statLbl: { fontSize: 10, fontFamily: "Inter_400Regular", color: "#64748b", marginTop: 2 },
+  statLbl: { fontSize: 10, fontFamily: "Inter_500Medium", color: "#64748b", marginTop: 2 },
   statDiv: { width: 1, backgroundColor: "#e2e8f0" },
   typeFilter: { paddingHorizontal: 20, marginBottom: 12 },
   typeTab: {
@@ -352,9 +357,9 @@ const s = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 5,
-    backgroundColor: "rgba(249,115,22,0.08)",
+    backgroundColor: "rgba(37,99,235,0.08)",
     borderWidth: 1,
-    borderColor: "rgba(249,115,22,0.25)",
+    borderColor: "rgba(37,99,235,0.25)",
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 100,
@@ -386,7 +391,7 @@ const s = StyleSheet.create({
   nextStopRow: { flexDirection: "row", alignItems: "center", gap: 4 },
   nextStopText: { fontSize: 12, fontFamily: "Inter_400Regular", color: "#64748b" },
   speedBox: { alignItems: "flex-end" },
-  speedVal: { fontSize: 20, fontFamily: "Inter_700Bold", color: "#f97316" },
+  speedVal: { fontSize: 20, fontFamily: "Inter_700Bold", color: "#2563eb" },
   speedUnit: { fontSize: 10, fontFamily: "Inter_400Regular", color: "#64748b" },
   cardBottom: {
     flexDirection: "row",
