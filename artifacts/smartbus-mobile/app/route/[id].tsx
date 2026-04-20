@@ -41,9 +41,9 @@ function FrequencyBar({ label, value, max }: { label: string; value: number; max
 const freqStyles = StyleSheet.create({
   row: { flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 8 },
   label: { fontSize: 12, fontFamily: "Inter_500Medium", color: "#94a3b8", width: 50 },
-  barWrap: { flex: 1, height: 8, backgroundColor: "#1e293b", borderRadius: 4, overflow: "hidden" },
+  barWrap: { flex: 1, height: 8, backgroundColor: "#e2e8f0", borderRadius: 4, overflow: "hidden" },
   bar: { height: 8, borderRadius: 4 },
-  value: { fontSize: 12, fontFamily: "Inter_600SemiBold", color: "#f1f5f9", width: 44, textAlign: "right" },
+  value: { fontSize: 12, fontFamily: "Inter_600SemiBold", color: "#0f172a", width: 44, textAlign: "right" },
 });
 
 export default function RouteDetailScreen() {
@@ -204,7 +204,7 @@ export default function RouteDetailScreen() {
                     (isFirst || isLast) ? styles.stopDotEndpoint : styles.stopDotMid,
                     { borderColor: route.color || Colors.primary }
                   ]} />
-                  {!isLast && <View style={[styles.stopLine, { backgroundColor: route.color ? `${route.color}44` : "#1e293b" }]} />}
+                  {!isLast && <View style={[styles.stopLine, { backgroundColor: route.color ? `${route.color}44` : "#e2e8f0" }]} />}
                 </View>
                 <View style={styles.stopInfo}>
                   <Text style={[styles.stopName, (isFirst || isLast) && styles.stopNameEndpoint]}>
@@ -230,10 +230,10 @@ const styles = StyleSheet.create({
   loadingText: { fontSize: 16, fontFamily: "Inter_500Medium", color: Colors.dark.textMuted },
   heroCard: {
     margin: 20,
-    backgroundColor: "#1a2235",
+    backgroundColor: "#ffffff",
     borderRadius: 24,
     borderWidth: 1,
-    borderColor: "#1e293b",
+    borderColor: "#e2e8f0",
     borderTopWidth: 4,
     overflow: "hidden",
     padding: 20,
@@ -248,19 +248,19 @@ const styles = StyleSheet.create({
   },
   heroBadgeText: { fontSize: 22, fontFamily: "Inter_700Bold", color: "#fff" },
   heroInfo: { flex: 1, justifyContent: "center" },
-  heroName: { fontSize: 16, fontFamily: "Inter_700Bold", color: "#f1f5f9", marginBottom: 6 },
+  heroName: { fontSize: 16, fontFamily: "Inter_700Bold", color: "#0f172a", marginBottom: 6 },
   heroRoute: { flexDirection: "row", alignItems: "center", gap: 6 },
   heroEndpoint: { fontSize: 13, fontFamily: "Inter_400Regular", color: "#94a3b8", flex: 1 },
   heroStats: {
     flexDirection: "row",
     borderTopWidth: 1,
-    borderTopColor: "#1e293b",
+    borderTopColor: "#e2e8f0",
     paddingTop: 16,
     gap: 24,
   },
   heroStat: { flexDirection: "row", alignItems: "center", gap: 8 },
-  heroStatValue: { fontSize: 16, fontFamily: "Inter_700Bold", color: "#f1f5f9" },
-  heroStatLabel: { fontSize: 12, fontFamily: "Inter_400Regular", color: "#475569" },
+  heroStatValue: { fontSize: 16, fontFamily: "Inter_700Bold", color: "#0f172a" },
+  heroStatLabel: { fontSize: 12, fontFamily: "Inter_400Regular", color: "#64748b" },
   section: { paddingHorizontal: 20, marginBottom: 24 },
   sectionHeaderRow: {
     flexDirection: "row",
@@ -271,7 +271,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontFamily: "Inter_700Bold",
-    color: "#f1f5f9",
+    color: "#0f172a",
     marginBottom: 12,
     flexDirection: "row",
     alignItems: "center",
@@ -283,7 +283,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.success,
   },
   liveBusCard: {
-    backgroundColor: "#1a2235",
+    backgroundColor: "#ffffff",
     borderRadius: 16,
     padding: 14,
     marginBottom: 10,
@@ -291,7 +291,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "#1e293b",
+    borderColor: "#e2e8f0",
   },
   liveBusLeft: { flexDirection: "row", alignItems: "center", gap: 10 },
   liveBusDot: { width: 8, height: 8, borderRadius: 4 },
@@ -299,19 +299,19 @@ const styles = StyleSheet.create({
   liveBusRight: { flexDirection: "row", alignItems: "center", gap: 8 },
   liveBusSpeed: { fontSize: 13, fontFamily: "Inter_600SemiBold", color: Colors.primary },
   freqCard: {
-    backgroundColor: "#1a2235",
+    backgroundColor: "#ffffff",
     borderRadius: 20,
     padding: 16,
     borderWidth: 1,
-    borderColor: "#1e293b",
+    borderColor: "#e2e8f0",
   },
   dayToggle: {
     flexDirection: "row",
-    backgroundColor: "#111827",
+    backgroundColor: "#ffffff",
     borderRadius: 100,
     padding: 3,
     borderWidth: 1,
-    borderColor: "#1e293b",
+    borderColor: "#e2e8f0",
   },
   dayToggleBtn: {
     paddingHorizontal: 12,
@@ -343,7 +343,7 @@ const styles = StyleSheet.create({
     height: 12,
     borderRadius: 6,
     borderWidth: 2,
-    backgroundColor: "#1a2235",
+    backgroundColor: "#ffffff",
   },
   stopDotEndpoint: {
     width: 16,
@@ -366,7 +366,7 @@ const styles = StyleSheet.create({
   },
   stopNameEndpoint: {
     fontFamily: "Inter_600SemiBold",
-    color: "#f1f5f9",
+    color: "#0f172a",
   },
   stopTag: {
     fontSize: 11,

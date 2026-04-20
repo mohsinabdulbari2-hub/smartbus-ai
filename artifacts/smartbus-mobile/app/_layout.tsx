@@ -25,10 +25,10 @@ const queryClient = new QueryClient({
 function RootLayoutNav() {
   return (
     <>
-      <StatusBar style="light" />
+      <StatusBar style="dark" />
       <Stack
         screenOptions={{
-          headerStyle: { backgroundColor: "#111827" },
+          headerStyle: { backgroundColor: "#ffffff" },
           headerTintColor: Colors.dark.text,
           headerTitleStyle: { fontFamily: "Inter_700Bold", fontSize: 18 },
           headerShadowVisible: false,
