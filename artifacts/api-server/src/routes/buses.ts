@@ -36,20 +36,31 @@ function getCrowdLevel(routeId: string, stopIndex: number): "Low" | "Medium" | "
   const hour = now.getHours();
   const dayOfWeek = now.getDay();
   const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-  const isMajorStop = stopIndex % 3 === 0;
 
-  let score = 0;
-  if (hour >= 8 && hour <= 10) score += 3;
-  else if (hour >= 17 && hour <= 20) score += 3;
-  else if (hour >= 12 && hour <= 14) score += 1;
-  else score -= 1;
-  if (!isWeekend) score += 1;
-  if (isMajorStop) score += 1;
-  const routeHash = routeId.charCodeAt(0) % 3;
-  score += routeHash;
+  // Base "demand" varies by time of day (0..1)
+  let timeFactor = 0.4;
+  if (hour >= 8 && hour <= 10) timeFactor = 0.65;       // morning peak
+  else if (hour >= 17 && hour <= 20) timeFactor = 0.65; // evening peak
+  else if (hour >= 12 && hour <= 14) timeFactor = 0.5;  // lunch
+  else if (hour >= 6 && hour < 8) timeFactor = 0.45;    // early morning
+  else if (hour >= 21 || hour < 6) timeFactor = 0.2;    // night
+  else timeFactor = 0.4;
 
-  if (score >= 4) return "High";
-  if (score >= 2) return "Medium";
+  if (isWeekend) timeFactor *= 0.75;
+
+  // Per-bus pseudo-random variation so different buses on the same route
+  // don't all show the same crowd level (wide range so all 3 levels appear).
+  let h = 0;
+  const seed = `${routeId}-${stopIndex}`;
+  for (let i = 0; i < seed.length; i++) {
+    h = (h * 31 + seed.charCodeAt(i)) | 0;
+  }
+  const jitter = ((Math.abs(h) % 100) / 100) * 0.8 - 0.4; // -0.4..+0.4
+
+  const score = timeFactor + jitter;
+
+  if (score >= 0.65) return "High";
+  if (score >= 0.35) return "Medium";
   return "Low";
 }
 
