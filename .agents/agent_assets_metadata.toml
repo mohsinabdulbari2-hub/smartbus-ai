@@ -42,3 +42,9 @@ id = "2B1xmlNVWr50C7MaYrncj"
 uri = "file://attached_assets/paper_figures/fig_route_detail.jpg"
 type = "image"
 title = "Fig. 4 — Route Detail with SVG mini-map"
+
+[[outputs]]
+id = "7Q9S41YrhE_fliLg4_Xeq"
+uri = "file://SmartBus_AI_Research_Paper.docx"
+type = "word_document"
+title = "SmartBus AI — Research Paper (Word .docx)"
