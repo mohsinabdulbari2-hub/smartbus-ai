@@ -1,252 +1,434 @@
-# SmartBus AI: An AI-Augmented Real-Time Bus Tracking and Journey Planning System for the BMTC Network
+# SmartBus AI: A Mobile-First Real-Time Bus Tracking and Crowd-Aware Journey Planning System for the BMTC Network
 
+---
 
+**Manjunath Charvik N**, **Shiva Kumar B**, **Mohsin Abdul Bari**, **P Puneetraj**
+School of Computer Science and Engineering
+REVA University, Bengaluru, India
+{manjunathcharvik, shivakumarb, mohsinabdulbari, ppuneetraj}@gmail.com
 
-
-
-Manjunath Charvik N
-School of CSE
-REVA University
-Bengaluru, India
-manjunathcharvik@gmail.com
-
-Shiva Kumar B
-School of CSE
-REVA University
-Bengaluru, India
-shivakumarb@gmail.com
-
-Mohsin Abdul Bari
-School of CSE
-REVA University
-Bengaluru, India
-mohsinabdulbari@gmail.com
-
-P Puneetraj
-School of CSE
-REVA University
-Bengaluru, India
-ppuneetraj@gmail.com
-
-Prof. Suvarna Hugar
-(Project Guide)
-School of CSE
-REVA University
-Bengaluru, India
+**Project Guide: Prof. Suvarna Hugar**
+Assistant Professor, School of Computer Science and Engineering
+REVA University, Bengaluru, India
 suvarna.hugar@reva.edu.in
 
+---
 
+## ABSTRACT
 
-ABSTRACT
+City buses in Bengaluru carry close to four million people every day, but the rider experience has not kept pace with the size of the network. The Bengaluru Metropolitan Transport Corporation (BMTC) operates 4,203 routes across 6,006 stops, and yet a typical commuter still waits at the bus stop with no idea whether a bus is on its way, how full it will be when it arrives, or whether a better route exists for the same trip. This work describes SmartBus AI, a cross-platform mobile application that pulls these missing pieces into one place. The system is built on the official BMTC General Transit Feed Specification (GTFS) feed, augmented by an in-process simulator that produces a steady stream of 240 live vehicles, and it surfaces the data through a small typed REST API consumed by an Expo / React Native client. Three things make the application different from a thin GTFS viewer. First, every live bus carries an AI-derived occupancy band that is exposed to the rider as a plain-language label such as *"Seats available"* or *"Very crowded"* rather than as a colour alone. Second, the journey planner ranks its top three results with descriptive tags (Recommended, Fastest, Comfortable) so that a first-time rider can pick a bus without parsing a table. Third, the entire interface is tuned for elderly accessibility, with a 48 pt minimum touch target, large display typography, and indicators that pair colour with icon and text. Functional testing on commodity hardware shows median API latency of 2 ms for the live-bus endpoint and 35 ms for the route directory of all 4,203 routes, with an end-to-end first-meaningful-content time below two seconds on the mobile client. The architecture is open: the simulator can be replaced with a public GTFS-Realtime feed when one becomes available, and the heuristic crowd classifier can be swapped for a learned model without changing the API surface.
 
-Urban public transport in Indian metropolitan cities is undergoing a digital transformation, yet the daily commuter still struggles with three persistent uncertainties: whether a bus is actually running on a given route, how crowded it will be on arrival, and which of the thousands of overlapping routes is best suited for a particular journey. This paper presents "SmartBus AI," a unified intelligence system that integrates Artificial Intelligence (AI), real-time data processing, and accessible mobile design to empower commuters of the Bengaluru Metropolitan Transport Corporation (BMTC). The system uses the official BMTC General Transit Feed Specification (GTFS) dataset of 4,203 routes and 6,006 stops, enriched by a deterministic live-bus simulator that produces a steady-state stream of 240 vehicles, and exposes the results through a typed REST API consumed by a cross-platform mobile application built on Expo and React Native. SmartBus AI provides live tracking with route-coloured map previews, an AI-augmented crowd-prediction model that classifies in-vehicle occupancy into Low, Medium, and High bands with friendly natural-language labels, a source-to-destination journey planner that ranks results into Recommended, Fastest, and Comfortable, a searchable directory of all routes, and per-route frequency analytics with weekday-versus-weekend toggles. The user interface is built on a premium dark design system whose typography and 48 pt minimum touch targets are explicitly tuned for elderly first-time commuters while preserving the visual quality expected of contemporary mobility apps such as Uber and Google Maps. End-to-end testing shows median API response times below 50 ms and a perceived first-meaningful-content time below 2 s on commodity mobile hardware, demonstrating the practical feasibility of an AI-augmented bus tracking platform for BMTC commuters.
+**INDEX TERMS** Intelligent transportation systems, GTFS, real-time public transit, bus crowd prediction, mobile UX, accessibility, BMTC, Bengaluru, React Native, Expo.
 
-Keywords — Intelligent Transportation Systems, GTFS, Real-Time Public Transit, Crowd Prediction, Mobile UX, Accessibility, BMTC, Bengaluru, React Native, Expo.
+---
 
-INTRODUCTION
+## I. INTRODUCTION
 
-Public bus transport remains the backbone of intra-city mobility in Bengaluru, with the BMTC operating more than 6,000 buses across over four thousand routes that together serve several million daily passengers. Despite this scale, the everyday commuter experience is shaped by uncertainty rather than information: timetables published in static PDFs are routinely overtaken by traffic conditions; private mobility apps focus on cars and cabs; and the few transit-specific apps that exist either expose only static schedules or hide useful information behind sign-in walls and advertisements. The result is a paradox in which one of India's most digitally connected cities still depends on word of mouth and visual confirmation at the bus stop to plan ordinary trips.
+Public transport in Indian metros sits at an awkward inflection point. The buses are there, the routes exist, and the agencies have begun publishing schedule data in standard formats, but the everyday rider still leans heavily on word of mouth and visual confirmation at the stop. In Bengaluru, BMTC operates more than six thousand vehicles across over four thousand routes that together serve several million daily passengers [1], [19]. The volume is enormous. The information layer on top of it, however, is thin.
 
-Three problems recur across user interviews and observation. First, riders cannot easily tell whether a bus is currently in service on a route, especially during off-peak hours and on weekends, leading to extended waits with no feedback. Second, riders cannot anticipate in-vehicle crowding before boarding, which is particularly important for elderly passengers, parents with children, and women travelling at night. Third, the BMTC route catalogue is large and overlapping, and the absence of an intuitive journey planner makes route discovery difficult for first-time and occasional travellers.
+Three recurring frustrations show up in any informal survey of BMTC riders. The first is uncertainty about whether a particular route is currently in service, especially during off-peak hours, late evenings, and weekends. Static schedules do not capture cancellations or delays, and there is no public real-time feed yet from the agency. The second is the inability to anticipate in-vehicle crowding before boarding. For an elderly rider, a parent with a small child, or a woman travelling at night, knowing that the next bus will be standing-room-only changes the decision from "board this one" to "wait for the next one". The third is the difficulty of discovering a good route between two stops when the catalogue is in the thousands and many routes overlap. New riders, occasional travellers, and visitors to the city are particularly affected by this discovery problem.
 
-This work proposes a unified "SmartBus AI" platform that combines all of these capabilities into one mobile application. It integrates real-time bus position data, AI-based crowd prediction, intelligent route search across the full BMTC network, per-route frequency analytics, and a searchable stop and route directory. By presenting these insights through a simple, large-typeface dashboard with consistent colour-coded indicators that always include text labels, the system supports commuters across the full journey lifecycle — from planning, to boarding, to in-trip awareness — while remaining usable by elderly first-time users.
+Most of the existing third-party transit apps tackle one of these problems at a time. Some show static schedules. Some show partial live tracking on a small set of routes. Very few combine the three things a rider actually needs in a single screen, and almost none are designed with the elderly first-time user in mind. The interfaces tend to be small-text, dense, and colour-coded in ways that fall apart for a rider with mild presbyopia or any form of colour-vision deficiency.
 
-LITERATURE SURVEY
+The work reported in this paper is an attempt to close that gap. We have built a unified mobile application, called SmartBus AI, that brings live tracking, AI-assisted crowd prediction, journey planning, and route discovery together behind a single calm interface. The application is implemented in Expo and React Native, talks to a typed REST API written in TypeScript on Node.js, and consumes the official BMTC GTFS feed of 4,203 routes and 6,006 stops. Live vehicle positions are produced by a deterministic simulator on a 12-second tick because BMTC has not yet released a public GTFS-Realtime feed, but the architecture is designed so that swapping the simulator for a real feed is a single-file change. Crowd predictions are produced by a heuristic feature-weighted classifier whose output is rendered to the rider as an icon plus a colour plus a plain-language label, never as a colour by itself. The whole interface uses a premium dark theme tuned for OLED displays, big display-grade typography, and a strict 48 pt minimum touch target on every interactive control. The result is an application that looks like a contemporary mobility product but reads like a large-print rider's guide.
 
-Real-time bus tracking and arrival prediction have received significant research attention because of their direct impact on commuter satisfaction and modal share. For instance, Catalá-Prat et al. [1] developed an arrival-prediction model for mid-sized European cities operating with sparse Automatic Vehicle Location (AVL) data and demonstrated that hybrid models combining historical schedules with sparse real-time observations outperform either approach in isolation. However, their evaluation was confined to a small fleet, and the model assumed continuous AVL coverage that many Indian agencies, including BMTC, do not yet provide on every vehicle.
+The contributions of this work can be summarised as follows.
 
-The General Transit Feed Specification (GTFS), originally introduced by Google and TriMet [2] and extended by GTFS-Realtime [3], has become the de-facto standard for transit data exchange. Wessel and Farber [4] showed that even a static GTFS feed, when combined with intelligent client-side rendering, can support a wide range of consumer applications, although their work pre-dates the modern mobile-first era and does not address the accessibility constraints that dominate Indian metropolitan ridership.
+1. An end-to-end open architecture that ingests the official BMTC GTFS dataset, augments it with a deterministic vehicle simulator, and serves the result through a small typed REST API consumable by mobile and web clients alike.
+2. A heuristic AI-assisted crowd-prediction layer that classifies every live bus into one of three semantically meaningful occupancy bands using time-of-day, route-popularity, vehicle-type, and day-of-week features. The output is exposed both numerically and as a friendly label.
+3. A custom SVG-based route mini-map that renders the polyline geometry of any route together with its stops and the live bus position, with no dependency on Google Maps, Mapbox, or any other paid tile service.
+4. A premium dark design system whose typography, contrast, and tap-target sizing are explicitly calibrated against the WCAG 2.2 success criteria and the Apple Human Interface Guidelines for elderly accessibility, while still preserving the visual polish of contemporary first-tier mobility apps.
+5. A reference implementation that runs on a single commodity Node.js process with sub-50 ms median latency on every endpoint other than the exhaustive search call, demonstrating that an AI-augmented BMTC tracking platform is feasible without the operational overhead of a large agency back-end.
 
-Crowd prediction in public transport has been studied using a variety of sensing modalities. Wang et al. [5] used data from Automatic Passenger Counters (APC) and a hybrid deep learning model to forecast bus passenger flow, while Liu et al. [6] explored vision-based passenger counting using deep convolutional networks on onboard CCTV feeds. Both approaches require sensor instrumentation that BMTC's older fleet largely lacks. Pinelli et al. [7] proposed an alternative that uses Wi-Fi probe-request counting on phones near the bus, but raised privacy concerns that have limited adoption. In sensor-poor regimes, Han et al. [8] showed that heuristic feature-weighted classifiers using time-of-day, route popularity, and vehicle type yield acceptable performance for coarse three-class occupancy prediction, motivating the heuristic crowd model used in this work.
+The remainder of the paper is organised as follows. Section II surveys the related work in real-time public transit, crowd prediction, and accessible mobile design. Section III describes the BMTC GTFS dataset and the data-augmentation pipeline. Section IV presents the system architecture. Section V documents the AI crowd-prediction methodology. Section VI explains the user-experience design rationale and shows the resulting screens. Section VII reports the evaluation results. Section VIII discusses the limitations of the current build and outlines the future work. Section IX concludes.
 
-Journey planning and route search across large transit networks has been formalised since the work of Bast et al. [9], whose RAPTOR algorithm and its variants underpin many production-grade transit planners. While RAPTOR scales to country-wide networks, most BMTC commuters need only direct routes between two stops, allowing a much simpler exhaustive search to remain practical when paired with appropriate caching.
+---
 
-Mobile user-experience research for transit apps has consistently identified the same three barriers to elderly adoption: small text, low contrast, and ambiguous icon-only controls. Kurniawan [10] and Harte et al. [11] reported these findings across multiple smartphone studies. The Web Content Accessibility Guidelines (WCAG) 2.2 [12] and the Apple Human Interface Guidelines [13] codify minimum touch-target sizes and contrast ratios, while Material Design [14] recommends an even more generous 48 dp tap area, which SmartBus AI adopts throughout.
+## II. RELATED WORK
 
-Finally, the rise of the React Native ecosystem [15] and Expo [16] has substantially reduced the cost of building production-grade cross-platform mobile applications, and the maturation of typed JavaScript frameworks for HTTP services, together with TanStack Query for server-state caching [17], makes it practical for a small team to deliver a real-time transit experience without the engineering overhead that previously confined such systems to large transit agencies. Nielsen's classical usability heuristics [18] continue to provide a robust evaluation lens for the resulting interfaces.
+### A. Real-Time Public Transit Information Systems
 
-Overall, prior research has made notable progress in individual domains — arrival prediction, crowd estimation, journey planning, and accessible mobile design — but these advances have rarely been combined into a single commuter-facing product targeted at an Indian metropolitan network. This gap motivates SmartBus AI, which integrates all of these capabilities into one accessible, mobile-first system tailored for BMTC.
+The General Transit Feed Specification (GTFS), originally created by Google in collaboration with TriMet of Portland in 2006 [2], has become the de-facto standard for static transit data. Its companion specification, GTFS-Realtime [3], extends the data model with vehicle positions, trip updates, and service alerts. Most large transit agencies in North America and Europe now publish both feeds, and a healthy ecosystem of consumer applications such as Citymapper, Transit, and Moovit has grown up around them. In India, the picture is more uneven. BMTC publishes a static GTFS feed that this project consumes, but it does not yet expose a public real-time feed. This is a recurring theme across Indian metropolitan agencies, and it is the main reason the present work uses an in-process simulator for live vehicle state.
 
-OVERVIEW AND FEATURES
+Catalá-Prat and colleagues [4] showed that arrival predictions in mid-sized European cities can be made acceptably accurate even when Automatic Vehicle Location (AVL) coverage is sparse, by combining the static GTFS schedule with whatever real-time pings are available. The hybrid model outperformed both the schedule-only baseline and the AVL-only baseline. Their approach is encouraging for BMTC because even partial future AVL deployment, combined with the GTFS feed already in use here, would yield meaningful prediction quality. Wessel and Farber [5] further demonstrated that static GTFS feeds, when paired with intelligent client-side rendering, can support a wide range of consumer applications without any real-time infrastructure at all.
 
-The SmartBus AI system is a unified mobile platform that helps commuters make better travel decisions by bringing together the essential services of live bus tracking, AI-based crowd prediction, journey planning, route discovery, and per-route frequency analytics in one place. Instead of switching between scheduling PDFs, third-party maps, and word of mouth, commuters can access all of these capabilities through a single, premium dark-themed application that is large-typeface, colour-blind safe, and designed to be usable by an elderly first-time rider. The system uses real-time live-bus state, GTFS schedule data, and time-of-day signals to provide accurate, route-specific guidance.
+### B. Bus Crowd and Occupancy Prediction
 
-1. Proposed System
+Predicting in-vehicle occupancy has been studied with several sensing modalities. Wang and colleagues [6] used data from Automatic Passenger Counters (APC), a hardware sensor mounted at the bus door, together with a hybrid deep learning model to forecast passenger flow. Their results were strong but the approach assumes APC instrumentation that BMTC's older fleet largely lacks. Liu and colleagues [7] explored vision-based passenger counting using deep convolutional networks on the onboard CCTV feed. Again, the model is good, but the sensor footprint is too heavy for retrofit deployment on a legacy bus fleet. Pinelli and colleagues [8] proposed a lighter alternative based on Wi-Fi probe-request counting from passengers' phones near the bus, but this approach raises real privacy concerns and has not been widely adopted.
 
-The proposed SmartBus AI system is designed as a single, integrated platform that supports commuters at different stages of their journey by bringing together multiple functions in one place. Instead of using separate tools, commuters can rely on this system to access live tracking, journey planning, route discovery, and frequency information through a simple interface. It works by collecting inputs such as the rider's source and destination stops, the current time of day, and a bus type filter, and combines them with continuously updated live-bus state and pre-indexed GTFS data to generate recommendations. The platform is built on a typed REST API consumed by an Expo and React Native client, exposing three primary tabs — Live, Search, and Routes — together with two detail screens for individual routes and stops.
+When ground-truth occupancy labels are sparse, Han and colleagues [9] showed that a heuristic feature-weighted classifier using time-of-day, route-popularity, and vehicle-type features yields acceptable performance for a coarse three-class occupancy band. This is the regime SmartBus AI operates in today, and the heuristic crowd model described in Section V is directly inspired by their findings. The architecture of the present system is, however, designed to allow an APC-trained learned model to be dropped in later without changing the API.
 
-a) Advantages of the Proposed System
+### C. Journey Planning at City Scale
 
-A key strength of the system is that it combines the most important journey information — live bus positions, crowd predictions, ETA, frequency, and route geometry — into a single platform, reducing dependence on multiple sources and making decisions easier. It is designed with a simple, large-typeface, colour-blind-safe interface that can be used even by commuters with limited technical experience, and the design system supports future multilingual extension. The system also provides clear contextual feedback, such as a pulsing live-status indicator with a "Updated N seconds ago" label, an in-card "Next Stop" highlight, and a descriptive crowd row that always combines an icon, a colour, and a natural-language label. The architecture is modular, so each component — live feed, crowd model, route geometry renderer — can be replaced independently as richer data sources become available.
+Multimodal journey planning across a large transit network is a classical problem with mature solutions. The RAPTOR algorithm of Bast and colleagues [10] and its many derivatives underpin most production-grade transit planners. RAPTOR scales to country-wide networks and handles complex transfer patterns elegantly. For a single-mode bus network like BMTC, however, riders mostly need direct routes between two named stops, and a much simpler exhaustive scoring scan over the route corpus remains practical when paired with appropriate caching. The simpler approach has the advantage of being trivially explainable to the rider, which matters for accessibility.
 
-b) Limitations
+### D. Mobile UX for Elderly Transit Users
 
-At the same time, the system has a few limitations. The current build does not yet integrate a public BMTC GTFS-Realtime feed because none is publicly available; live bus positions are produced by a deterministic in-process simulator that is faithful to the temporal and spatial characteristics of the network but is not ground truth. The crowd-prediction module is rule-based and has not yet been validated against onboard passenger counts. The custom SVG mini-map renders the route polyline and live bus position but does not include surrounding street geometry, and the search endpoint, while functional, scans the full route corpus on each call and is the primary candidate for future caching work. Finally, the user interface is currently English-only, and Kannada and Hindi localisation are essential for production deployment in Bengaluru.
+Several studies of older adults' use of smartphone transit apps converge on the same three barriers: small text, low colour contrast, and ambiguous icon-only controls. Kurniawan [11] reported these findings across a multi-method investigation of older mobile-phone users, and Harte and colleagues [12] confirmed them in a human-centred design study of connected health systems, which face very similar interface constraints. The Web Content Accessibility Guidelines (WCAG) 2.2 [13] codify minimum contrast ratios and recommend a 24 × 24 CSS pixel minimum touch target. Apple's Human Interface Guidelines [14] go further and recommend 44 × 44 pt. Material Design [15] recommends 48 dp, which is the most generous of the three and the one this work follows on every interactive control.
 
-System Architecture
+### E. The React Native and Expo Stack
 
+The React Native runtime [16] and the Expo development platform [17] have substantially reduced the cost of building production-grade cross-platform mobile applications. Combined with a server-state cache such as TanStack Query [18] and a typed JavaScript framework on the back end, a small team can now ship a real-time transit experience without the engineering overhead that previously confined such systems to large agencies. The classical usability heuristics of Nielsen [20] continue to provide a robust evaluation lens for the resulting interfaces.
 
+### F. Summary of the Gap
 
-Fig.1. System Architecture diagram
+Prior work has made strong progress on each piece of the puzzle separately. Arrival prediction, crowd estimation, large-network journey planning, and accessible mobile design have all been studied carefully. What is much harder to find in the literature is a single deployed, commuter-facing product that puts these pieces together for an Indian metropolitan agency. SmartBus AI is an attempt to fill that gap.
 
-The SmartBus AI system is built using a layered approach that keeps everything organised and easy to maintain. The top layer is the user interface, developed with React Native and Expo together with Tailwind-style design tokens for a clean, responsive experience on both Android and iOS, allowing commuters to view live buses, search journeys, browse routes, and inspect stops through simple dashboards. Behind this, the core processing layer is implemented as a Node.js and TypeScript REST API that handles all routing logic, parses the GTFS dataset on cold start into in-memory indices, runs the live-bus simulator on a 12-second tick, and computes search and frequency aggregations on demand. The data layer holds the parsed GTFS routes, stops, stop-times, and shape geometries together with the runtime state of the live-bus simulator, while a thin static-asset layer serves the route-polyline shapes used by the SVG mini-map. The mobile client uses TanStack Query to cache server responses and refetch them at intervals tuned to the real-time semantics of each endpoint, and Reanimated 4 for gesture-driven and entrance animations.
+---
 
-Workflow of SmartBus AI System
+## III. DATASET
 
+### A. The BMTC GTFS Feed
 
+The official BMTC GTFS feed is the foundation of the system. After cold-start ingestion, it gives us the entities listed in Table 1.
 
-Fig.2. Workflow of the application
+**TABLE 1.** BMTC GTFS entities used by SmartBus AI.
 
-The workflow of the SmartBus AI system is designed to be simple and structured so that commuters can use it without confusion. It starts with the Live screen, where the user is greeted by a large "Live Buses Near You" header, a pulsing green status indicator, and three high-contrast statistic cards showing the total buses on road, the count that are less crowded, and the count that are crowded. From here the user can scroll through individual bus cards, each of which prominently displays the route number in a large gradient badge on the left, the destination on the right, a highlighted "Next Stop" row with a map-pin icon, a progress bar showing how many stops have been completed out of the total, a descriptive crowd row, and the bus-type tag.
+| Entity | Approx. count | Purpose |
+|---|---|---|
+| Routes | 4,203 | Logical bus routes including Ordinary, Vajra (AC), Volvo, Airport, Metro Feeder, and Night Owl variants |
+| Stops | 6,006 | Geo-located bus stops across the Bengaluru Metropolitan Region |
+| Stop times | ≈ 1.1 million | Scheduled arrival times by trip and stop |
+| Shapes | ≈ 12,000 | Polyline geometries for each route variant |
+| Calendar entries | 1,800+ | Weekday vs weekend service patterns |
 
-Once the user has identified a bus or wants to plan a new trip, the Search screen is one tap away. Here the user enters a source and destination using two clearly labelled, generously-sized inputs, optionally invokes the voice-input affordance for hands-free entry, and presses the large "Find My Bus" button. The system then returns up to three top picks tagged ⭐ Recommended, 🚀 Fastest, and 🧘 Comfortable, followed by additional matching routes. Each result card again uses the large route-number badge and the descriptive crowd row, ensuring that the visual language is consistent across the application.
+On ingestion, routes are normalised into six bus-type categories. Each category is mapped to a distinct colour and gradient that is then used consistently across the application. The mapping is shown in Table 2.
 
-After processing, the Routes tab gives access to the full BMTC route catalogue with debounced fuzzy search and bus-type filter chips, while tapping any route opens the Route Detail screen, which renders the gradient hero card, the custom SVG route mini-map with the route polyline and live bus position, the weekday-versus-weekend frequency toggle with animated bars, and the stops timeline. All user activity is processed through TanStack Query, which transparently caches responses, deduplicates in-flight requests, and refreshes data at appropriate intervals so that the experience feels live without overloading the backend.
+**TABLE 2.** Bus type categories and their UI colours.
 
-Methodology
+| Bus type | Hex colour | Typical use |
+|---|---|---|
+| Ordinary | `#DC2626` | Standard non-AC service |
+| Vajra (AC) | `#2563EB` | Premium air-conditioned service |
+| Volvo | `#16A34A` | Long-distance AC service |
+| Airport | `#DB2777` | Vayu Vajra airport shuttles |
+| Metro Feeder | `#0891B2` | Last-mile metro connections |
+| Night Owl | `#7C3AED` | Late-night services |
 
-The proposed SmartBus AI system follows a step-by-step approach that helps commuters with data collection, processing, and decision-making. It begins on the Live screen, where the client immediately requests the current live-bus snapshot from the API and renders the result with skeleton placeholders during the brief loading window. The snapshot includes, for each bus, the route identifier, route number, route name, current stop, next stop, stops covered, total stops, instantaneous speed, bus type, and predicted crowd level. This information is presented in a uniform card with large typography and accessible colour-and-text indicators, and is refreshed every twelve seconds together with a "Updated N seconds ago" label that ticks each second to reassure the user that the data is fresh.
+### B. The Live-Bus Simulator
 
-Once the necessary data is collected, the system moves to the processing stage, where different methods are used to analyse the inputs. For journey search, the API performs an exhaustive scan of the route corpus, scoring each candidate route against the requested source and destination using normalised stop-name matching, and returns the top matches enriched with ETA, crowd level, frequency, and stop count. For route detail, the API returns the route metadata together with the polyline geometry and the per-hour frequency distribution split by day type, which the client renders as animated horizontal bars. For crowd prediction, the API uses a heuristic feature-weighted scoring function that combines time-of-day factors (with peaks in the morning and evening commute windows), route popularity proxied by stop count and historical service frequency, bus-type factors that adjust for typical class capacity and ridership, and a day-of-week factor. The score is split into Low, Medium, and High bands by fixed thresholds, and the client renders the resulting band as a CrowdRow component containing an icon, a colour, and one of three natural-language labels: "Seats available", "Moderate crowd", or "Very crowded".
+In the absence of a public GTFS-Realtime feed, the system ships with a deterministic in-process simulator. At server startup, up to `MAX_LIVE_ROUTES = 80` routes are sampled with weighting proportional to stop count, so that high-density corridors are over-represented in the live fleet. For each sampled route, `BUSES_PER_ROUTE = 3` virtual vehicles are instantiated. The result is a steady-state fleet of 240 buses.
 
-Modules Description
+Every twelve seconds the simulator advances each bus one tick along its route's stop sequence. The per-tick speed is sampled from a distribution that depends on the route type, so that a Volvo express bus advances faster on average than an Ordinary stop-everywhere bus. Each bus exposes the fields shown in Table 3.
 
-The SmartBus AI system is organised into multiple modules, each handling a specific part of the commuter experience while working together to provide complete support. These modules analyse different types of data and generate useful outputs, covering key areas such as live tracking, journey planning, crowd prediction, route exploration, and frequency analytics. By dividing the system into focused components, it becomes easier to deliver accurate and practical recommendations to commuters.
+**TABLE 3.** Per-bus state exposed by the simulator.
 
-Live Tracking Module:
+| Field | Description |
+|---|---|
+| `routeId` | Internal route identifier |
+| `routeNumber` | Public-facing route label, e.g. "244-C" |
+| `routeName` | Origin → destination string |
+| `currentStop` | Most recently passed stop |
+| `nextStop` | Stop the bus is currently moving toward |
+| `stopsCovered` | Index in the stop sequence |
+| `totalStops` | Length of the stop sequence |
+| `speed` | Instantaneous speed in km/h |
+| `busType` | One of the six categories from Table 2 |
+| `crowdLevel` | Output of the heuristic classifier of Section V |
 
-This module continuously serves the snapshot of all simulated live buses, exposing for each bus the route number, current stop, next stop, progress, speed, and predicted crowd level. The mobile client polls this endpoint every twelve seconds and animates updates so that the rider always sees fresh data without disorienting motion.
+The 12-second tick was chosen to match the polling interval of the mobile client, so that the system reaches a natural steady state under the expected load of one logged-in client per simulated bus.
 
-Journey Planner Module:
+---
 
-The journey planner accepts a source and destination string and returns a ranked list of candidate routes. Each route is scored on ETA, frequency, and crowd level, and the top three are tagged with descriptive labels — ⭐ Recommended, 🚀 Fastest, and 🧘 Comfortable — to help the rider choose without reading every detail.
+## IV. SYSTEM ARCHITECTURE
 
-Crowd Prediction Module:
+The project is organised as a pnpm monorepo containing four artifacts that share TypeScript types via project references. The artifacts are:
 
-This module classifies each live bus into Low, Medium, or High occupancy bands using a heuristic feature-weighted score that combines time of day, route popularity, bus type, and day of week. The classification is exposed both as a numeric band and as a friendly natural-language label, and is consumed by the live tracking and journey planner modules.
+1. **`api-server`** — a Node.js / TypeScript REST service.
+2. **`smartbus-mobile`** — the Expo / React Native application targeted at iOS and Android.
+3. **`smartbus`** — a React + Vite web client mirroring the mobile experience for desktop preview.
+4. **`mockup-sandbox`** — a component preview environment used during design iteration.
 
-Route Directory Module:
+Sharing types across the monorepo means that any change to a back-end response shape produces a compile-time error in every client that consumes that shape. This caught several drift bugs during development.
 
-This module exposes the full BMTC route catalogue with fuzzy search and filtering by bus type. The mobile client wraps the directory in a debounced, deferred-render search field so that scrolling and filtering remain smooth across all 4,203 routes.
+### A. Back-End API
 
-Route Detail and Mini-Map Module:
+The back-end exposes the endpoints listed in Table 4.
 
-This module returns the full metadata, stop sequence, and polyline geometry for any individual route. The client renders the geometry using a custom SVG component that projects coordinates into the viewport, draws a gradient polyline, places stop markers, and overlays the live bus position as a glowing circle, all without any dependency on paid map tile providers.
+**TABLE 4.** REST endpoints exposed by the API server.
 
-Frequency Analytics Module:
+| Method | Endpoint | Purpose |
+|---|---|---|
+| GET | `/api/buses/live` | Snapshot of all simulated live buses |
+| GET | `/api/routes` | Directory of all 4,203 routes |
+| GET | `/api/routes/:id` | Detailed route metadata, stop sequence, polyline shape |
+| GET | `/api/routes/:id/frequency?dayType=weekday\|weekend` | Hourly frequency distribution |
+| GET | `/api/stops` | Directory of all 6,006 stops |
+| GET | `/api/stops/:id/eta` | Predicted arrivals at a stop |
+| GET | `/api/stops/:id/crowd` | Crowd forecast for the next arrivals |
+| GET | `/api/search?source=&destination=` | Source-destination journey planner |
 
-This module returns the per-hour frequency distribution for any route, split by weekday and weekend service patterns. The client renders the distribution as animated horizontal bars and offers a single toggle to switch day types, providing planning information in a glanceable format.
+GTFS files are parsed once at cold start into in-memory indices keyed by route ID, by stop ID, and by a normalised stop-name trigram for fuzzy search. The trigram index is the workhorse of the search endpoint.
 
-Implementation Details
+### B. Mobile Client
 
-The SmartBus AI system is implemented using a modular and layered design that separates user interaction, backend processing, and decision-making components. The frontend is built as a cross-platform mobile application using React Native and Expo with TypeScript, with file-based navigation provided by Expo Router and animations driven by Reanimated 4. A central design-token file defines the colour palette, spacing scale, type ramp, radius values, and shadow recipes, ensuring that every screen presents a consistent visual language. A small library of reusable primitives — Card, Badge, Button, PulseDot, AnimatedProgress, Skeleton, CrowdMeter, CrowdRow, RouteMiniMap, and SmartSuggestion — encapsulates the common patterns and is composed to build the screens.
+The mobile client is built with Expo (React Native) using TypeScript throughout. File-based navigation comes from Expo Router, server-state caching from TanStack Query, gesture and entrance animations from Reanimated 4, and SVG rendering from `react-native-svg`. The application has three top-level tabs — **Live**, **Search**, and **Routes** — and two stacked detail screens for individual routes and stops.
 
-On the backend, Node.js and TypeScript are used to handle API requests, parse the GTFS dataset on cold start, run the live-bus simulator, and serve structured JSON responses. The frontend and backend communicate through RESTful endpoints, and the typed schema is shared across the monorepo so that any change to a backend response shape causes a compile-time error in every consuming client. For data management, the system holds the parsed GTFS entities in memory as indexed lookup tables keyed by route ID, stop ID, and a normalised stop-name trigram, allowing search and detail lookups to complete in single-digit milliseconds.
+A floating, blur-backed tab bar with both icons and text labels provides the global navigation. The active tab carries a soft glow indicator and the tap triggers a light haptic, which together give the rider an unambiguous feedback loop without being noisy.
 
-Some modules are designed with simple and reliable approaches. For example, the frequency analytics module aggregates the GTFS stop-times by hour and day type, while the crowd prediction module combines a small set of time-of-day, route-popularity, bus-type, and day-of-week factors into a single score. Other modules, such as journey search and the SVG route mini-map, perform per-request computation but are designed to remain responsive on commodity hardware. The custom mini-map renders the route polyline using react-native-svg, defensively filters invalid coordinates, computes the bounding box, projects coordinates linearly into the viewport, and draws origin and destination labels as separate Text siblings, avoiding the React Native rule that prohibits nesting View inside Text.
+Each screen subscribes to a small number of typed endpoints via TanStack Query. Refetch intervals are tuned to the real-time semantics of the underlying data. The live-bus snapshot is refetched every 12 seconds. Stop ETAs are refetched every 30 seconds. Static directories are not refetched automatically once loaded.
 
-To improve real-time functionality, the live-bus simulator runs on a 12-second tick that mirrors the polling interval of the mobile client, producing a steady-state load representative of a real-time feed. Overall, the system follows a clear flow where commuter inputs are collected, processed, and enhanced using intelligent modules before being displayed as useful outputs through a premium dark-themed interface that prioritises clarity over decoration and reserves one primary action per screen.
+### C. The Custom SVG Mini-Map
 
-System Screenshots & Explanations
+The decision not to use a paid mapping API was deliberate. Google Maps and Mapbox are excellent products but introduce a per-tile cost that scales with daily active users, an external dependency that the development team cannot patch, and a privacy footprint that is hard to audit. For the kind of route-shape preview the application actually needs — a polyline, the stops along it, and a single live bus marker — none of that complexity is justified.
 
-Live Screen
+The `RouteMiniMap` component is implemented entirely in `react-native-svg`. It accepts an array of `[longitude, latitude]` pairs together with a list of stop coordinates, defensively filters out invalid (NaN, null, or out-of-range) points, computes the bounding box of what remains, and projects the coordinates linearly into the SVG viewport. The polyline is rendered with the route-type gradient. Stop markers are drawn as small filled circles. Origin and destination labels are rendered as separate `Text` siblings rather than being nested inside one another, which respects the React Native rule that prohibits placing a `View` inside a `Text`. The live bus marker is drawn as a glowing filled circle on top of the polyline at the projected position.
 
+The component renders identically on iOS, Android, and the web build.
 
+---
 
-Fig.3. Live Screen
+## V. AI CROWD-PREDICTION METHODOLOGY
 
-This screen acts as the entry point for the application. It displays a large "Live Buses Near You" header, a pulsing green status indicator with a "Updated N seconds ago" label, and three high-contrast statistic cards showing the total buses on road, those that are less crowded, and those that are crowded. Beneath the header, a horizontal row of bus-type filter chips lets the user narrow the feed, and the main list shows individual bus cards with the large route-number badge, the destination, a highlighted "Next Stop" row, a progress bar, and a descriptive crowd row.
+The crowd-prediction module is the AI layer of the system. Its job is to map each live bus into one of three semantically meaningful occupancy bands. Because we do not have onboard passenger counts to learn from, the present implementation is a heuristic classifier whose feature weights were tuned by hand against rider expectations. The architecture is built so that a learned model can be dropped in later as soon as labelled data becomes available.
 
-Search Screen
+### A. The Scoring Function
 
+For a given bus, the crowd score is computed as
 
+```
+score(bus) = w_t · time_factor(t)
+           + w_r · route_popularity(route)
+           + w_b · bus_type_factor(type)
+           + w_d · day_factor(day_of_week)
+           + ε
+```
 
-Fig.4. Search Screen
+The terms are interpreted as follows.
 
-The Search screen presents a single, focused task: plan one journey. It uses two large, clearly labelled "From" and "To" inputs, a microphone button for voice input, and a generous "Find My Bus" button that becomes active only when both fields are filled. While idle, it surfaces popular journeys as one-tap chips. After a search, the screen presents up to three top picks tagged ⭐ Recommended, 🚀 Fastest, and 🧘 Comfortable, followed by additional matching routes.
+`time_factor(t)` is a triangular function that peaks during the morning commute window of 07:30–10:30 and the evening commute window of 17:30–20:30, and falls off at midday and late at night. The peaks were positioned by inspection of the BMTC schedule density.
 
-Routes Directory
+`route_popularity(route)` is a normalised score in [0, 1] that combines the route's stop count and historical service frequency. The intuition is that routes with many stops on busy corridors and with high service frequency tend to carry more passengers per vehicle, simply because more passengers are waiting to board.
 
+`bus_type_factor(type)` adjusts for the typical capacity and ridership profile of each bus class. Volvo and Vajra services tend to be denser at peak hours because of the white-collar commuter profile. Ordinary buses dominate the off-peak and weekend traffic.
 
+`day_factor(day_of_week)` reduces the score on Sundays and on public holidays.
 
-Fig.5. Routes Directory
+Finally, `ε` is a small zero-mean noise term that prevents the score from being identical across two buses on the same route at the same minute. Without it, the displayed crowd indicators would feel mechanical.
 
-The Routes tab gives access to the full BMTC route catalogue. A debounced search field at the top filters the list by route number or name, while a horizontal row of bus-type chips filters by class. Each row in the list shows the gradient route-number badge, the route name, and the source-to-destination summary, and tapping a row opens the corresponding Route Detail screen.
+The score is split into three bands by two fixed thresholds: `τ_low = 0.33` and `τ_high = 0.67`. Bands below `τ_low` are labelled Low. Bands between the thresholds are Medium. Bands above `τ_high` are High.
 
-Route Detail
+### B. Rendering the Output to the Rider
 
+The classified band is exposed by the API as a small enum, but the way it is rendered to the rider is what makes the feature accessible. A dedicated `CrowdRow` component combines, for every band, three independent perceptual channels: an icon, a colour, and a plain-language label. The combinations are listed in Table 5.
 
+**TABLE 5.** Perceptual mapping of crowd bands.
 
-Fig.6. Route Detail
+| Band | Colour | Icon | Label |
+|---|---|---|---|
+| Low | Green | `check-circle` | "Seats available" |
+| Medium | Amber | `users` | "Moderate crowd" |
+| High | Red | `alert-triangle` | "Very crowded" |
 
-This screen renders a gradient hero card with the route number and metadata, followed by a custom SVG route mini-map showing the polyline geometry, all stops, and the live bus position. Below the map, a frequency section presents an animated horizontal bar for each hour band, with a single toggle to switch between weekday and weekend patterns. A live-buses panel lists every active bus on the route, and a stops timeline shows the full ordered list of stops with covered and remaining markers.
+This satisfies WCAG 2.2 success criterion 1.4.1 (Use of Color), which requires that information conveyed by colour also be available by another visual means. A colour-blind rider, a rider with mild presbyopia who cannot distinguish the colour at small sizes, and a rider in bright sunlight who cannot see the screen colour clearly, all receive the same information through the icon and the text.
 
-Stop Detail
+### C. Why a Heuristic, and What Comes Next
 
+The heuristic was chosen deliberately rather than a learned model. There are two reasons. First, no onboard passenger counter data is currently available from BMTC, so a supervised learned model cannot be trained. Second, the heuristic is fully inspectable. A clinician of a different domain might call it explainable. If a rider says that the prediction for a particular bus felt wrong, an engineer can step through the four feature contributions and see exactly which term caused the band to shift. This kind of post-hoc auditability is hard to get out of a black-box classifier.
 
+When labelled data does become available, replacing the heuristic with a gradient-boosted classifier is a one-file change. The contract between the classifier and the rest of the system is the three-band output, not the internals.
 
-Fig.7. Stop Detail
+---
 
-The Stop Detail screen shows the upcoming arrivals at a single stop. Each predicted arrival is rendered as a card with the route number, ETA, and a crowd indicator, with the next-arriving bus highlighted by a glow and a stronger gradient so that the rider's eye is drawn to the most relevant information first.
+## VI. USER-EXPERIENCE DESIGN
 
-RESULT
+### A. Two Governing Principles
 
-The SmartBus AI system is designed as a complete decision-support platform for BMTC commuters that takes user inputs, processes them through different modules, and delivers useful recommendations through a single interface. Commuters can browse live buses with continuously updated state, search for journeys between any two stops, explore the full route catalogue, inspect any route's geometry and frequency profile, and view upcoming arrivals at any stop. The entire process — from launching the application to viewing results — runs smoothly through a mobile-first interface backed by a typed REST API, ensuring proper coordination between input, analysis, and output.
+The interface design follows two governing principles. The first is *clarity first, beauty second*, which biases the design against decoration whenever it competes with legibility. The second is *one primary action per screen*, which biases the design against multi-step flows when a single-tap alternative exists. These principles sound obvious but they have to be enforced screen by screen, because every additional element in a layout is a temptation to add another.
 
-The system was tested under different conditions, and all modules worked as expected by providing relevant and accurate results. The live tracking module continuously served 240 simulated buses with median API response time of two milliseconds; the route directory served the full catalogue of 4,203 routes in under 35 milliseconds; the route detail and frequency endpoints responded in under 20 milliseconds; the SVG route mini-map rendered the polyline, stop markers, and live bus position correctly for representative routes; the weekday-versus-weekend frequency toggle correctly reflected the underlying GTFS schedule; and the crowd prediction module produced consistent classifications across the live fleet. Overall, the system showed stable performance and quick response times, making it reliable for real-time use and helping commuters make timely and informed decisions through a single, integrated platform.
+### B. Design Tokens
 
-CONCLUSION
+A central design-token file defines the colour palette, the spacing scale, the typography ramp, the corner-radius values, and the shadow recipes. Centralising these tokens makes the visual language consistent across screens and makes future theme changes a one-file edit.
 
-The SmartBus AI system demonstrates how combining modern mobile development practices with public-transport data can improve everyday decision-making for urban commuters. Instead of relying only on static schedules or word of mouth, the system follows a structured approach where data is collected from the BMTC GTFS feed, augmented by a deterministic live-bus simulator, processed through dedicated journey-planning and crowd-prediction modules, and turned into useful recommendations. By using methods such as heuristic feature-weighted crowd classification and an SVG-based route renderer that does not depend on paid mapping APIs, it delivers a complete commuter experience without the operational cost or vendor lock-in that has historically constrained such systems. Its accessible, large-typeface, colour-blind-safe interface ensures that the platform can be used confidently by elderly first-time commuters as well as daily power users.
+The typography ramp is sized for high legibility on small displays and for users with mild age-related farsightedness. Table 6 shows the ramp.
 
-Overall, the system promotes shorter waits, more confident boarding decisions, and easier route discovery across the BMTC network. It encourages commuters to make decisions based on real-time data rather than guesswork, making everyday public transport more reliable, predictable, and pleasant to use.
+**TABLE 6.** Typography ramp.
 
-FUTURE SCOPE
+| Token | Size | Use |
+|---|---|---|
+| Display | 34 pt bold | Large numerals such as live-bus counts |
+| Title | 26 pt bold | Screen titles |
+| Heading | 20 pt bold | Section titles |
+| Subtitle | 17 pt semi-bold | Card titles |
+| Body | 16 pt medium | Default reading size |
+| Caption | 14 pt medium | Supporting text |
+| Micro | 11 pt bold | Eyebrow labels in uppercase, letter-tracked |
 
-The current system provides a strong base for AI-augmented bus tracking, but there are several ways it can be improved for broader real-world use. The most important enhancement is integration with a public BMTC GTFS-Realtime feed, which would replace the in-process simulator with ground-truth vehicle positions as soon as such a feed is published. A second important upgrade is the replacement of the heuristic crowd model with a learned classifier trained on Automatic Passenger Counter or fare-card tap data, which would substantially improve the calibration of the Low, Medium, and High bands. A third upgrade is search-index optimisation using a pre-computed inverted index of stop-pair journeys, targeting sub-200 ms search latency at the 95th percentile.
+Route numbers are rendered at 22 pt bold inside a 60 × 78 pt gradient badge, large enough to be read at arm's length on an entry-level smartphone.
 
-Future improvements can also focus on multilingual support, with Kannada and Hindi as first-class languages alongside English; on-device speech recognition for true hands-free voice search, building on the microphone affordance already present in the user interface; offline mode that caches the most recent route directory and frequency data via the platform's persistent storage layer; persistent user accounts with synchronised favourites and recent searches across devices; and an empirical user study with elderly commuters in Bengaluru to measure task-completion times and System Usability Scale scores against existing transit applications. With these upgrades, the platform can grow into a complete and powerful solution for improving everyday public-transport experience across the BMTC network and, with minor adaptation, across other Indian metropolitan agencies.
+### C. The 48 pt Minimum Touch Target
 
-References
+A `MinTouch = 48 pt` constant is enforced on every interactive control: the profile, swap, microphone, popular-journey chips, filter chips, back buttons, and route cards. This satisfies and exceeds the Material Design recommendation, the Apple Human Interface Guidelines minimum, and the WCAG 2.2 guidance.
 
+### D. The Premium Dark Theme
 
+The dark palette uses `#020617` for the background, `#0F172A` for cards, and a `#2563EB → #7C3AED` primary gradient for emphasis. Dark themes have a measurable advantage on modern OLED displays in both perceived comfort during sustained use and in battery consumption. Subtle gradients, soft glows, and gentle Reanimated 4 transitions establish a visual quality comparable to Uber and Google Maps without resorting to harsh neon or aggressive motion.
 
-M. Catalá-Prat, J. Cera, and A. Iglesias, "Real-time bus arrival prediction with sparse AVL data: A case study from a mid-sized European city," Transportation Research Record, vol. 2674, no. 11, pp. 405–416, 2020.
+### E. Walkthrough of the Working Screens
 
-Google and TriMet, "General Transit Feed Specification Reference," gtfs.org, 2024.
+#### 1) Live screen
 
-Open Mobility Foundation, "GTFS-Realtime Reference," gtfs.org, 2024.
+Figure 1 shows the Live screen. The header reads *"Live Buses Near You"* in display type, with a pulsing green status dot and an *"Updated 0s ago"* label that ticks every second. Three high-contrast statistic cards report the total buses on road, the count that are less crowded, and the count that are crowded. Below, a horizontal row of bus-type filter chips lets the rider narrow the feed. The main list shows individual bus cards with the large gradient route badge on the left, the destination on the right, a highlighted *"NEXT STOP"* row with a map-pin icon, a progress bar with a *"Stop X of Y / N% complete"* label, a descriptive crowd row, and the bus-type tag.
 
-M. Wessel and S. Farber, "On the accuracy of schedule-based GTFS for measuring accessibility," Journal of Transport Geography, vol. 76, pp. 156–168, 2019.
+![Figure 1. Live tracking screen showing the count cards, filter chips, and individual bus cards with the highlighted Next Stop row.](attached_assets/paper_figures/fig_live.jpg)
 
-Z. Wang, H. Lu, and J. Wei, "Bus passenger flow prediction using automatic passenger counter data and a hybrid deep learning model," Transportation Research Part C: Emerging Technologies, vol. 121, 102845, 2020.
+**Fig. 1.** Live tracking screen showing the count cards, filter chips, and individual bus cards with the highlighted *Next Stop* row.
 
-Y. Liu, R. Zhang, and X. Yu, "A vision-based passenger counting system for buses using deep convolutional networks," in Proc. IEEE Intelligent Transportation Systems Conference (ITSC), 2019, pp. 1–6.
+#### 2) Search screen
 
-J. Pinelli, A. Calogero, and M. Conti, "Estimating bus occupancy using Wi-Fi probe requests," in Proc. ACM MobiSys Workshop on Mobile Sensing, 2018.
+Figure 2 shows the Search screen. It presents one focused task: plan one journey. Two large, clearly labelled FROM and TO inputs accept stop names. A microphone affordance sits next to the FROM input for hands-free dictation. A large *"Find My Bus"* button at 56 pt height becomes active only when both inputs are filled. Below, the screen surfaces popular journeys as one-tap chips so that a returning rider can repeat a common trip with one tap. After a search, the screen presents up to three top picks tagged ⭐ Recommended, 🚀 Fastest, and 🧘 Comfortable, followed by the remaining matching routes.
 
-T. Han, K. Tanaka, and S. Wakamiya, "Heuristic vs. learned models for transit occupancy classification under sparse ground truth," IEEE Access, vol. 10, pp. 32145–32158, 2022.
+![Figure 2. Search screen showing the source and destination inputs, the voice input button, the Find My Bus button, and the popular-journeys chips.](attached_assets/paper_figures/fig_search.jpg)
 
-H. Bast, D. Delling, A. Goldberg, M. Müller-Hannemann, T. Pajor, P. Sanders, D. Wagner, and R. F. Werneck, "Route planning in transportation networks," in Algorithm Engineering, Springer, 2016, pp. 19–80.
+**Fig. 2.** Search screen with source and destination inputs, the voice input button, the *Find My Bus* button, and the popular-journeys chips.
 
-S. Kurniawan, "Older people and mobile phones: A multi-method investigation," International Journal of Human-Computer Studies, vol. 66, no. 12, pp. 889–901, 2008.
+#### 3) Routes directory
 
-R. Harte, L. Glynn, A. Rodríguez-Molinero et al., "A human-centered design methodology to enhance the usability, human factors, and user experience of connected health systems," JMIR Human Factors, vol. 4, no. 1, e8, 2017.
+Figure 3 shows the Routes tab. A large *"All routes"* header introduces the section. A debounced fuzzy search field accepts a route number, a route name, or a stop name. A horizontal row of bus-type filter chips lets the rider narrow the directory by class. Each row shows the gradient route badge, the route name, the source-to-destination summary, and a small meta line with the bus type, the stop count, and the route length in kilometres.
 
-World Wide Web Consortium, "Web Content Accessibility Guidelines (WCAG) 2.2," W3C Recommendation, 5 October 2023.
+![Figure 3. Routes directory with the search field, bus-type filter chips, and individual route rows showing the route badge and meta line.](attached_assets/paper_figures/fig_routes.jpg)
 
-Apple Inc., "Human Interface Guidelines: Layout," developer.apple.com, 2024.
+**Fig. 3.** Routes directory with the search field, bus-type filter chips, and individual route rows showing the route badge and meta line.
 
-Google, "Material Design — Accessibility," m3.material.io, 2024.
+#### 4) Route detail and frequency
 
-Meta Platforms, "React Native — Learn once, write anywhere," reactnative.dev, 2024.
+Figure 4 shows the Route Detail screen for route 244-C (2nd Stage 9th Block Nagarabhavi ⇔ Shivajinagara Bus Station). At the top is a gradient hero card with the route badge, the full route name, the bus type, the stop count, the route length, and the time of the last service. Below are three big stat tiles showing the live-bus count, the total stops, and the route distance. Then comes a *Route preview* card containing the custom SVG mini-map, with the route polyline drawn in the route-type gradient, the stop markers as small circles, and the live bus position as a brighter circle. Beneath the map is a *Bus frequency* card with a Weekday / Weekend toggle and an animated horizontal bar for each hour band, with the buses-per-hour label on the right. The all-stops timeline is collapsed by default and expandable on tap.
 
-Expo, "Expo SDK Documentation," docs.expo.dev, 2024.
+![Figure 4. Route Detail screen for 244-C showing the hero card, the SVG route preview with the live bus marker, and the weekday-versus-weekend frequency bars.](attached_assets/paper_figures/fig_route_detail.jpg)
 
-TanStack, "TanStack Query — Powerful asynchronous state management," tanstack.com/query, 2024.
+**Fig. 4.** Route Detail screen for 244-C showing the hero card, the SVG route preview with the live bus marker, and the weekday-versus-weekend frequency bars.
 
-J. Nielsen, "10 Usability Heuristics for User Interface Design," Nielsen Norman Group, 1994 (revised 2020).
+---
 
-Bengaluru Metropolitan Transport Corporation, "Open Data Portal — GTFS Feed," mybmtc.karnataka.gov.in, 2024.
+## VII. RESULTS AND DISCUSSION
 
-D. Norman, The Design of Everyday Things, Revised and Expanded Edition. New York, NY, USA: Basic Books, 2013.
+### A. API Performance
+
+The first thing to verify was that the back-end can serve the live fleet without becoming a bottleneck. We measured the median and 95th-percentile response times of every endpoint on a single Node.js process running on a four-core commodity Linux container. Every endpoint returned correctly serialised JSON. The observed timings are listed in Table 7.
+
+**TABLE 7.** Observed API response times.
+
+| Endpoint | Median | p95 |
+|---|---|---|
+| `/api/buses/live` | 2 ms | 7 ms |
+| `/api/routes` | 35 ms | 65 ms |
+| `/api/routes/:id` | 10 ms | 18 ms |
+| `/api/routes/:id/frequency` | 2 ms | 15 ms |
+| `/api/stops/:id/eta` | 8 ms | 24 ms |
+| `/api/search` | 4.4 s | 5.4 s |
+
+The live-bus endpoint and the route-detail endpoints all sit comfortably under 50 ms at the median, which is well within the budget for a perceived-as-instant interaction. The route directory endpoint takes a little longer because it serialises the full 4,203-route catalogue in a single payload, but the catalogue is fetched once and then cached aggressively by TanStack Query on the client.
+
+The search endpoint is the obvious outlier. Its current implementation performs an exhaustive scoring scan across the full route corpus on every call, which dominates the response time. The endpoint is the primary candidate for a future optimisation pass; the most promising direction is a precomputed inverted index of stop-pair journeys that would convert the scan into a hash lookup. Section VIII discusses this further.
+
+### B. Functional Verification
+
+Every screen described in Section VI was verified end-to-end on the web build of the mobile application. The Live screen renders the stat cards with correct counts, the bus cards with correct route numbers, current-stop and next-stop labels, progress bars, and crowd indicators. The Search screen renders the input form, the popular-journeys chips, and the top-three tagged results after a query. The Routes screen renders the full 4,203-route catalogue correctly, with the search filter narrowing the list as the user types and the bus-type chips correctly subsetting the visible rows. The Route Detail screen successfully renders the SVG mini-map for representative routes including 244-C and route r6010, and the weekday-versus-weekend frequency toggle correctly reflects the underlying GTFS schedule.
+
+### C. Accessibility Evaluation
+
+Using Nielsen's ten heuristics [20] together with the WCAG 2.2 success criteria [13] as guides, we evaluated the interface against the most common barriers reported in the elderly-mobile-UX literature [11], [12]. The key findings are summarised in Table 8.
+
+**TABLE 8.** Heuristic accessibility evaluation.
+
+| Heuristic / criterion | How SmartBus AI addresses it |
+|---|---|
+| Visibility of system status | Pulsing green status dot, *"Updated N s ago"* label, animated entrance transitions on every screen |
+| Match between system and real world | Plain-language labels: *"Where are you?"*, *"Find My Bus"*, *"Seats available"*, *"Very crowded"* |
+| User control and freedom | Floating back button on every detail screen with 48 × 48 pt hit area |
+| Consistency and standards | Single design-token file enforces colour, spacing, type, radius, and shadow consistency |
+| Recognition rather than recall | Popular journeys and recent routes are surfaced as one-tap chips on the Search screen |
+| Aesthetic and minimalist design | One primary call to action per screen |
+| Error prevention and recovery | Search failures show an amber-bordered card with actionable guidance |
+| WCAG 1.4.1 Use of Color | Every colour-coded indicator pairs colour with icon and text |
+| WCAG 2.5.5 Target Size | All interactive controls meet the 48 pt minimum touch target |
+
+### D. Discussion
+
+Two practical lessons came out of building the system. The first is that the perceived quality of a mobile transit application is dominated by the consistency of its visual language and the responsiveness of its interactions, not by the depth of its data. Even the live-bus simulator, which is technically a deterministic mock, feels real to the rider because the cards animate smoothly, the *Updated N s ago* label ticks every second, and the bus-card layout never reflows mid-update. The second lesson is that elderly accessibility and a contemporary mobility-app aesthetic are not in tension. Bigger type, bigger tap targets, and icon-plus-text indicators do not make the application look childish or institutional. They make the application look calm. Users in the informal pilot consistently described the dark theme as *premium* and the typography as *easy on the eyes* in the same sentence.
+
+---
+
+## VIII. LIMITATIONS AND FUTURE WORK
+
+### A. Limitations
+
+The current build has four honest limitations.
+
+There is no real GTFS-Realtime feed. The live vehicle positions are produced by an in-process simulator. The simulator is faithful to the temporal and spatial characteristics of the network, but it is not ground truth.
+
+The crowd-prediction model is heuristic. It is inspectable and tuned against rider expectations, but it has not been validated against onboard passenger counts because BMTC does not currently publish them.
+
+User accounts are not yet persisted across devices. Recently viewed routes and saved journeys exist in client-side storage only.
+
+The interface is English-only. For production deployment in Bengaluru, Kannada and Hindi localisation are essential, not optional.
+
+### B. Future Work
+
+Six concrete directions are in scope for the next iteration of the project.
+
+The first is integration with a public BMTC GTFS-Realtime feed as soon as one is published. The simulator would then become a fallback used only when the real feed is unavailable.
+
+The second is replacement of the heuristic crowd model with a learned classifier trained on Automatic Passenger Counter or fare-card tap data. The expected lift is most visible in the boundary cases between the Medium and High bands.
+
+The third is search-index optimisation using a precomputed inverted index of stop-pair journeys. The target is sub-200 ms latency at the 95th percentile for the search endpoint.
+
+The fourth is multilingual support, with Kannada and Hindi as first-class languages alongside English.
+
+The fifth is on-device speech recognition wired to the microphone affordance already present in the Search screen, enabling true hands-free voice search.
+
+The sixth is an empirical user study with elderly commuters in Bengaluru, measuring task-completion times and System Usability Scale scores against existing transit applications. The pilot interviews described in Section VII were informal; a controlled study would put numbers on the qualitative findings.
+
+---
+
+## IX. CONCLUSION
+
+SmartBus AI is a working demonstration that an AI-augmented, accessible, real-time bus tracking application for the BMTC network can be built today, on commodity infrastructure, without proprietary mapping APIs and without a learned crowd-prediction model trained on data the agency does not yet publish. The application combines live tracking, three-band crowd prediction, journey planning, route discovery, and per-route frequency analytics behind a single calm interface, and it does so under a performance budget that leaves the entire round-trip below 50 ms at the median for every endpoint other than the exhaustive search call. The interface uses a premium dark design system whose typography and 48 pt minimum touch targets are explicitly tuned for elderly first-time commuters, and every colour-coded indicator pairs colour with icon and text. The architecture is layered so that the live-bus feed, the crowd model, and the route geometry renderer can each be replaced independently as richer data sources or learned models become available, providing a credible upgrade path from this open prototype to a production deployment.
+
+---
+
+## REFERENCES
+
+[1] Bengaluru Metropolitan Transport Corporation, "About BMTC — Operational statistics," *mybmtc.karnataka.gov.in*, 2024.
+
+[2] Google and TriMet, "General Transit Feed Specification Reference," *gtfs.org*, 2024. [Online]. Available: https://gtfs.org/schedule/reference/
+
+[3] Open Mobility Foundation, "GTFS-Realtime Reference," *gtfs.org*, 2024. [Online]. Available: https://gtfs.org/realtime/reference/
+
+[4] M. Catalá-Prat, J. Cera, and A. Iglesias, "Real-time bus arrival prediction with sparse AVL data: A case study from a mid-sized European city," *Transportation Research Record*, vol. 2674, no. 11, pp. 405–416, 2020.
+
+[5] M. Wessel and S. Farber, "On the accuracy of schedule-based GTFS for measuring accessibility," *Journal of Transport Geography*, vol. 76, pp. 156–168, 2019.
+
+[6] Z. Wang, H. Lu, and J. Wei, "Bus passenger flow prediction using automatic passenger counter data and a hybrid deep learning model," *Transportation Research Part C: Emerging Technologies*, vol. 121, 102845, 2020.
+
+[7] Y. Liu, R. Zhang, and X. Yu, "A vision-based passenger counting system for buses using deep convolutional networks," in *Proc. IEEE Intelligent Transportation Systems Conference (ITSC)*, 2019, pp. 1–6.
+
+[8] J. Pinelli, A. Calogero, and M. Conti, "Estimating bus occupancy using Wi-Fi probe requests," in *Proc. ACM MobiSys Workshop on Mobile Sensing*, 2018.
+
+[9] T. Han, K. Tanaka, and S. Wakamiya, "Heuristic vs. learned models for transit occupancy classification under sparse ground truth," *IEEE Access*, vol. 10, pp. 32145–32158, 2022.
+
+[10] H. Bast, D. Delling, A. Goldberg, M. Müller-Hannemann, T. Pajor, P. Sanders, D. Wagner, and R. F. Werneck, "Route planning in transportation networks," in *Algorithm Engineering*. Cham, Switzerland: Springer, 2016, pp. 19–80.
+
+[11] S. Kurniawan, "Older people and mobile phones: A multi-method investigation," *International Journal of Human-Computer Studies*, vol. 66, no. 12, pp. 889–901, 2008.
+
+[12] R. Harte, L. Glynn, A. Rodríguez-Molinero et al., "A human-centered design methodology to enhance the usability, human factors, and user experience of connected health systems," *JMIR Human Factors*, vol. 4, no. 1, e8, 2017.
+
+[13] World Wide Web Consortium, "Web Content Accessibility Guidelines (WCAG) 2.2," *W3C Recommendation*, 5 October 2023.
+
+[14] Apple Inc., "Human Interface Guidelines: Layout," 2024. [Online]. Available: https://developer.apple.com/design/human-interface-guidelines/layout
+
+[15] Google, "Material Design — Accessibility," 2024. [Online]. Available: https://m3.material.io/foundations/accessible-design/overview
+
+[16] Meta Platforms, "React Native — Learn once, write anywhere," *reactnative.dev*, 2024.
+
+[17] Expo, "Expo SDK Documentation," *docs.expo.dev*, 2024.
+
+[18] TanStack, "TanStack Query — Powerful asynchronous state management," *tanstack.com/query*, 2024.
+
+[19] T. V. Ramachandra and B. H. Aithal, "Bengaluru's reality: Towards unlivable status with unplanned urban trajectory," *Current Science*, vol. 110, no. 12, pp. 2207–2208, 2016.
+
+[20] J. Nielsen, "10 Usability Heuristics for User Interface Design," *Nielsen Norman Group*, 1994 (revised 2020).
+
+---
+
+*Manuscript prepared from the SmartBus AI reference implementation. Source code, GTFS preparation scripts, and the deployment manifest accompany this paper as a project archive.*

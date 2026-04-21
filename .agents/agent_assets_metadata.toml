@@ -17,4 +17,28 @@ title = "SmartBus AI - Full Official BMTC GTFS Dataset"
 id = "OyZ9qnNpUK3TwAfY64qtu"
 uri = "file://SmartBus_AI_Research_Paper.md"
 type = "text"
-title = "SmartBus AI — Research Paper"
+title = "SmartBus AI — Research Paper (IEEE Format)"
+
+[[outputs]]
+id = "FrbJb1Gg6L3bVKI-R6Dx0"
+uri = "file://attached_assets/paper_figures/fig_live.jpg"
+type = "image"
+title = "Fig. 1 — Live tracking screen"
+
+[[outputs]]
+id = "81NqPTwafYicgnTWoxla4"
+uri = "file://attached_assets/paper_figures/fig_search.jpg"
+type = "image"
+title = "Fig. 2 — Search screen"
+
+[[outputs]]
+id = "16_a-odicJEpGSeN2IaIu"
+uri = "file://attached_assets/paper_figures/fig_routes.jpg"
+type = "image"
+title = "Fig. 3 — Routes directory"
+
+[[outputs]]
+id = "2B1xmlNVWr50C7MaYrncj"
+uri = "file://attached_assets/paper_figures/fig_route_detail.jpg"
+type = "image"
+title = "Fig. 4 — Route Detail with SVG mini-map"
