@@ -48,3 +48,9 @@ id = "7Q9S41YrhE_fliLg4_Xeq"
 uri = "file://SmartBus_AI_Research_Paper.docx"
 type = "word_document"
 title = "SmartBus AI Research Paper (IEEE 2-column Word document)"
+
+[[outputs]]
+id = "t1rYg_K27YMMvt4-R-DPJ"
+uri = "file://SmartBus_AI_Research_Paper.pdf"
+type = "pdf"
+title = "SmartBus AI Research Paper (PDF)"
