@@ -271,7 +271,7 @@ The dark palette uses `#020617` for the background, `#0F172A` for cards, and a `
 
 #### 1) Live screen
 
-Figure 1 shows the Live screen. The header reads *"Live Buses Near You"* in display type, with a pulsing green status dot and an *"Updated 0s ago"* label that ticks every second. Three high-contrast stat cards report total buses on road, count that are less crowded, and count that are crowded. Below, a row of bus-type filter chips lets the rider narrow the feed. Each bus card shows a large gradient route badge on the left, the destination on the right, a highlighted *"NEXT STOP"* row, a progress bar, a descriptive crowd row, and the bus-type tag.
+As shown in Fig. 1, the Live tracking interface presents *"Live Buses Near You"* in display type, with a pulsing green status dot and an *"Updated 0s ago"* label that ticks every second. Three high-contrast stat cards report total buses on road, count that are less crowded, and count that are crowded. A row of bus-type filter chips lets the rider narrow the feed below. Each bus card shows a large gradient route badge on the left, the destination on the right, a highlighted *"NEXT STOP"* row, a progress bar, a descriptive crowd row, and the bus-type tag.
 
 ![Figure 1. Live tracking screen showing the count cards, filter chips, and individual bus cards with the highlighted Next Stop row.](attached_assets/paper_figures/fig_live.jpg)
 
@@ -279,7 +279,7 @@ Figure 1 shows the Live screen. The header reads *"Live Buses Near You"* in disp
 
 #### 2) Search screen
 
-Figure 2 shows the Search screen. It presents one focused task. Two large FROM and TO inputs accept stop names. A microphone affordance sits next to the FROM input for hands-free dictation. A *"Find My Bus"* button at 56 pt height becomes active only when both inputs are filled. Below, popular journeys appear as one-tap chips so a returning rider can repeat a common trip with one tap. After a search, the screen presents up to three top picks tagged ⭐ Recommended, 🚀 Fastest, and 🧘 Comfortable, followed by the remaining matching routes.
+Fig. 2 illustrates the search workflow, which is intentionally built around one focused task. Two large FROM and TO inputs accept stop names. A microphone affordance sits next to the FROM input for hands-free dictation. A *"Find My Bus"* button at 56 pt height becomes active only when both inputs are filled. Below, popular journeys appear as one-tap chips so a returning rider can repeat a common trip with one tap. After a search, the screen presents up to three top picks tagged ⭐ Recommended, 🚀 Fastest, and 🧘 Comfortable, followed by the remaining matching routes.
 
 ![Figure 2. Search screen showing the source and destination inputs, the voice input button, the Find My Bus button, and the popular-journeys chips.](attached_assets/paper_figures/fig_search.jpg)
 
@@ -287,7 +287,7 @@ Figure 2 shows the Search screen. It presents one focused task. Two large FROM a
 
 #### 3) Routes directory
 
-Figure 3 shows the Routes tab. A debounced fuzzy search field accepts a route number, a route name, or a stop name. A row of bus-type filter chips lets the rider narrow the directory. Each row shows the gradient route badge, the route name, the source-to-destination summary, and a meta line with the bus type, the stop count, and the route length.
+Fig. 3 depicts the Routes directory. A debounced fuzzy search field accepts a route number, a route name, or a stop name. A row of bus-type filter chips lets the rider narrow the directory. Each row shows the gradient route badge, the route name, the source-to-destination summary, and a meta line with the bus type, the stop count, and the route length.
 
 ![Figure 3. Routes directory with the search field, bus-type filter chips, and individual route rows.](attached_assets/paper_figures/fig_routes.jpg)
 
@@ -295,7 +295,7 @@ Figure 3 shows the Routes tab. A debounced fuzzy search field accepts a route nu
 
 #### 4) Route detail and frequency
 
-Figure 4 shows the Route Detail screen for route 244-C (2nd Stage 9th Block Nagarabhavi ⇔ Shivajinagara Bus Station). At the top is a gradient hero card with the route badge, the full route name, the bus type, the stop count, and the route length. Below are three stat tiles. Then comes a *Route preview* card containing the custom SVG mini-map, with the route polyline drawn in the route-type gradient, stop markers as small circles, and the live bus position as a brighter circle. Beneath the map is a *Bus frequency* card with a Weekday / Weekend toggle and an animated horizontal bar for each hour band.
+As shown in Fig. 4, the Route Detail screen for route 244-C (2nd Stage 9th Block Nagarabhavi ⇔ Shivajinagara Bus Station) opens with a gradient hero card displaying the route badge, the full route name, the bus type, the stop count, and the route length. Below are three stat tiles. Then comes a *Route preview* card containing the custom SVG mini-map, with the route polyline drawn in the route-type gradient, stop markers as small circles, and the live bus position as a brighter circle. Beneath the map is a *Bus frequency* card with a Weekday / Weekend toggle and an animated horizontal bar for each hour band.
 
 ![Figure 4. Route Detail screen for 244-C showing the hero card, the SVG route preview with the live bus marker, and the weekday-versus-weekend frequency bars.](attached_assets/paper_figures/fig_route_detail.jpg)
 
@@ -305,11 +305,11 @@ Figure 4 shows the Route Detail screen for route 244-C (2nd Stage 9th Block Naga
 
 A few engineering challenges are worth recording, because they shaped the final architecture more than the original design did.
 
-*Invalid GTFS coordinates breaking the SVG renderer.* The first time we ran the mini-map across the full route corpus, several routes crashed the renderer because their `shapes.txt` rows contained NaN or out-of-range coordinates (a known artefact of the BMTC export). We pushed the validation into the renderer itself rather than the ingestion path, so a partially malformed shape now drops the bad points and continues drawing.
+*Invalid GTFS coordinates breaking the SVG renderer.* One unexpected issue was that the very first time we ran the mini-map across the full route corpus, several routes crashed the renderer because their `shapes.txt` rows contained NaN or out-of-range coordinates (a known artefact of the BMTC export). Pushing the validation into the renderer itself rather than the ingestion path solved it; a partially malformed shape now drops the bad points and keeps drawing. In hindsight, this design choice proved effective for every odd shape we encountered later.
 
 *The `View`-inside-`Text` rule.* Our first cut of the route preview nested an animated `View` inside a `Text` for the origin and destination labels, which renders fine on the web but throws on the device. The fix was to break the labels out into sibling `Text` nodes — obvious in hindsight, easy to miss the first time.
 
-*Search latency.* We initially expected the search endpoint to return in well under a second. The actual scan over 4,203 routes takes about 4.4 s at the median, which is the obvious outlier in Table 7. We document this as the primary candidate for a future optimisation pass; a precomputed inverted index of stop-pair journeys would convert the scan into a hash lookup.
+*Search latency.* Going in, we expected the search endpoint to return in well under a second. Interestingly, during testing we noticed the actual scan over 4,203 routes settles around 4.4 s at the median, which is the obvious outlier in Table 7. This is the primary candidate for a future optimisation pass; a precomputed inverted index of stop-pair journeys would convert the scan into a hash lookup.
 
 ---
 
@@ -330,7 +330,7 @@ We measured the median and 95th-percentile response time of every endpoint on a 
 | `/api/stops/:id/eta` | 8 ms | 24 ms |
 | `/api/search` | 4.4 s | 5.4 s |
 
-The live-bus endpoint and the route-detail endpoints all sit comfortably under 50 ms at the median, which is well within the budget for a perceived-as-instant interaction. The search endpoint is the obvious outlier and is discussed in Section VI-F.
+The live-bus endpoint and the route-detail endpoints all sit comfortably under 50 ms at the median, which is well within the budget for a perceived-as-instant interaction. The search endpoint is the obvious outlier and is discussed in Section VI-F. Although the current exhaustive search introduces higher latency (~4.4 s), this is a deliberate trade-off for simplicity and interpretability; future optimisation using indexed search structures is expected to reduce latency below 200 ms.
 
 ### B. Comparison with Existing BMTC-Facing Apps
 
