@@ -47,10 +47,10 @@ title = "Fig. 4 — Route Detail with SVG mini-map"
 id = "7Q9S41YrhE_fliLg4_Xeq"
 uri = "file://SmartBus_AI_Research_Paper.docx"
 type = "word_document"
-title = "SmartBus AI — Research Paper (Word, humanized v2)"
+title = "SmartBus AI — Research Paper (Word, IEEE rewrite)"
 
 [[outputs]]
 id = "t1rYg_K27YMMvt4-R-DPJ"
 uri = "file://SmartBus_AI_Research_Paper.pdf"
 type = "pdf"
-title = "SmartBus AI — Research Paper (PDF, humanized v2)"
+title = "SmartBus AI — Research Paper (PDF, IEEE rewrite)"
