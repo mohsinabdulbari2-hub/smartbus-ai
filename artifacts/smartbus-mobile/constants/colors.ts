@@ -1,4 +1,4 @@
-// SmartBus AI — Premium Dark Design System
+// Bus Overcrowding Prediction System — Premium Dark Design System
 
 const PRIMARY = "#2563EB";
 const SECONDARY = "#7C3AED";

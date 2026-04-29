@@ -1,4 +1,4 @@
-// SmartBus AI — Design tokens
+// Bus Overcrowding Prediction System — Design tokens
 
 export const Spacing = {
   xs: 4,

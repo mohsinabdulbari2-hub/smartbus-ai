@@ -1,6 +1,6 @@
 kind = "mobile"
 previewPath = "/mobile/"
-title = "SmartBus AI Mobile"
+title = "Bus Overcrowding Prediction System (Mobile)"
 version = "1.0.0"
 id = "artifacts/smartbus-mobile"
 router = "expo-domain"

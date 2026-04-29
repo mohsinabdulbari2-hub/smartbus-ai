@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "SmartBus AI Mobile",
+    "name": "Bus Overcrowding Prediction System",
     "slug": "smartbus-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -14,9 +14,17 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": false
+      "supportsTablet": false,
+      "bundleIdentifier": "com.busoverpredict.app"
     },
-    "android": {},
+    "android": {
+      "package": "com.busoverpredict.app",
+      "versionCode": 1,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/icon.png",
+        "backgroundColor": "#ffffff"
+      }
+    },
     "web": {
       "favicon": "./assets/images/icon.png"
     },
