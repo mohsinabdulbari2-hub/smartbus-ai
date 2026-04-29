@@ -5,6 +5,68 @@ import { busState, getCrowdLevel } from "./buses.js";
 
 const router: IRouter = Router();
 
+const MIN_QUERY_LENGTH = 3;
+
+type StopRow = { id: string; name: string; [key: string]: unknown };
+type RouteRow = { id: string; number: string; name: string; color: string | null; busType: string | null; lastBusTime: string | null; [key: string]: unknown };
+type FreqRow = { routeId: string; dayType: string; morning: number; afternoon: number; evening: number; night: number; [key: string]: unknown };
+
+interface CachedTransitData {
+  allStops: StopRow[];
+  allRoutes: RouteRow[];
+  allFreq: FreqRow[];
+  routeStopIndex: Map<string, string[]>;
+}
+
+const CACHE_TTL_MS = 60_000;
+
+let transitCache: { data: CachedTransitData | null; expiresAt: number } = { data: null, expiresAt: 0 };
+let refreshPromise: Promise<CachedTransitData> | null = null;
+
+async function fetchFreshData(): Promise<CachedTransitData> {
+  const [allStops, allRoutes, allRouteStops, allFreq] = await Promise.all([
+    db.select().from(busStopsTable),
+    db.select().from(busRoutesTable),
+    db.select().from(routeStopsTable),
+    db.select().from(busFrequencyTable),
+  ]);
+  const routeStopIndex = new Map<string, string[]>();
+  for (const rs of allRouteStops as { routeId: string; stopId: string; order: number }[]) {
+    if (!routeStopIndex.has(rs.routeId)) routeStopIndex.set(rs.routeId, []);
+    routeStopIndex.get(rs.routeId)!.push(rs.stopId + ":" + rs.order);
+  }
+  for (const [routeId, entries] of routeStopIndex) {
+    routeStopIndex.set(
+      routeId,
+      entries.sort((a, b) => Number(a.split(":")[1]) - Number(b.split(":")[1])).map((e) => e.split(":")[0])
+    );
+  }
+  return {
+    allStops: allStops as StopRow[],
+    allRoutes: allRoutes as RouteRow[],
+    allFreq: allFreq as FreqRow[],
+    routeStopIndex,
+  };
+}
+
+async function getTransitData(): Promise<CachedTransitData> {
+  const now = Date.now();
+  if (transitCache.data && now < transitCache.expiresAt) {
+    return transitCache.data;
+  }
+  if (!refreshPromise) {
+    refreshPromise = fetchFreshData().then((data) => {
+      transitCache = { data, expiresAt: Date.now() + CACHE_TTL_MS };
+      refreshPromise = null;
+      return data;
+    }).catch((err) => {
+      refreshPromise = null;
+      throw err;
+    });
+  }
+  return refreshPromise;
+}
+
 router.get("/", async (req, res) => {
   try {
     const { source, destination } = req.query as { source: string; destination: string };
@@ -14,10 +76,12 @@ router.get("/", async (req, res) => {
       return;
     }
 
-    const allStops = await db.select().from(busStopsTable);
-    const allRoutes = await db.select().from(busRoutesTable);
-    const allRouteStops = await db.select().from(routeStopsTable);
-    const allFreq = await db.select().from(busFrequencyTable);
+    if (source.trim().length < MIN_QUERY_LENGTH || destination.trim().length < MIN_QUERY_LENGTH) {
+      res.status(400).json({ error: `source and destination must each be at least ${MIN_QUERY_LENGTH} characters` });
+      return;
+    }
+
+    const { allStops, allRoutes, allFreq, routeStopIndex } = await getTransitData();
 
     const sourceLower = source.toLowerCase().trim();
     const destLower = destination.toLowerCase().trim();
@@ -60,10 +124,7 @@ router.get("/", async (req, res) => {
     const hour = now.getHours();
 
     for (const route of allRoutes) {
-      const routeStopEntries = allRouteStops
-        .filter((rs) => rs.routeId === route.id)
-        .sort((a, b) => a.order - b.order);
-      const routeStopIds = routeStopEntries.map((rs) => rs.stopId);
+      const routeStopIds = routeStopIndex.get(route.id) ?? [];
 
       for (const srcStop of matchingSourceStops) {
         if (!routeStopIds.includes(srcStop.id)) continue;
