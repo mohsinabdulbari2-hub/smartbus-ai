@@ -3,9 +3,14 @@ import { useMutation } from "@tanstack/react-query";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import * as Haptics from "expo-haptics";
-import { StatusBar } from "expo-status-bar";
-import React, { useMemo, useState } from "react";
 import {
+  ExpoSpeechRecognitionModule,
+  useSpeechRecognitionEvent,
+} from "expo-speech-recognition";
+import { StatusBar } from "expo-status-bar";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import {
+  Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -47,6 +52,74 @@ const POPULAR_SEARCHES = [
 export default function SearchScreen() {
   const [source, setSource] = useState("");
   const [destination, setDestination] = useState("");
+  const [listeningField, setListeningField] = useState<"from" | "to" | null>(null);
+  const listeningFieldRef = useRef<"from" | "to" | null>(null);
+  useEffect(() => {
+    listeningFieldRef.current = listeningField;
+  }, [listeningField]);
+
+  const micPulse = useSharedValue(1);
+  useEffect(() => {
+    if (listeningField) {
+      micPulse.value = withTiming(1.2, { duration: 600 });
+    } else {
+      micPulse.value = withTiming(1, { duration: 200 });
+    }
+  }, [listeningField]);
+  const micPulseStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: micPulse.value }],
+  }));
+
+  useSpeechRecognitionEvent("result", (event) => {
+    const transcript = event.results?.[0]?.transcript?.trim();
+    if (!transcript) return;
+    const target = listeningFieldRef.current;
+    if (target === "from") setSource(transcript);
+    else if (target === "to") setDestination(transcript);
+  });
+  useSpeechRecognitionEvent("end", () => {
+    setListeningField(null);
+  });
+  useSpeechRecognitionEvent("error", (event) => {
+    setListeningField(null);
+    if (event.error && event.error !== "no-speech" && event.error !== "aborted") {
+      Alert.alert("Voice search", "Could not capture voice. Please try again.");
+    }
+  });
+
+  const startListening = async (field: "from" | "to") => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    if (listeningField) {
+      ExpoSpeechRecognitionModule.stop();
+      setListeningField(null);
+      return;
+    }
+    try {
+      const perm = await ExpoSpeechRecognitionModule.requestPermissionsAsync();
+      if (!perm.granted) {
+        Alert.alert(
+          "Microphone permission needed",
+          "Please allow microphone and speech recognition to use voice search.",
+        );
+        return;
+      }
+      setListeningField(field);
+      ExpoSpeechRecognitionModule.start({
+        lang: "en-IN",
+        interimResults: false,
+        maxAlternatives: 1,
+        continuous: false,
+        requiresOnDeviceRecognition: false,
+        addsPunctuation: false,
+        androidIntentOptions: {
+          EXTRA_LANGUAGE_MODEL: "free_form",
+        },
+      });
+    } catch (err) {
+      setListeningField(null);
+      Alert.alert("Voice search unavailable", "Speech recognition is not available on this device.");
+    }
+  };
 
   const swapRotate = useSharedValue(0);
   const swapStyle = useAnimatedStyle(() => ({
@@ -149,12 +222,21 @@ export default function SearchScreen() {
                       />
                     </View>
                     <Pressable
-                      onPress={() => Haptics.selectionAsync()}
-                      style={styles.micBtn}
-                      accessibilityLabel="Voice input"
+                      onPress={() => startListening("from")}
+                      style={[
+                        styles.micBtn,
+                        listeningField === "from" && styles.micBtnActive,
+                      ]}
+                      accessibilityLabel="Voice input for starting stop"
                       hitSlop={6}
                     >
-                      <Feather name="mic" size={18} color={Colors.primary} />
+                      <Animated.View style={listeningField === "from" ? micPulseStyle : undefined}>
+                        <Feather
+                          name="mic"
+                          size={18}
+                          color={listeningField === "from" ? "#fff" : Colors.primary}
+                        />
+                      </Animated.View>
                     </Pressable>
                   </View>
 
@@ -181,8 +263,34 @@ export default function SearchScreen() {
                         onSubmitEditing={onSearch}
                       />
                     </View>
+                    <Pressable
+                      onPress={() => startListening("to")}
+                      style={[
+                        styles.micBtn,
+                        listeningField === "to" && styles.micBtnActive,
+                      ]}
+                      accessibilityLabel="Voice input for destination"
+                      hitSlop={6}
+                    >
+                      <Animated.View style={listeningField === "to" ? micPulseStyle : undefined}>
+                        <Feather
+                          name="mic"
+                          size={18}
+                          color={listeningField === "to" ? "#fff" : Colors.secondary}
+                        />
+                      </Animated.View>
+                    </Pressable>
                   </View>
                 </View>
+
+                {listeningField && (
+                  <Animated.View entering={FadeIn} style={styles.listeningBar}>
+                    <View style={styles.listeningDot} />
+                    <Text style={styles.listeningText}>
+                      Listening… speak the {listeningField === "from" ? "starting" : "destination"} stop name
+                    </Text>
+                  </Animated.View>
+                )}
 
                 <Button
                   label="Find My Bus"
@@ -218,7 +326,7 @@ export default function SearchScreen() {
                 <View style={{ marginTop: 16 }}>
                   <SmartSuggestion
                     title="Try voice search"
-                    message="Long-press FROM field to dictate stop names hands-free."
+                    message="Tap the microphone next to FROM or TO to speak the stop name."
                     icon="mic"
                     cta="Got it"
                   />
@@ -393,6 +501,27 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: "rgba(37,99,235,0.35)",
     alignItems: "center", justifyContent: "center",
   },
+  micBtnActive: {
+    backgroundColor: Colors.danger,
+    borderColor: Colors.danger,
+  },
+  listeningBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    marginTop: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    backgroundColor: "rgba(239,68,68,0.12)",
+    borderRadius: Radius.lg,
+    borderWidth: 1,
+    borderColor: "rgba(239,68,68,0.3)",
+  },
+  listeningDot: {
+    width: 10, height: 10, borderRadius: 5,
+    backgroundColor: Colors.danger,
+  },
+  listeningText: { ...Type.body, color: Colors.danger, flex: 1 },
   divider: {
     height: 28,
     marginLeft: 5,

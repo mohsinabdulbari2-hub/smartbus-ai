@@ -8,6 +8,7 @@
     "scheme": "smartbus-mobile",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "owner": "mohsin1751",
     "splash": {
       "image": "./assets/images/splash-icon.png",
       "resizeMode": "contain",
@@ -15,11 +16,18 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.busoverpredict.app"
+      "bundleIdentifier": "com.busoverpredict.app",
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "Allow $(PRODUCT_NAME) to use the microphone for voice search of bus stops.",
+        "NSSpeechRecognitionUsageDescription": "Allow $(PRODUCT_NAME) to use speech recognition to convert your voice into a bus stop name."
+      }
     },
     "android": {
       "package": "com.busoverpredict.app",
       "versionCode": 1,
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/icon.png",
         "backgroundColor": "#ffffff"
@@ -36,7 +44,17 @@
         }
       ],
       "expo-font",
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "expo-speech-recognition",
+        {
+          "microphonePermission": "Allow $(PRODUCT_NAME) to use the microphone for voice search.",
+          "speechRecognitionPermission": "Allow $(PRODUCT_NAME) to convert your speech to text for searching bus stops.",
+          "androidSpeechServicePackages": [
+            "com.google.android.googlequicksearchbox"
+          ]
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
@@ -46,7 +64,6 @@
       "eas": {
         "projectId": "1069669b-3f5c-47bc-b978-e0c97d50b25d"
       }
-    },
-    "owner": "mohsin1751"
+    }
   }
 }
