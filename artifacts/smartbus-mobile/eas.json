@@ -9,22 +9,34 @@
       "distribution": "internal",
       "android": {
         "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_DOMAIN": "detailed-product-spec.replit.app"
       }
     },
     "preview": {
       "distribution": "internal",
       "android": {
         "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_DOMAIN": "detailed-product-spec.replit.app"
       }
     },
     "production": {
       "android": {
         "buildType": "app-bundle"
+      },
+      "env": {
+        "EXPO_PUBLIC_DOMAIN": "detailed-product-spec.replit.app"
       }
     },
     "production-apk": {
       "android": {
         "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_DOMAIN": "detailed-product-spec.replit.app"
       }
     }
   },
