@@ -1,0 +1,1001 @@
+bus_id,route,stop,hour,crowd
+BUS0,201,BTM,9,High
+BUS1,201,Indiranagar,12,Low
+BUS2,401K,BTM,14,Low
+BUS3,600F,Indiranagar,6,Medium
+BUS4,401K,BTM,3,Medium
+BUS5,401K,BTM,8,High
+BUS6,600F,Electronic City,19,High
+BUS7,500A,Majestic,14,Low
+BUS8,401K,Majestic,22,Medium
+BUS9,300C,Majestic,10,High
+BUS10,201,BTM,13,Low
+BUS11,500A,Whitefield,6,Medium
+BUS12,300C,Electronic City,1,Medium
+BUS13,600F,Indiranagar,15,Low
+BUS14,500A,Whitefield,18,High
+BUS15,500A,Whitefield,14,Low
+BUS16,600F,Indiranagar,20,High
+BUS17,401K,Electronic City,15,Low
+BUS18,600F,Whitefield,9,High
+BUS19,600F,BTM,19,High
+BUS20,300C,Whitefield,18,High
+BUS21,300C,Whitefield,22,Medium
+BUS22,300C,Whitefield,17,High
+BUS23,600F,Electronic City,5,Medium
+BUS24,401K,BTM,9,High
+BUS25,401K,Majestic,10,High
+BUS26,500A,Electronic City,23,Medium
+BUS27,401K,Majestic,0,Medium
+BUS28,600F,Indiranagar,22,Medium
+BUS29,401K,Whitefield,8,High
+BUS30,201,Whitefield,1,Medium
+BUS31,300C,Electronic City,21,Medium
+BUS32,500A,Indiranagar,3,Medium
+BUS33,600F,Indiranagar,13,Low
+BUS34,300C,Majestic,3,Medium
+BUS35,300C,BTM,1,Medium
+BUS36,600F,Majestic,11,Low
+BUS37,401K,Indiranagar,8,High
+BUS38,300C,Majestic,0,Medium
+BUS39,300C,Whitefield,3,Medium
+BUS40,401K,Indiranagar,10,High
+BUS41,300C,Whitefield,13,Low
+BUS42,401K,Majestic,20,High
+BUS43,300C,Whitefield,18,High
+BUS44,300C,Majestic,22,Medium
+BUS45,500A,Whitefield,3,Medium
+BUS46,600F,Electronic City,13,Low
+BUS47,500A,BTM,4,Medium
+BUS48,201,Majestic,14,Low
+BUS49,401K,Whitefield,6,Medium
+BUS50,300C,BTM,9,High
+BUS51,600F,BTM,11,Low
+BUS52,600F,Majestic,14,Low
+BUS53,401K,BTM,19,High
+BUS54,600F,BTM,23,Medium
+BUS55,500A,Majestic,14,Low
+BUS56,401K,Majestic,15,Low
+BUS57,401K,Majestic,21,Medium
+BUS58,600F,Electronic City,19,High
+BUS59,500A,Majestic,8,High
+BUS60,201,Electronic City,3,Medium
+BUS61,201,Whitefield,17,High
+BUS62,201,Electronic City,2,Medium
+BUS63,201,Indiranagar,5,Medium
+BUS64,201,BTM,14,Low
+BUS65,201,Electronic City,14,Low
+BUS66,600F,BTM,20,High
+BUS67,300C,Electronic City,2,Medium
+BUS68,401K,Indiranagar,5,Medium
+BUS69,201,BTM,7,Medium
+BUS70,500A,BTM,9,High
+BUS71,300C,Majestic,18,High
+BUS72,300C,Indiranagar,17,High
+BUS73,300C,BTM,11,Low
+BUS74,500A,Indiranagar,17,High
+BUS75,401K,Indiranagar,18,High
+BUS76,201,Electronic City,15,Low
+BUS77,500A,Majestic,13,Low
+BUS78,500A,BTM,6,Medium
+BUS79,500A,Indiranagar,15,Low
+BUS80,600F,Indiranagar,3,Medium
+BUS81,500A,Indiranagar,11,Low
+BUS82,500A,Electronic City,9,High
+BUS83,600F,Majestic,21,Medium
+BUS84,201,Indiranagar,12,Low
+BUS85,201,Electronic City,9,High
+BUS86,600F,Electronic City,7,Medium
+BUS87,600F,Majestic,0,Medium
+BUS88,600F,BTM,23,Medium
+BUS89,201,Whitefield,17,High
+BUS90,500A,Whitefield,11,Low
+BUS91,600F,Whitefield,17,High
+BUS92,401K,Whitefield,6,Medium
+BUS93,300C,Electronic City,7,Medium
+BUS94,201,Whitefield,0,Medium
+BUS95,201,Electronic City,17,High
+BUS96,201,Whitefield,0,Medium
+BUS97,600F,Majestic,17,High
+BUS98,300C,Majestic,7,Medium
+BUS99,600F,BTM,9,High
+BUS100,300C,Electronic City,5,Medium
+BUS101,300C,Electronic City,9,High
+BUS102,401K,Whitefield,18,High
+BUS103,600F,Whitefield,12,Low
+BUS104,600F,Whitefield,11,Low
+BUS105,600F,Majestic,0,Medium
+BUS106,500A,Indiranagar,23,Medium
+BUS107,201,BTM,4,Medium
+BUS108,201,Electronic City,23,Medium
+BUS109,300C,BTM,18,High
+BUS110,401K,Electronic City,2,Medium
+BUS111,500A,BTM,10,High
+BUS112,401K,Majestic,10,High
+BUS113,201,Electronic City,0,Medium
+BUS114,300C,Electronic City,13,Low
+BUS115,500A,Indiranagar,17,High
+BUS116,201,Indiranagar,10,High
+BUS117,600F,Whitefield,7,Medium
+BUS118,500A,BTM,18,High
+BUS119,401K,Electronic City,17,High
+BUS120,201,Indiranagar,20,High
+BUS121,201,Indiranagar,14,Low
+BUS122,201,Whitefield,17,High
+BUS123,500A,Whitefield,16,Low
+BUS124,201,Indiranagar,15,Low
+BUS125,500A,Majestic,3,Medium
+BUS126,300C,Whitefield,15,Low
+BUS127,600F,Indiranagar,1,Medium
+BUS128,401K,Whitefield,4,Medium
+BUS129,201,Whitefield,17,High
+BUS130,500A,BTM,23,Medium
+BUS131,300C,Indiranagar,9,High
+BUS132,500A,Electronic City,13,Low
+BUS133,500A,Whitefield,16,Low
+BUS134,401K,Indiranagar,15,Low
+BUS135,201,Majestic,20,High
+BUS136,600F,Electronic City,16,Low
+BUS137,401K,BTM,22,Medium
+BUS138,500A,Majestic,11,Low
+BUS139,600F,Electronic City,8,High
+BUS140,300C,Majestic,20,High
+BUS141,500A,Majestic,15,Low
+BUS142,500A,Electronic City,0,Medium
+BUS143,600F,Indiranagar,16,Low
+BUS144,600F,Majestic,18,High
+BUS145,300C,BTM,16,Low
+BUS146,500A,BTM,5,Medium
+BUS147,500A,Electronic City,14,Low
+BUS148,401K,Indiranagar,22,Medium
+BUS149,401K,Indiranagar,15,Low
+BUS150,600F,Electronic City,16,Low
+BUS151,300C,Indiranagar,16,Low
+BUS152,300C,Whitefield,20,High
+BUS153,600F,Majestic,10,High
+BUS154,300C,BTM,1,Medium
+BUS155,500A,Whitefield,6,Medium
+BUS156,201,Majestic,12,Low
+BUS157,201,Majestic,20,High
+BUS158,500A,Whitefield,14,Low
+BUS159,500A,Majestic,20,High
+BUS160,600F,Majestic,6,Medium
+BUS161,401K,Electronic City,13,Low
+BUS162,500A,Majestic,15,Low
+BUS163,600F,Indiranagar,21,Medium
+BUS164,201,BTM,3,Medium
+BUS165,300C,Majestic,18,High
+BUS166,600F,Majestic,6,Medium
+BUS167,201,Whitefield,3,Medium
+BUS168,500A,Whitefield,3,Medium
+BUS169,500A,Whitefield,5,Medium
+BUS170,401K,Majestic,19,High
+BUS171,201,Whitefield,18,High
+BUS172,300C,Whitefield,1,Medium
+BUS173,600F,Whitefield,4,Medium
+BUS174,300C,Majestic,19,High
+BUS175,401K,BTM,12,Low
+BUS176,201,Indiranagar,0,Medium
+BUS177,600F,Electronic City,11,Low
+BUS178,401K,Majestic,5,Medium
+BUS179,201,Majestic,23,Medium
+BUS180,201,Electronic City,19,High
+BUS181,600F,Whitefield,2,Medium
+BUS182,300C,Indiranagar,16,Low
+BUS183,401K,Indiranagar,9,High
+BUS184,401K,Whitefield,22,Medium
+BUS185,300C,Indiranagar,0,Medium
+BUS186,401K,Majestic,21,Medium
+BUS187,500A,Majestic,16,Low
+BUS188,300C,Whitefield,15,Low
+BUS189,500A,Whitefield,6,Medium
+BUS190,600F,Indiranagar,8,High
+BUS191,201,Majestic,6,Medium
+BUS192,201,Indiranagar,19,High
+BUS193,600F,Indiranagar,15,Low
+BUS194,300C,Indiranagar,7,Medium
+BUS195,300C,Electronic City,10,High
+BUS196,300C,Indiranagar,5,Medium
+BUS197,300C,Electronic City,17,High
+BUS198,500A,Electronic City,11,Low
+BUS199,201,Electronic City,20,High
+BUS200,201,Majestic,7,Medium
+BUS201,300C,BTM,18,High
+BUS202,300C,Electronic City,3,Medium
+BUS203,300C,BTM,14,Low
+BUS204,401K,BTM,5,Medium
+BUS205,600F,BTM,21,Medium
+BUS206,201,Majestic,16,Low
+BUS207,500A,Majestic,14,Low
+BUS208,401K,BTM,2,Medium
+BUS209,201,Majestic,18,High
+BUS210,600F,Whitefield,9,High
+BUS211,401K,Electronic City,9,High
+BUS212,600F,Majestic,19,High
+BUS213,500A,BTM,5,Medium
+BUS214,600F,Majestic,22,Medium
+BUS215,600F,Electronic City,10,High
+BUS216,300C,Whitefield,1,Medium
+BUS217,500A,Majestic,4,Medium
+BUS218,401K,Indiranagar,10,High
+BUS219,600F,Whitefield,14,Low
+BUS220,401K,BTM,2,Medium
+BUS221,300C,Electronic City,4,Medium
+BUS222,401K,Whitefield,9,High
+BUS223,201,Majestic,3,Medium
+BUS224,500A,Whitefield,19,High
+BUS225,300C,Majestic,3,Medium
+BUS226,500A,Electronic City,10,High
+BUS227,600F,Indiranagar,8,High
+BUS228,401K,Majestic,22,Medium
+BUS229,500A,Electronic City,6,Medium
+BUS230,300C,Majestic,18,High
+BUS231,201,Whitefield,10,High
+BUS232,401K,Indiranagar,15,Low
+BUS233,600F,Majestic,22,Medium
+BUS234,401K,Whitefield,11,Low
+BUS235,600F,Whitefield,11,Low
+BUS236,300C,Electronic City,19,High
+BUS237,401K,Electronic City,11,Low
+BUS238,201,BTM,20,High
+BUS239,600F,Majestic,15,Low
+BUS240,401K,Majestic,15,Low
+BUS241,201,BTM,16,Low
+BUS242,300C,Whitefield,3,Medium
+BUS243,401K,Whitefield,16,Low
+BUS244,600F,Whitefield,2,Medium
+BUS245,300C,Indiranagar,0,Medium
+BUS246,201,Whitefield,23,Medium
+BUS247,600F,BTM,1,Medium
+BUS248,401K,Majestic,14,Low
+BUS249,300C,BTM,5,Medium
+BUS250,401K,Whitefield,15,Low
+BUS251,401K,Electronic City,13,Low
+BUS252,401K,Indiranagar,22,Medium
+BUS253,401K,Electronic City,19,High
+BUS254,201,BTM,17,High
+BUS255,201,Whitefield,3,Medium
+BUS256,500A,Majestic,5,Medium
+BUS257,600F,Whitefield,21,Medium
+BUS258,600F,Indiranagar,15,Low
+BUS259,300C,Majestic,13,Low
+BUS260,201,Majestic,22,Medium
+BUS261,500A,Whitefield,7,Medium
+BUS262,600F,Whitefield,19,High
+BUS263,201,Whitefield,0,Medium
+BUS264,600F,Electronic City,11,Low
+BUS265,600F,Indiranagar,23,Medium
+BUS266,500A,BTM,13,Low
+BUS267,401K,Indiranagar,7,Medium
+BUS268,401K,Majestic,14,Low
+BUS269,500A,BTM,19,High
+BUS270,500A,Majestic,14,Low
+BUS271,300C,BTM,23,Medium
+BUS272,201,BTM,2,Medium
+BUS273,600F,BTM,4,Medium
+BUS274,600F,Electronic City,19,High
+BUS275,500A,Majestic,22,Medium
+BUS276,600F,BTM,13,Low
+BUS277,300C,BTM,13,Low
+BUS278,600F,BTM,2,Medium
+BUS279,401K,BTM,14,Low
+BUS280,600F,BTM,13,Low
+BUS281,500A,Whitefield,9,High
+BUS282,500A,Electronic City,23,Medium
+BUS283,300C,BTM,3,Medium
+BUS284,201,BTM,5,Medium
+BUS285,600F,Electronic City,15,Low
+BUS286,201,Indiranagar,4,Medium
+BUS287,500A,Whitefield,17,High
+BUS288,300C,Majestic,16,Low
+BUS289,401K,Whitefield,3,Medium
+BUS290,300C,Majestic,3,Medium
+BUS291,600F,Majestic,7,Medium
+BUS292,300C,Majestic,6,Medium
+BUS293,201,Indiranagar,2,Medium
+BUS294,401K,BTM,10,High
+BUS295,600F,Electronic City,6,Medium
+BUS296,300C,Majestic,9,High
+BUS297,600F,BTM,8,High
+BUS298,300C,Whitefield,16,Low
+BUS299,201,BTM,23,Medium
+BUS300,600F,Electronic City,11,Low
+BUS301,401K,Whitefield,3,Medium
+BUS302,401K,Electronic City,10,High
+BUS303,600F,Majestic,4,Medium
+BUS304,401K,Indiranagar,7,Medium
+BUS305,300C,Majestic,19,High
+BUS306,600F,Majestic,16,Low
+BUS307,201,BTM,7,Medium
+BUS308,500A,Indiranagar,14,Low
+BUS309,600F,Whitefield,5,Medium
+BUS310,201,BTM,21,Medium
+BUS311,401K,Whitefield,16,Low
+BUS312,500A,Majestic,7,Medium
+BUS313,401K,Electronic City,4,Medium
+BUS314,600F,Majestic,8,High
+BUS315,600F,BTM,12,Low
+BUS316,201,BTM,22,Medium
+BUS317,600F,BTM,10,High
+BUS318,201,Majestic,4,Medium
+BUS319,600F,Majestic,23,Medium
+BUS320,300C,Majestic,0,Medium
+BUS321,401K,Electronic City,9,High
+BUS322,300C,Whitefield,3,Medium
+BUS323,500A,Majestic,11,Low
+BUS324,500A,Electronic City,21,Medium
+BUS325,201,Electronic City,3,Medium
+BUS326,500A,Electronic City,9,High
+BUS327,500A,Majestic,21,Medium
+BUS328,401K,Electronic City,11,Low
+BUS329,201,Electronic City,14,Low
+BUS330,401K,BTM,22,Medium
+BUS331,500A,BTM,3,Medium
+BUS332,600F,Indiranagar,7,Medium
+BUS333,500A,Whitefield,0,Medium
+BUS334,600F,Whitefield,7,Medium
+BUS335,600F,Majestic,14,Low
+BUS336,201,BTM,19,High
+BUS337,201,Whitefield,13,Low
+BUS338,401K,Whitefield,3,Medium
+BUS339,600F,Majestic,11,Low
+BUS340,201,Indiranagar,23,Medium
+BUS341,201,Electronic City,23,Medium
+BUS342,401K,Electronic City,2,Medium
+BUS343,300C,Whitefield,20,High
+BUS344,300C,BTM,1,Medium
+BUS345,401K,BTM,5,Medium
+BUS346,500A,Indiranagar,12,Low
+BUS347,600F,BTM,13,Low
+BUS348,300C,Majestic,1,Medium
+BUS349,600F,Majestic,12,Low
+BUS350,600F,BTM,10,High
+BUS351,201,Majestic,14,Low
+BUS352,201,Indiranagar,17,High
+BUS353,500A,BTM,20,High
+BUS354,300C,BTM,2,Medium
+BUS355,600F,BTM,18,High
+BUS356,300C,Indiranagar,17,High
+BUS357,500A,Whitefield,8,High
+BUS358,401K,Indiranagar,14,Low
+BUS359,300C,Whitefield,2,Medium
+BUS360,600F,Majestic,19,High
+BUS361,401K,Whitefield,8,High
+BUS362,600F,Electronic City,2,Medium
+BUS363,600F,BTM,15,Low
+BUS364,401K,Indiranagar,19,High
+BUS365,500A,Indiranagar,13,Low
+BUS366,600F,Electronic City,12,Low
+BUS367,401K,Electronic City,6,Medium
+BUS368,300C,Indiranagar,3,Medium
+BUS369,201,Electronic City,7,Medium
+BUS370,500A,Electronic City,11,Low
+BUS371,201,Electronic City,15,Low
+BUS372,401K,Indiranagar,6,Medium
+BUS373,600F,Indiranagar,12,Low
+BUS374,401K,Majestic,10,High
+BUS375,300C,Majestic,22,Medium
+BUS376,300C,Whitefield,23,Medium
+BUS377,500A,Whitefield,3,Medium
+BUS378,401K,Electronic City,9,High
+BUS379,600F,Whitefield,13,Low
+BUS380,201,BTM,11,Low
+BUS381,401K,Electronic City,15,Low
+BUS382,600F,Majestic,2,Medium
+BUS383,500A,Majestic,9,High
+BUS384,201,BTM,17,High
+BUS385,500A,BTM,1,Medium
+BUS386,201,Majestic,11,Low
+BUS387,300C,Indiranagar,16,Low
+BUS388,401K,Indiranagar,12,Low
+BUS389,401K,BTM,13,Low
+BUS390,500A,Whitefield,6,Medium
+BUS391,500A,BTM,7,Medium
+BUS392,401K,BTM,6,Medium
+BUS393,401K,Whitefield,10,High
+BUS394,600F,Indiranagar,11,Low
+BUS395,600F,Electronic City,14,Low
+BUS396,500A,Indiranagar,18,High
+BUS397,600F,Majestic,3,Medium
+BUS398,201,BTM,21,Medium
+BUS399,500A,Whitefield,9,High
+BUS400,600F,Indiranagar,18,High
+BUS401,401K,Majestic,10,High
+BUS402,401K,Majestic,19,High
+BUS403,201,Indiranagar,1,Medium
+BUS404,500A,Indiranagar,0,Medium
+BUS405,300C,Majestic,11,Low
+BUS406,600F,BTM,17,High
+BUS407,401K,BTM,0,Medium
+BUS408,401K,Whitefield,3,Medium
+BUS409,201,BTM,3,Medium
+BUS410,300C,BTM,10,High
+BUS411,500A,Indiranagar,8,High
+BUS412,401K,BTM,23,Medium
+BUS413,600F,Whitefield,10,High
+BUS414,600F,Majestic,1,Medium
+BUS415,600F,Majestic,0,Medium
+BUS416,201,Majestic,20,High
+BUS417,300C,Electronic City,19,High
+BUS418,500A,Indiranagar,9,High
+BUS419,600F,Electronic City,4,Medium
+BUS420,401K,BTM,6,Medium
+BUS421,201,Whitefield,1,Medium
+BUS422,300C,Electronic City,2,Medium
+BUS423,201,Indiranagar,1,Medium
+BUS424,500A,BTM,4,Medium
+BUS425,600F,Electronic City,18,High
+BUS426,300C,Whitefield,23,Medium
+BUS427,401K,Indiranagar,8,High
+BUS428,401K,Majestic,17,High
+BUS429,201,Electronic City,5,Medium
+BUS430,401K,Majestic,22,Medium
+BUS431,201,Whitefield,22,Medium
+BUS432,300C,BTM,7,Medium
+BUS433,401K,Electronic City,13,Low
+BUS434,401K,Indiranagar,3,Medium
+BUS435,600F,Whitefield,0,Medium
+BUS436,600F,Majestic,19,High
+BUS437,600F,Majestic,3,Medium
+BUS438,600F,Majestic,21,Medium
+BUS439,500A,BTM,19,High
+BUS440,401K,Majestic,16,Low
+BUS441,201,Electronic City,19,High
+BUS442,600F,Majestic,10,High
+BUS443,600F,Electronic City,6,Medium
+BUS444,201,Whitefield,14,Low
+BUS445,201,BTM,14,Low
+BUS446,201,BTM,17,High
+BUS447,201,Majestic,19,High
+BUS448,600F,Whitefield,21,Medium
+BUS449,600F,Whitefield,12,Low
+BUS450,600F,BTM,22,Medium
+BUS451,401K,Indiranagar,13,Low
+BUS452,600F,Whitefield,23,Medium
+BUS453,500A,Electronic City,2,Medium
+BUS454,401K,Majestic,12,Low
+BUS455,600F,Indiranagar,15,Low
+BUS456,500A,Whitefield,21,Medium
+BUS457,300C,Electronic City,14,Low
+BUS458,201,Whitefield,0,Medium
+BUS459,600F,Majestic,16,Low
+BUS460,600F,Majestic,4,Medium
+BUS461,600F,BTM,0,Medium
+BUS462,201,Indiranagar,21,Medium
+BUS463,300C,Whitefield,6,Medium
+BUS464,500A,BTM,6,Medium
+BUS465,600F,Majestic,19,High
+BUS466,201,BTM,19,High
+BUS467,300C,BTM,21,Medium
+BUS468,600F,BTM,6,Medium
+BUS469,401K,BTM,3,Medium
+BUS470,600F,Indiranagar,12,Low
+BUS471,600F,BTM,9,High
+BUS472,500A,Majestic,6,Medium
+BUS473,300C,Whitefield,13,Low
+BUS474,500A,BTM,21,Medium
+BUS475,300C,Indiranagar,9,High
+BUS476,600F,Indiranagar,9,High
+BUS477,401K,Majestic,17,High
+BUS478,300C,Indiranagar,7,Medium
+BUS479,300C,BTM,22,Medium
+BUS480,600F,Majestic,17,High
+BUS481,201,Whitefield,23,Medium
+BUS482,401K,Majestic,11,Low
+BUS483,500A,Indiranagar,17,High
+BUS484,500A,Majestic,9,High
+BUS485,600F,Electronic City,3,Medium
+BUS486,201,Whitefield,21,Medium
+BUS487,300C,BTM,13,Low
+BUS488,201,BTM,7,Medium
+BUS489,500A,Electronic City,9,High
+BUS490,401K,Whitefield,7,Medium
+BUS491,300C,Indiranagar,14,Low
+BUS492,500A,Electronic City,5,Medium
+BUS493,500A,Whitefield,4,Medium
+BUS494,600F,Indiranagar,13,Low
+BUS495,300C,BTM,23,Medium
+BUS496,401K,Electronic City,13,Low
+BUS497,401K,Electronic City,4,Medium
+BUS498,300C,Electronic City,6,Medium
+BUS499,600F,Majestic,14,Low
+BUS500,600F,Whitefield,8,High
+BUS501,201,Indiranagar,2,Medium
+BUS502,201,Whitefield,16,Low
+BUS503,201,BTM,15,Low
+BUS504,500A,Whitefield,23,Medium
+BUS505,300C,Electronic City,7,Medium
+BUS506,401K,Whitefield,19,High
+BUS507,500A,Majestic,18,High
+BUS508,500A,Electronic City,7,Medium
+BUS509,401K,Electronic City,0,Medium
+BUS510,401K,Indiranagar,21,Medium
+BUS511,401K,Indiranagar,3,Medium
+BUS512,201,BTM,4,Medium
+BUS513,201,BTM,19,High
+BUS514,600F,Electronic City,23,Medium
+BUS515,500A,Electronic City,4,Medium
+BUS516,401K,Majestic,5,Medium
+BUS517,201,Indiranagar,16,Low
+BUS518,201,Whitefield,14,Low
+BUS519,401K,Whitefield,16,Low
+BUS520,600F,Indiranagar,3,Medium
+BUS521,401K,Majestic,16,Low
+BUS522,401K,BTM,11,Low
+BUS523,401K,Majestic,21,Medium
+BUS524,300C,BTM,9,High
+BUS525,500A,Indiranagar,7,Medium
+BUS526,500A,Majestic,14,Low
+BUS527,300C,BTM,11,Low
+BUS528,401K,Electronic City,10,High
+BUS529,401K,Electronic City,17,High
+BUS530,201,Indiranagar,6,Medium
+BUS531,201,Electronic City,15,Low
+BUS532,201,BTM,23,Medium
+BUS533,201,BTM,21,Medium
+BUS534,300C,Electronic City,0,Medium
+BUS535,300C,Indiranagar,11,Low
+BUS536,201,Majestic,19,High
+BUS537,201,Whitefield,15,Low
+BUS538,201,BTM,6,Medium
+BUS539,500A,Indiranagar,8,High
+BUS540,300C,Whitefield,9,High
+BUS541,300C,Indiranagar,23,Medium
+BUS542,500A,Electronic City,5,Medium
+BUS543,401K,Indiranagar,0,Medium
+BUS544,600F,Electronic City,15,Low
+BUS545,600F,Majestic,17,High
+BUS546,300C,Whitefield,13,Low
+BUS547,600F,Majestic,4,Medium
+BUS548,300C,BTM,0,Medium
+BUS549,500A,Whitefield,7,Medium
+BUS550,600F,Whitefield,5,Medium
+BUS551,300C,Indiranagar,17,High
+BUS552,500A,Whitefield,8,High
+BUS553,500A,BTM,6,Medium
+BUS554,401K,Whitefield,0,Medium
+BUS555,600F,Electronic City,21,Medium
+BUS556,600F,Indiranagar,19,High
+BUS557,500A,Whitefield,15,Low
+BUS558,401K,Electronic City,22,Medium
+BUS559,300C,Whitefield,16,Low
+BUS560,300C,Whitefield,7,Medium
+BUS561,401K,Whitefield,12,Low
+BUS562,500A,Whitefield,6,Medium
+BUS563,600F,BTM,23,Medium
+BUS564,500A,Indiranagar,10,High
+BUS565,401K,Indiranagar,21,Medium
+BUS566,201,BTM,17,High
+BUS567,300C,Electronic City,21,Medium
+BUS568,600F,Electronic City,23,Medium
+BUS569,500A,Majestic,20,High
+BUS570,201,Whitefield,8,High
+BUS571,401K,Indiranagar,11,Low
+BUS572,500A,Indiranagar,0,Medium
+BUS573,300C,Whitefield,17,High
+BUS574,401K,Whitefield,22,Medium
+BUS575,401K,Indiranagar,20,High
+BUS576,600F,Indiranagar,13,Low
+BUS577,300C,Electronic City,7,Medium
+BUS578,300C,BTM,8,High
+BUS579,500A,BTM,20,High
+BUS580,600F,Majestic,21,Medium
+BUS581,201,Majestic,0,Medium
+BUS582,401K,Indiranagar,9,High
+BUS583,401K,Indiranagar,9,High
+BUS584,500A,BTM,0,Medium
+BUS585,201,Majestic,22,Medium
+BUS586,500A,Indiranagar,19,High
+BUS587,300C,Whitefield,18,High
+BUS588,300C,Indiranagar,10,High
+BUS589,300C,Majestic,1,Medium
+BUS590,401K,Majestic,3,Medium
+BUS591,300C,BTM,14,Low
+BUS592,600F,Whitefield,19,High
+BUS593,600F,Electronic City,22,Medium
+BUS594,300C,Electronic City,12,Low
+BUS595,500A,BTM,3,Medium
+BUS596,201,Whitefield,6,Medium
+BUS597,300C,Indiranagar,1,Medium
+BUS598,600F,BTM,21,Medium
+BUS599,300C,BTM,3,Medium
+BUS600,300C,Electronic City,7,Medium
+BUS601,300C,Electronic City,11,Low
+BUS602,500A,Majestic,18,High
+BUS603,401K,Whitefield,19,High
+BUS604,201,Electronic City,19,High
+BUS605,201,Indiranagar,23,Medium
+BUS606,600F,Indiranagar,10,High
+BUS607,401K,Indiranagar,22,Medium
+BUS608,401K,Indiranagar,0,Medium
+BUS609,401K,Electronic City,2,Medium
+BUS610,600F,Whitefield,9,High
+BUS611,300C,Majestic,22,Medium
+BUS612,201,Electronic City,8,High
+BUS613,401K,Indiranagar,14,Low
+BUS614,600F,Whitefield,1,Medium
+BUS615,600F,Indiranagar,4,Medium
+BUS616,401K,BTM,12,Low
+BUS617,401K,BTM,13,Low
+BUS618,201,Indiranagar,15,Low
+BUS619,201,Indiranagar,22,Medium
+BUS620,300C,BTM,15,Low
+BUS621,401K,Electronic City,12,Low
+BUS622,600F,Whitefield,7,Medium
+BUS623,300C,BTM,11,Low
+BUS624,401K,Whitefield,22,Medium
+BUS625,401K,Whitefield,14,Low
+BUS626,600F,Indiranagar,2,Medium
+BUS627,201,Electronic City,12,Low
+BUS628,401K,Indiranagar,0,Medium
+BUS629,500A,BTM,12,Low
+BUS630,300C,Majestic,3,Medium
+BUS631,401K,Whitefield,21,Medium
+BUS632,600F,Indiranagar,15,Low
+BUS633,600F,Majestic,20,High
+BUS634,500A,Electronic City,14,Low
+BUS635,201,Indiranagar,9,High
+BUS636,201,Indiranagar,15,Low
+BUS637,500A,Indiranagar,22,Medium
+BUS638,500A,Indiranagar,12,Low
+BUS639,500A,Indiranagar,19,High
+BUS640,500A,Majestic,4,Medium
+BUS641,201,Indiranagar,23,Medium
+BUS642,600F,Majestic,3,Medium
+BUS643,401K,Electronic City,8,High
+BUS644,600F,Majestic,3,Medium
+BUS645,300C,Electronic City,11,Low
+BUS646,500A,Majestic,3,Medium
+BUS647,201,Indiranagar,11,Low
+BUS648,401K,Whitefield,20,High
+BUS649,300C,Electronic City,7,Medium
+BUS650,401K,BTM,21,Medium
+BUS651,500A,Whitefield,10,High
+BUS652,401K,Majestic,18,High
+BUS653,201,Whitefield,9,High
+BUS654,401K,Electronic City,17,High
+BUS655,500A,Electronic City,15,Low
+BUS656,500A,Electronic City,20,High
+BUS657,201,Whitefield,5,Medium
+BUS658,600F,Whitefield,3,Medium
+BUS659,300C,Electronic City,8,High
+BUS660,500A,Indiranagar,19,High
+BUS661,600F,BTM,8,High
+BUS662,300C,Electronic City,23,Medium
+BUS663,300C,Indiranagar,0,Medium
+BUS664,201,Majestic,10,High
+BUS665,201,Electronic City,10,High
+BUS666,401K,Whitefield,6,Medium
+BUS667,201,Whitefield,9,High
+BUS668,401K,Majestic,10,High
+BUS669,600F,Indiranagar,23,Medium
+BUS670,600F,Majestic,6,Medium
+BUS671,500A,Electronic City,18,High
+BUS672,600F,Majestic,8,High
+BUS673,600F,Whitefield,17,High
+BUS674,401K,Electronic City,3,Medium
+BUS675,201,Indiranagar,11,Low
+BUS676,600F,Indiranagar,5,Medium
+BUS677,401K,Majestic,5,Medium
+BUS678,201,Indiranagar,15,Low
+BUS679,500A,Majestic,20,High
+BUS680,201,Majestic,21,Medium
+BUS681,300C,Majestic,21,Medium
+BUS682,300C,Majestic,3,Medium
+BUS683,401K,Electronic City,5,Medium
+BUS684,600F,BTM,23,Medium
+BUS685,401K,Electronic City,13,Low
+BUS686,201,BTM,1,Medium
+BUS687,401K,Majestic,20,High
+BUS688,300C,BTM,0,Medium
+BUS689,500A,Electronic City,19,High
+BUS690,600F,Indiranagar,1,Medium
+BUS691,201,Indiranagar,19,High
+BUS692,500A,Whitefield,16,Low
+BUS693,401K,Majestic,15,Low
+BUS694,300C,Majestic,8,High
+BUS695,600F,Electronic City,18,High
+BUS696,500A,Majestic,6,Medium
+BUS697,201,BTM,20,High
+BUS698,300C,Electronic City,19,High
+BUS699,401K,BTM,23,Medium
+BUS700,600F,Majestic,9,High
+BUS701,600F,BTM,10,High
+BUS702,600F,BTM,15,Low
+BUS703,201,Majestic,16,Low
+BUS704,300C,Whitefield,14,Low
+BUS705,500A,Indiranagar,6,Medium
+BUS706,300C,Electronic City,2,Medium
+BUS707,500A,Indiranagar,6,Medium
+BUS708,600F,Electronic City,18,High
+BUS709,201,Whitefield,19,High
+BUS710,300C,Electronic City,4,Medium
+BUS711,300C,Whitefield,14,Low
+BUS712,401K,Whitefield,0,Medium
+BUS713,201,Majestic,3,Medium
+BUS714,401K,BTM,17,High
+BUS715,500A,BTM,17,High
+BUS716,300C,Whitefield,6,Medium
+BUS717,401K,Indiranagar,11,Low
+BUS718,500A,Whitefield,3,Medium
+BUS719,300C,Electronic City,21,Medium
+BUS720,300C,Whitefield,16,Low
+BUS721,401K,Indiranagar,5,Medium
+BUS722,300C,Whitefield,23,Medium
+BUS723,500A,Whitefield,9,High
+BUS724,300C,BTM,16,Low
+BUS725,201,Electronic City,8,High
+BUS726,201,Whitefield,17,High
+BUS727,300C,Majestic,12,Low
+BUS728,300C,BTM,5,Medium
+BUS729,600F,Indiranagar,11,Low
+BUS730,600F,Whitefield,6,Medium
+BUS731,500A,Indiranagar,12,Low
+BUS732,600F,Whitefield,14,Low
+BUS733,401K,BTM,15,Low
+BUS734,201,Whitefield,5,Medium
+BUS735,600F,Indiranagar,9,High
+BUS736,201,Majestic,5,Medium
+BUS737,201,BTM,18,High
+BUS738,300C,Electronic City,11,Low
+BUS739,401K,Electronic City,3,Medium
+BUS740,600F,Majestic,17,High
+BUS741,600F,BTM,2,Medium
+BUS742,500A,Whitefield,6,Medium
+BUS743,600F,Majestic,9,High
+BUS744,500A,Whitefield,8,High
+BUS745,500A,Majestic,20,High
+BUS746,300C,Electronic City,11,Low
+BUS747,401K,Majestic,23,Medium
+BUS748,300C,Indiranagar,15,Low
+BUS749,500A,BTM,19,High
+BUS750,500A,Majestic,5,Medium
+BUS751,201,BTM,2,Medium
+BUS752,201,Whitefield,18,High
+BUS753,300C,Majestic,18,High
+BUS754,500A,BTM,12,Low
+BUS755,600F,BTM,16,Low
+BUS756,500A,Majestic,22,Medium
+BUS757,500A,BTM,20,High
+BUS758,300C,Whitefield,20,High
+BUS759,300C,Indiranagar,10,High
+BUS760,201,Indiranagar,11,Low
+BUS761,201,BTM,7,Medium
+BUS762,300C,Majestic,16,Low
+BUS763,201,BTM,2,Medium
+BUS764,300C,BTM,20,High
+BUS765,300C,Electronic City,15,Low
+BUS766,300C,Whitefield,22,Medium
+BUS767,500A,Electronic City,7,Medium
+BUS768,500A,Electronic City,7,Medium
+BUS769,300C,Whitefield,7,Medium
+BUS770,201,Whitefield,13,Low
+BUS771,500A,Indiranagar,23,Medium
+BUS772,600F,Indiranagar,4,Medium
+BUS773,500A,Whitefield,15,Low
+BUS774,201,BTM,13,Low
+BUS775,201,Whitefield,19,High
+BUS776,600F,Indiranagar,10,High
+BUS777,300C,Indiranagar,7,Medium
+BUS778,201,Majestic,1,Medium
+BUS779,300C,Majestic,9,High
+BUS780,201,Indiranagar,3,Medium
+BUS781,401K,Majestic,20,High
+BUS782,500A,Electronic City,1,Medium
+BUS783,201,Electronic City,19,High
+BUS784,201,Indiranagar,21,Medium
+BUS785,300C,Whitefield,22,Medium
+BUS786,300C,Majestic,0,Medium
+BUS787,600F,Whitefield,0,Medium
+BUS788,600F,Whitefield,4,Medium
+BUS789,201,Indiranagar,16,Low
+BUS790,500A,Indiranagar,12,Low
+BUS791,600F,Majestic,11,Low
+BUS792,300C,Indiranagar,23,Medium
+BUS793,500A,Indiranagar,6,Medium
+BUS794,201,BTM,7,Medium
+BUS795,300C,Indiranagar,17,High
+BUS796,500A,BTM,7,Medium
+BUS797,500A,BTM,5,Medium
+BUS798,500A,Electronic City,10,High
+BUS799,300C,Whitefield,13,Low
+BUS800,500A,Whitefield,23,Medium
+BUS801,201,BTM,8,High
+BUS802,600F,Electronic City,17,High
+BUS803,300C,Indiranagar,19,High
+BUS804,401K,Whitefield,11,Low
+BUS805,300C,BTM,14,Low
+BUS806,500A,BTM,23,Medium
+BUS807,401K,Electronic City,15,Low
+BUS808,500A,BTM,0,Medium
+BUS809,500A,Electronic City,0,Medium
+BUS810,300C,Whitefield,19,High
+BUS811,600F,Majestic,21,Medium
+BUS812,300C,Electronic City,2,Medium
+BUS813,600F,Indiranagar,4,Medium
+BUS814,600F,Majestic,11,Low
+BUS815,201,Indiranagar,20,High
+BUS816,401K,Majestic,5,Medium
+BUS817,300C,Indiranagar,8,High
+BUS818,300C,Majestic,8,High
+BUS819,600F,Indiranagar,13,Low
+BUS820,401K,BTM,8,High
+BUS821,201,Electronic City,22,Medium
+BUS822,201,Indiranagar,12,Low
+BUS823,401K,Indiranagar,8,High
+BUS824,600F,BTM,0,Medium
+BUS825,201,BTM,22,Medium
+BUS826,600F,Majestic,15,Low
+BUS827,600F,Whitefield,17,High
+BUS828,600F,BTM,5,Medium
+BUS829,600F,BTM,14,Low
+BUS830,401K,Whitefield,18,High
+BUS831,300C,BTM,18,High
+BUS832,300C,Whitefield,6,Medium
+BUS833,401K,Electronic City,17,High
+BUS834,401K,BTM,18,High
+BUS835,500A,Whitefield,0,Medium
+BUS836,201,Majestic,5,Medium
+BUS837,201,Whitefield,10,High
+BUS838,401K,Majestic,8,High
+BUS839,401K,Majestic,8,High
+BUS840,300C,Indiranagar,4,Medium
+BUS841,201,Electronic City,3,Medium
+BUS842,201,Whitefield,3,Medium
+BUS843,401K,Majestic,15,Low
+BUS844,300C,Majestic,20,High
+BUS845,600F,Electronic City,2,Medium
+BUS846,201,Whitefield,0,Medium
+BUS847,300C,BTM,22,Medium
+BUS848,201,Indiranagar,3,Medium
+BUS849,600F,Indiranagar,5,Medium
+BUS850,300C,Electronic City,13,Low
+BUS851,300C,Whitefield,11,Low
+BUS852,600F,Indiranagar,20,High
+BUS853,201,Whitefield,6,Medium
+BUS854,201,BTM,2,Medium
+BUS855,401K,Indiranagar,3,Medium
+BUS856,300C,Majestic,17,High
+BUS857,201,Indiranagar,2,Medium
+BUS858,401K,Electronic City,14,Low
+BUS859,300C,Whitefield,10,High
+BUS860,500A,Indiranagar,21,Medium
+BUS861,300C,Majestic,18,High
+BUS862,500A,Electronic City,15,Low
+BUS863,500A,Indiranagar,21,Medium
+BUS864,401K,Indiranagar,21,Medium
+BUS865,600F,Indiranagar,0,Medium
+BUS866,500A,Majestic,17,High
+BUS867,500A,BTM,22,Medium
+BUS868,500A,Electronic City,13,Low
+BUS869,300C,Electronic City,21,Medium
+BUS870,201,Majestic,18,High
+BUS871,401K,Indiranagar,2,Medium
+BUS872,401K,Whitefield,4,Medium
+BUS873,401K,Majestic,1,Medium
+BUS874,401K,Indiranagar,20,High
+BUS875,500A,Electronic City,4,Medium
+BUS876,401K,Indiranagar,0,Medium
+BUS877,401K,BTM,11,Low
+BUS878,300C,Indiranagar,3,Medium
+BUS879,500A,Majestic,20,High
+BUS880,600F,Indiranagar,5,Medium
+BUS881,500A,BTM,0,Medium
+BUS882,600F,Whitefield,16,Low
+BUS883,300C,BTM,16,Low
+BUS884,600F,BTM,0,Medium
+BUS885,300C,Majestic,7,Medium
+BUS886,600F,BTM,17,High
+BUS887,300C,Electronic City,8,High
+BUS888,300C,BTM,13,Low
+BUS889,300C,BTM,17,High
+BUS890,201,Indiranagar,16,Low
+BUS891,401K,Electronic City,21,Medium
+BUS892,401K,BTM,23,Medium
+BUS893,300C,Electronic City,3,Medium
+BUS894,201,Indiranagar,15,Low
+BUS895,300C,Whitefield,7,Medium
+BUS896,401K,Indiranagar,19,High
+BUS897,600F,Whitefield,12,Low
+BUS898,201,Whitefield,2,Medium
+BUS899,201,BTM,23,Medium
+BUS900,600F,Electronic City,5,Medium
+BUS901,201,Indiranagar,15,Low
+BUS902,201,BTM,5,Medium
+BUS903,401K,Whitefield,20,High
+BUS904,201,Whitefield,8,High
+BUS905,201,Majestic,16,Low
+BUS906,300C,Majestic,0,Medium
+BUS907,300C,Majestic,15,Low
+BUS908,500A,Majestic,20,High
+BUS909,401K,Indiranagar,19,High
+BUS910,500A,Majestic,12,Low
+BUS911,300C,Electronic City,22,Medium
+BUS912,600F,Whitefield,19,High
+BUS913,300C,Indiranagar,14,Low
+BUS914,201,Indiranagar,16,Low
+BUS915,401K,Electronic City,19,High
+BUS916,600F,Majestic,3,Medium
+BUS917,201,Majestic,14,Low
+BUS918,300C,Majestic,18,High
+BUS919,300C,Indiranagar,19,High
+BUS920,600F,Indiranagar,22,Medium
+BUS921,401K,BTM,0,Medium
+BUS922,500A,Whitefield,17,High
+BUS923,500A,Indiranagar,6,Medium
+BUS924,500A,Indiranagar,7,Medium
+BUS925,201,BTM,9,High
+BUS926,401K,Indiranagar,10,High
+BUS927,600F,Electronic City,11,Low
+BUS928,600F,Electronic City,20,High
+BUS929,600F,BTM,19,High
+BUS930,300C,Indiranagar,2,Medium
+BUS931,401K,Whitefield,15,Low
+BUS932,401K,Majestic,19,High
+BUS933,500A,Whitefield,12,Low
+BUS934,201,BTM,22,Medium
+BUS935,401K,Indiranagar,11,Low
+BUS936,401K,Electronic City,3,Medium
+BUS937,500A,Indiranagar,17,High
+BUS938,500A,BTM,4,Medium
+BUS939,600F,Whitefield,15,Low
+BUS940,500A,Indiranagar,8,High
+BUS941,500A,BTM,6,Medium
+BUS942,401K,Majestic,3,Medium
+BUS943,401K,Indiranagar,1,Medium
+BUS944,401K,Whitefield,7,Medium
+BUS945,401K,Majestic,6,Medium
+BUS946,600F,Majestic,17,High
+BUS947,401K,BTM,0,Medium
+BUS948,600F,BTM,0,Medium
+BUS949,401K,Whitefield,9,High
+BUS950,500A,Majestic,2,Medium
+BUS951,201,Whitefield,10,High
+BUS952,300C,Whitefield,20,High
+BUS953,300C,Majestic,17,High
+BUS954,300C,Indiranagar,7,Medium
+BUS955,600F,Majestic,16,Low
+BUS956,201,Electronic City,23,Medium
+BUS957,300C,Indiranagar,7,Medium
+BUS958,500A,Electronic City,22,Medium
+BUS959,401K,Indiranagar,23,Medium
+BUS960,500A,Whitefield,17,High
+BUS961,600F,Indiranagar,19,High
+BUS962,300C,BTM,8,High
+BUS963,201,BTM,2,Medium
+BUS964,600F,Indiranagar,14,Low
+BUS965,300C,Electronic City,14,Low
+BUS966,500A,Majestic,22,Medium
+BUS967,500A,Electronic City,21,Medium
+BUS968,201,Indiranagar,5,Medium
+BUS969,300C,Majestic,3,Medium
+BUS970,600F,Indiranagar,9,High
+BUS971,600F,Whitefield,6,Medium
+BUS972,401K,BTM,16,Low
+BUS973,600F,Electronic City,4,Medium
+BUS974,500A,Indiranagar,4,Medium
+BUS975,401K,BTM,16,Low
+BUS976,500A,BTM,0,Medium
+BUS977,300C,Whitefield,22,Medium
+BUS978,500A,Majestic,20,High
+BUS979,500A,Electronic City,15,Low
+BUS980,600F,Electronic City,2,Medium
+BUS981,300C,Indiranagar,14,Low
+BUS982,401K,Majestic,9,High
+BUS983,201,Majestic,22,Medium
+BUS984,500A,Electronic City,7,Medium
+BUS985,401K,Majestic,16,Low
+BUS986,201,Indiranagar,15,Low
+BUS987,500A,Indiranagar,12,Low
+BUS988,300C,BTM,9,High
+BUS989,500A,Electronic City,0,Medium
+BUS990,500A,Indiranagar,5,Medium
+BUS991,500A,Indiranagar,7,Medium
+BUS992,300C,BTM,21,Medium
+BUS993,600F,Electronic City,3,Medium
+BUS994,500A,BTM,5,Medium
+BUS995,401K,Majestic,22,Medium
+BUS996,401K,Majestic,16,Low
+BUS997,201,BTM,22,Medium
+BUS998,600F,Whitefield,20,High
+BUS999,401K,Whitefield,23,Medium
