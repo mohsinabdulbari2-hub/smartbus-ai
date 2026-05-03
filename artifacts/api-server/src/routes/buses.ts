@@ -167,12 +167,15 @@ async function getRouteStopsCache() {
 
 // How many routes do we simulate live buses for? With 4,200+ routes, simulating
 // every one would create thousands of buses. Cap to a representative sample.
-// 1,200 routes × 8 buses = 9,600 live buses — matches the real BMTC fleet
-// scale. The /live response is still hard-capped at 100 buses per request
-// (X-Total-Count header carries the true total), so wire payload stays small;
-// only in-memory simulation cost grows linearly with fleet size.
-const MAX_LIVE_ROUTES = 1200;
-const BUSES_PER_ROUTE = 8;
+// We simulate ACTIVE buses, not total fleet capacity. Routes ≠ buses.
+// 200 major routes × 3 buses + 100 minor routes × 1 bus = 700 live buses
+// — matches the spec's 600–800 active-fleet target.
+// "Major" = top 200 picked routes by stop count (busier corridors run more buses).
+const MAJOR_ROUTES_COUNT = 200;
+const MINOR_ROUTES_COUNT = 100;
+const MAX_LIVE_ROUTES = MAJOR_ROUTES_COUNT + MINOR_ROUTES_COUNT; // 300
+const MAJOR_BUSES_PER_ROUTE = 3;
+const MINOR_BUSES_PER_ROUTE = 1;
 
 async function initializeBuses() {
   if (initialized) return;
@@ -196,7 +199,7 @@ async function initializeBuses() {
   // Pick a balanced sample so every filter chip has buses to show
   const TYPES: NormalizedBusType[] = ["Ordinary", "Vajra", "Volvo", "Airport", "MetroFeeder", "Night"];
   const PER_TYPE: Record<NormalizedBusType, number> = {
-    Ordinary: 40, Vajra: 18, Volvo: 14, Airport: 10, MetroFeeder: 12, Night: 8,
+    Ordinary: 120, Vajra: 50, Volvo: 40, Airport: 30, MetroFeeder: 36, Night: 24,
   };
   const picked: Array<{ route: typeof allRoutes[number]; type: NormalizedBusType }> = [];
   for (const t of TYPES) {
@@ -236,8 +239,19 @@ async function initializeBuses() {
   }
   const ranked = interleaved.slice(0, MAX_LIVE_ROUTES);
 
+  // Decide tier (major/minor) by stop count among the picked set. Insertion order
+  // stays the type-interleaved order above so the capped /live response remains
+  // balanced across types.
+  const byLenDesc = [...ranked].sort(
+    (a, b) => (cache.get(b.route.id)?.length ?? 0) - (cache.get(a.route.id)?.length ?? 0),
+  );
+  const majorIds = new Set(byLenDesc.slice(0, MAJOR_ROUTES_COUNT).map((p) => p.route.id));
+
+  const totalBuses =
+    Math.min(MAJOR_ROUTES_COUNT, ranked.length) * MAJOR_BUSES_PER_ROUTE +
+    Math.max(0, ranked.length - MAJOR_ROUTES_COUNT) * MINOR_BUSES_PER_ROUTE;
   const breakdown = ranked.reduce((acc, p) => { acc[p.type] = (acc[p.type] || 0) + 1; return acc; }, {} as Record<string, number>);
-  console.log(`[buses] initializing ~${ranked.length * BUSES_PER_ROUTE} live buses across ${ranked.length} routes`, breakdown);
+  console.log(`[buses] initializing ${totalBuses} live buses across ${ranked.length} routes (${majorIds.size} major × ${MAJOR_BUSES_PER_ROUTE} + ${ranked.length - majorIds.size} minor × ${MINOR_BUSES_PER_ROUTE})`, breakdown);
 
   // Flip the readiness flag *after* the loop so concurrent callers awaiting
   // ensureInitialized() can never see a half-built busState.
@@ -245,7 +259,7 @@ async function initializeBuses() {
     const stops = cache.get(route.id) ?? [];
     if (stops.length < 2) continue;
 
-    const numBuses = BUSES_PER_ROUTE;
+    const numBuses = majorIds.has(route.id) ? MAJOR_BUSES_PER_ROUTE : MINOR_BUSES_PER_ROUTE;
     for (let i = 0; i < numBuses; i++) {
       // Spread starting positions evenly + small per-bus jitter so two buses
       // on the same route never start at the exact same stop.
