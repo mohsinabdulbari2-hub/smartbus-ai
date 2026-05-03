@@ -26,6 +26,8 @@ export type BusType = "Ordinary" | "Vajra" | "Volvo" | "Airport" | "MetroFeeder"
 
 export type CrowdLevel = "Low" | "Medium" | "High" | "VeryHigh";
 
+export type BusStatus = "At_Stop" | "Approaching" | "Departed" | "Upcoming";
+
 export type LiveBus = {
   id: string;
   routeId: string;
@@ -46,6 +48,8 @@ export type LiveBus = {
   stopsCovered: number;
   stopsRemaining: number;
   currentStop: string;
+  status?: BusStatus;
+  distanceToNextStop?: number;
 };
 
 export type BusStop = {

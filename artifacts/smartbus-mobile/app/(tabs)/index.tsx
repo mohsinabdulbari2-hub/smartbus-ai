@@ -27,7 +27,7 @@ import { SmartSuggestion } from "@/components/ui/SmartSuggestion";
 import { CrowdRow } from "@/components/ui/CrowdRow";
 import Colors from "@/constants/colors";
 import { MinTouch, Radius, Shadow, Spacing, Type } from "@/constants/theme";
-import { api, type LiveBus, type BusType } from "@/lib/api";
+import { api, type LiveBus, type BusType, type BusStatus } from "@/lib/api";
 
 const FILTERS: { key: BusType | "All"; label: string; emoji: string }[] = [
   { key: "All",         label: "All",      emoji: "🚍" },
@@ -39,34 +39,33 @@ const FILTERS: { key: BusType | "All"; label: string; emoji: string }[] = [
   { key: "Night",       label: "Night",    emoji: "🌙" },
 ];
 
-function timeAgo(ts: number) {
-  const s = Math.max(0, Math.floor((Date.now() - ts) / 1000));
-  if (s < 60) return `${s}s ago`;
-  const m = Math.floor(s / 60);
-  return `${m}m ago`;
-}
-
 export default function LiveScreen() {
   const [filter, setFilter] = useState<BusType | "All">("All");
-  const [lastUpdate, setLastUpdate] = useState(Date.now());
-  const [, force] = useState(0);
+  const [secondsAgo, setSecondsAgo] = useState(0);
 
-  const { data, isLoading, refetch, isRefetching } = useQuery({
+  const { data, isLoading, refetch, isRefetching, dataUpdatedAt, failureCount } = useQuery({
     queryKey: ["liveBuses"],
     queryFn: api.getLiveBusesWithMeta,
     refetchInterval: 12000,
     placeholderData: (prev) => prev,
   });
 
-  useEffect(() => {
-    if (data) setLastUpdate(Date.now());
-  }, [data]);
+  // Stable offline detection — only after 2+ consecutive failures so a
+  // single dropped poll doesn't flicker the banner.
+  const isOffline = failureCount >= 2;
 
-  // Tick "X sec ago" every second
+  // Tick "Updated Xs ago" every second, but only after we've had at least
+  // one successful fetch (dataUpdatedAt > 0). dataUpdatedAt is updated by
+  // TanStack Query ONLY on successful refetch — never on failure — which
+  // is exactly the "only update lastFetchTime on success" rule.
   useEffect(() => {
-    const t = setInterval(() => force((x) => x + 1), 1000);
+    if (!dataUpdatedAt) return;
+    setSecondsAgo(Math.floor((Date.now() - dataUpdatedAt) / 1000));
+    const t = setInterval(() => {
+      setSecondsAgo(Math.floor((Date.now() - dataUpdatedAt) / 1000));
+    }, 1000);
     return () => clearInterval(t);
-  }, []);
+  }, [dataUpdatedAt]);
 
   const buses = data?.buses ?? [];
   // Real fleet size from X-Total-Count header. The response body is
@@ -124,7 +123,9 @@ export default function LiveScreen() {
               empty={stats.empty}
               filter={filter}
               setFilter={setFilter}
-              lastUpdate={lastUpdate}
+              dataUpdatedAt={dataUpdatedAt}
+              secondsAgo={secondsAgo}
+              isOffline={isOffline}
               showingCount={filtered.length}
             />
           }
@@ -144,11 +145,11 @@ export default function LiveScreen() {
               <View style={styles.empty}>
                 <Feather name="wifi-off" size={36} color={Colors.dark.textMuted} />
                 <Text style={styles.emptyText}>
-                  {filter === "All" ? "No buses on the road right now" : `No ${filter} buses running`}
+                  {filter === "All" ? "No buses within 5 km" : `No ${filter} buses running`}
                 </Text>
                 <Text style={styles.emptySub}>
                   {filter === "All"
-                    ? "Pull down to refresh in a moment"
+                    ? "Showing nearest buses — pull down to refresh"
                     : "Try another bus type or tap All to see everything"}
                 </Text>
                 {filter !== "All" && (
@@ -170,13 +171,22 @@ export default function LiveScreen() {
 }
 
 function Header({
-  total, crowded, empty, filter, setFilter, lastUpdate, showingCount,
+  total, crowded, empty, filter, setFilter, dataUpdatedAt, secondsAgo, isOffline, showingCount,
 }: {
   total: number; crowded: number; empty: number;
   filter: BusType | "All"; setFilter: (f: BusType | "All") => void;
-  lastUpdate: number;
+  dataUpdatedAt: number;
+  secondsAgo: number;
+  isOffline: boolean;
   showingCount: number;
 }) {
+  const timerLabel = dataUpdatedAt ? `Updated ${secondsAgo}s ago` : "Connecting...";
+  const timerColor = !dataUpdatedAt
+    ? Colors.dark.textMuted
+    : secondsAgo > 20
+      ? Colors.warning
+      : Colors.dark.textSecondary;
+  const dotColor = !dataUpdatedAt || secondsAgo > 20 ? Colors.warning : Colors.success;
   return (
     <View style={{ paddingTop: 8, paddingBottom: 16 }}>
       {/* Top header */}
@@ -185,9 +195,9 @@ function Header({
           <View style={{ flex: 1 }}>
             <Text style={styles.title}>Live Buses Near You</Text>
             <View style={styles.liveStatusRow}>
-              <PulseDot color={Colors.success} size={10} />
-              <Text style={styles.liveStatusText}>
-                Updated {timeAgo(lastUpdate)}
+              <PulseDot color={dotColor} size={10} />
+              <Text style={[styles.liveStatusText, { color: timerColor }]}>
+                {timerLabel}
               </Text>
             </View>
           </View>
@@ -262,11 +272,17 @@ function Header({
         })}
       </ScrollView>
 
+      {isOffline && (
+        <Text style={styles.offlineBanner}>
+          Offline • Showing last known data
+        </Text>
+      )}
+
       <View style={styles.sectionTitleRow}>
         <Text style={styles.sectionTitle}>Live buses</Text>
         <Text style={styles.sectionCaption}>
-          {showingCount < 20 && total > showingCount
-            ? `No buses nearby • Showing nearest ${showingCount}`
+          {showingCount === total
+            ? `Showing all ${total.toLocaleString()} buses`
             : `Showing ${showingCount.toLocaleString()} of ${total.toLocaleString()} buses`}
         </Text>
       </View>
@@ -293,11 +309,24 @@ function StatCard({
   );
 }
 
+const STATUS_CONFIG: Record<BusStatus, { label: string; color: string }> = {
+  At_Stop:     { label: "🟡 At Stop",     color: "#eab308" },
+  Approaching: { label: "🟠 Approaching", color: "#f97316" },
+  Departed:    { label: "🟢 Running",     color: "#22c55e" },
+  Upcoming:    { label: "🟢 Running",     color: "#22c55e" },
+};
+
 function BusCard({ bus }: { bus: LiveBus }) {
   const config = BUS_TYPE_CONFIG[bus.busType] || BUS_TYPE_CONFIG.Ordinary;
   const gradient = getBusTypeGradient(bus.busType);
   const progress = bus.totalStops > 0 ? bus.stopsCovered / bus.totalStops : 0;
   const isOffline = bus.isOnline === false;
+
+  // "Arriving" overrides everything else when the bus is essentially at
+  // the next stop. We don't have an ETA field, so we derive purely from
+  // distanceToNextStop (meters).
+  const isArriving = (bus.distanceToNextStop ?? Number.POSITIVE_INFINITY) < 30;
+  const statusInfo = bus.status ? STATUS_CONFIG[bus.status] : null;
 
   return (
     <Card
@@ -346,10 +375,17 @@ function BusCard({ bus }: { bus: LiveBus }) {
               {bus.nextStop}
             </Text>
           </View>
-          <View style={styles.speedPill}>
-            <Feather name="zap" size={12} color={Colors.warning} />
-            <Text style={styles.speedText}>{Math.round(bus.speed)} km/h</Text>
-          </View>
+          {isArriving ? (
+            <View style={styles.arrivingPill}>
+              <Feather name="navigation" size={12} color="#fff" />
+              <Text style={styles.arrivingText}>Arriving</Text>
+            </View>
+          ) : (
+            <View style={styles.speedPill}>
+              <Feather name="zap" size={12} color={Colors.warning} />
+              <Text style={styles.speedText}>{Math.round(bus.speed)} km/h</Text>
+            </View>
+          )}
         </View>
 
         {/* Progress */}
@@ -371,6 +407,13 @@ function BusCard({ bus }: { bus: LiveBus }) {
         {/* Footer badges */}
         <View style={styles.busFooter}>
           <Badge variant="primary" emoji={config.icon} label={config.label} size="md" />
+          {!isArriving && statusInfo && (
+            <View style={[styles.statusPill, { borderColor: statusInfo.color + "66", backgroundColor: statusInfo.color + "1A" }]}>
+              <Text style={[styles.statusPillText, { color: statusInfo.color }]}>
+                {statusInfo.label}
+              </Text>
+            </View>
+          )}
           {isOffline ? (
             <Badge variant="neutral" emoji="⚪" label="Offline" size="md" />
           ) : (
@@ -435,6 +478,17 @@ const styles = StyleSheet.create({
   sectionTitle: { ...Type.heading, color: Colors.dark.text },
   sectionTitleRow: { flexDirection: "row", alignItems: "baseline", justifyContent: "space-between", marginTop: 20, marginBottom: 10, gap: 8 },
   sectionCaption: { ...Type.caption, color: Colors.dark.textMuted, flexShrink: 1, textAlign: "right" },
+  offlineBanner: {
+    ...Type.caption,
+    color: Colors.warning,
+    backgroundColor: "rgba(245,158,11,0.10)",
+    borderColor: "rgba(245,158,11,0.35)",
+    borderWidth: 1,
+    borderRadius: Radius.sm,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    marginTop: 12,
+  },
 
   busAccent: { height: 4, width: "100%" },
   busHeaderRow: { flexDirection: "row", alignItems: "center", gap: 14 },
@@ -472,6 +526,21 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: "rgba(245,158,11,0.3)",
   },
   speedText: { fontSize: 13, color: Colors.warning, fontFamily: "Inter_700Bold" },
+
+  arrivingPill: {
+    flexDirection: "row", alignItems: "center", gap: 4,
+    paddingHorizontal: 10, paddingVertical: 6,
+    backgroundColor: Colors.primary,
+    borderRadius: Radius.pill,
+  },
+  arrivingText: { fontSize: 13, color: "#fff", fontFamily: "Inter_700Bold" },
+
+  statusPill: {
+    paddingHorizontal: 10, paddingVertical: 4,
+    borderRadius: Radius.pill,
+    borderWidth: 1,
+  },
+  statusPillText: { fontSize: 11, fontFamily: "Inter_700Bold" },
 
   progressMeta: { flexDirection: "row", justifyContent: "space-between", marginBottom: 6 },
   progressMetaText: { fontSize: 13, fontFamily: "Inter_600SemiBold", color: Colors.dark.textSecondary },
