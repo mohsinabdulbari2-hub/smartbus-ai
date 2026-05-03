@@ -1,6 +1,7 @@
 import { Feather } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
 import { LinearGradient } from "expo-linear-gradient";
+import * as Location from "expo-location";
 import { router } from "expo-router";
 import * as Haptics from "expo-haptics";
 import { StatusBar } from "expo-status-bar";
@@ -39,11 +40,50 @@ const FILTERS: { key: BusType | "All"; label: string; emoji: string }[] = [
   { key: "Night",       label: "Night",    emoji: "🌙" },
 ];
 
+// Lightweight haversine — no library, ~5 lines of math.
+function getDistanceKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * (Math.PI / 180);
+  const dLng = (lng2 - lng1) * (Math.PI / 180);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1 * (Math.PI / 180)) *
+      Math.cos(lat2 * (Math.PI / 180)) *
+      Math.sin(dLng / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+// Pseudo-ETA in minutes from on-bus telemetry. Real BMTC has no public
+// per-bus ETA feed, so we estimate from distanceToNextStop / speed and
+// floor speed at 8 km/h to avoid divide-by-zero / massive ETAs at lights.
+// Returns null when distance telemetry is missing — callers must treat
+// "no ETA" distinctly from "0 min / Arriving" so unknown buses don't get
+// promoted to the top of the list.
+function getEtaMinutes(bus: LiveBus): number | null {
+  const dMeters = bus.distanceToNextStop;
+  if (dMeters == null || !Number.isFinite(dMeters)) return null;
+  if (dMeters < 30) return 0; // Arriving
+  const speedKmh = Math.max(8, bus.speed || 0);
+  return (dMeters / 1000) / speedKmh * 60;
+}
+
+// Sort key: Arriving (0) → real ETA → unknown (Infinity) at the bottom.
+function getEtaSortKey(bus: LiveBus): number {
+  const eta = getEtaMinutes(bus);
+  return eta == null ? Number.POSITIVE_INFINITY : eta;
+}
+
+const CROWD_ORDER: Record<LiveBus["crowdLevel"], number> = {
+  Low: 1, Medium: 2, High: 3, VeryHigh: 4,
+};
+
 export default function LiveScreen() {
   const [filter, setFilter] = useState<BusType | "All">("All");
   const [secondsAgo, setSecondsAgo] = useState(0);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [showFetchHint, setShowFetchHint] = useState(false);
 
-  const { data, isLoading, refetch, isRefetching, dataUpdatedAt, failureCount } = useQuery({
+  const { data, isLoading, refetch, isRefetching, isFetching, dataUpdatedAt, failureCount } = useQuery({
     queryKey: ["liveBuses"],
     queryFn: api.getLiveBusesWithMeta,
     refetchInterval: 12000,
@@ -53,6 +93,36 @@ export default function LiveScreen() {
   // Stable offline detection — only after 2+ consecutive failures so a
   // single dropped poll doesn't flicker the banner.
   const isOffline = failureCount >= 2;
+
+  // Slow-fetch hint: only after a fetch is genuinely taking >5s.
+  useEffect(() => {
+    if (!isFetching) {
+      setShowFetchHint(false);
+      return;
+    }
+    const t = setTimeout(() => setShowFetchHint(true), 5000);
+    return () => clearTimeout(t);
+  }, [isFetching]);
+
+  // Get user location once on mount (best-effort; silently no-op if denied).
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== "granted") return;
+        const pos = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.Low,
+        });
+        if (!cancelled) {
+          setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        }
+      } catch {
+        // Permission denied / location services off — gracefully omit distance.
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   // Tick "Updated Xs ago" every second, but only after we've had at least
   // one successful fetch (dataUpdatedAt > 0). dataUpdatedAt is updated by
@@ -72,10 +142,18 @@ export default function LiveScreen() {
   // server-capped at 100 — using it for "Buses on road" would have
   // dramatically under-reported the live fleet.
   const fleetTotal = data?.total ?? buses.length;
-  const filtered = useMemo(
-    () => (filter === "All" ? buses : buses.filter((b) => b.busType === filter)),
-    [buses, filter],
-  );
+
+  // Filter by bus type, then sort: Arriving first (eta=0), then by lowest
+  // pseudo-ETA, then by lowest crowd level. Memoized so we only re-sort
+  // when buses or filter actually changes.
+  const filtered = useMemo(() => {
+    const base = filter === "All" ? buses : buses.filter((b) => b.busType === filter);
+    return [...base].sort((a, b) => {
+      const etaDiff = getEtaSortKey(a) - getEtaSortKey(b);
+      if (etaDiff !== 0) return etaDiff;
+      return (CROWD_ORDER[a.crowdLevel] ?? 2) - (CROWD_ORDER[b.crowdLevel] ?? 2);
+    });
+  }, [buses, filter]);
 
   const stats = useMemo(() => {
     const live = buses.filter((b) => b.isOnline !== false);
@@ -126,12 +204,13 @@ export default function LiveScreen() {
               dataUpdatedAt={dataUpdatedAt}
               secondsAgo={secondsAgo}
               isOffline={isOffline}
+              showFetchHint={showFetchHint}
               showingCount={filtered.length}
             />
           }
           renderItem={({ item, index }) => (
             <Animated.View entering={FadeInDown.delay(Math.min(index * 30, 360)).springify()}>
-              <BusCard bus={item} />
+              <BusCard bus={item} userLocation={userLocation} />
             </Animated.View>
           )}
           ListEmptyComponent={
@@ -149,9 +228,12 @@ export default function LiveScreen() {
                 </Text>
                 <Text style={styles.emptySub}>
                   {filter === "All"
-                    ? "Showing nearest buses — pull down to refresh"
+                    ? "Showing nearest available buses"
                     : "Try another bus type or tap All to see everything"}
                 </Text>
+                {filter === "All" && (
+                  <Text style={styles.emptySub}>Pull down to refresh</Text>
+                )}
                 {filter !== "All" && (
                   <Pressable
                     onPress={() => { Haptics.selectionAsync(); setFilter("All"); }}
@@ -171,13 +253,14 @@ export default function LiveScreen() {
 }
 
 function Header({
-  total, crowded, empty, filter, setFilter, dataUpdatedAt, secondsAgo, isOffline, showingCount,
+  total, crowded, empty, filter, setFilter, dataUpdatedAt, secondsAgo, isOffline, showFetchHint, showingCount,
 }: {
   total: number; crowded: number; empty: number;
   filter: BusType | "All"; setFilter: (f: BusType | "All") => void;
   dataUpdatedAt: number;
   secondsAgo: number;
   isOffline: boolean;
+  showFetchHint: boolean;
   showingCount: number;
 }) {
   const timerLabel = dataUpdatedAt ? `Updated ${secondsAgo}s ago` : "Connecting...";
@@ -278,6 +361,12 @@ function Header({
         </Text>
       )}
 
+      {showFetchHint && !isOffline && (
+        <Text style={styles.fetchHint}>
+          Fetching live buses…
+        </Text>
+      )}
+
       <View style={styles.sectionTitleRow}>
         <Text style={styles.sectionTitle}>Live buses</Text>
         <Text style={styles.sectionCaption}>
@@ -316,7 +405,13 @@ const STATUS_CONFIG: Record<BusStatus, { label: string; color: string }> = {
   Upcoming:    { label: "🟢 Running",     color: "#22c55e" },
 };
 
-function BusCard({ bus }: { bus: LiveBus }) {
+function BusCard({
+  bus,
+  userLocation,
+}: {
+  bus: LiveBus;
+  userLocation: { lat: number; lng: number } | null;
+}) {
   const config = BUS_TYPE_CONFIG[bus.busType] || BUS_TYPE_CONFIG.Ordinary;
   const gradient = getBusTypeGradient(bus.busType);
   const progress = bus.totalStops > 0 ? bus.stopsCovered / bus.totalStops : 0;
@@ -327,6 +422,26 @@ function BusCard({ bus }: { bus: LiveBus }) {
   // distanceToNextStop (meters).
   const isArriving = (bus.distanceToNextStop ?? Number.POSITIVE_INFINITY) < 30;
   const statusInfo = bus.status ? STATUS_CONFIG[bus.status] : null;
+
+  // Pseudo-ETA + combined "X min • Next: stop" label. Falls back to "—"
+  // when the bus is missing distance telemetry, so we never show a fake
+  // "1 min" for buses we can't actually estimate.
+  const etaMin = getEtaMinutes(bus);
+  const etaText = isArriving
+    ? "Arriving"
+    : etaMin == null
+      ? "— min"
+      : `${Math.max(1, Math.round(etaMin))} min`;
+  const nextStopShort =
+    bus.nextStop.length > 22 ? bus.nextStop.slice(0, 22) + "…" : bus.nextStop;
+  const arrivingColor = "#60A5FA";
+
+  // Distance from user (memoized per render — cheap math, no need for useMemo).
+  const distLabel = useMemo(() => {
+    if (!userLocation) return null;
+    const km = getDistanceKm(userLocation.lat, userLocation.lng, bus.lat, bus.lng);
+    return km < 1 ? `${Math.round(km * 1000)} m away` : `${km.toFixed(1)} km away`;
+  }, [userLocation, bus.lat, bus.lng]);
 
   return (
     <Card
@@ -364,23 +479,30 @@ function BusCard({ bus }: { bus: LiveBus }) {
           </View>
         </View>
 
-        {/* Next stop — highlighted */}
+        {/* Combined ETA + Next Stop row */}
         <View style={styles.nextStopRow}>
           <View style={styles.nextStopIcon}>
-            <Feather name="map-pin" size={16} color={Colors.primary} />
+            <Feather
+              name={isArriving ? "navigation" : "map-pin"}
+              size={16}
+              color={isArriving ? arrivingColor : Colors.primary}
+            />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={styles.nextStopLabel}>NEXT STOP</Text>
-            <Text style={styles.nextStopValue} numberOfLines={1}>
-              {bus.nextStop}
+            <Text
+              style={[
+                styles.nextStopValue,
+                { color: isArriving ? arrivingColor : Colors.dark.text },
+              ]}
+              numberOfLines={1}
+            >
+              {etaText} • Next: {nextStopShort}
             </Text>
+            {distLabel && (
+              <Text style={styles.distanceText}>{distLabel}</Text>
+            )}
           </View>
-          {isArriving ? (
-            <View style={styles.arrivingPill}>
-              <Feather name="navigation" size={12} color="#fff" />
-              <Text style={styles.arrivingText}>Arriving</Text>
-            </View>
-          ) : (
+          {!isArriving && (
             <View style={styles.speedPill}>
               <Feather name="zap" size={12} color={Colors.warning} />
               <Text style={styles.speedText}>{Math.round(bus.speed)} km/h</Text>
@@ -488,6 +610,19 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 10,
     marginTop: 12,
+  },
+  fetchHint: {
+    ...Type.caption,
+    color: Colors.dark.textMuted,
+    fontStyle: "italic",
+    textAlign: "center",
+    paddingVertical: 8,
+  },
+  distanceText: {
+    fontSize: 11,
+    color: Colors.dark.textMuted,
+    fontFamily: "Inter_500Medium",
+    marginTop: 2,
   },
 
   busAccent: { height: 4, width: "100%" },

@@ -1,0 +1,238 @@
+You are applying final UX and data-display improvements to an existing bus tracking mobile app.
+
+DO NOT rebuild anything.
+DO NOT change backend logic, APIs, or endpoints.
+DO NOT modify layout or component structure.
+DO NOT install any new packages.
+
+Apply ONLY the patches below carefully.
+
+----------------------------------------
+GLOBAL RULES (STRICT)
+----------------------------------------
+
+- Do NOT break existing features
+- Do NOT clear data on fetch failure
+- Do NOT reset scroll or map position
+- Use lightweight logic only
+- All changes must be frontend-only
+- Keep everything stable and smooth
+
+----------------------------------------
+PATCH 1 — SORT BUSES (DO FIRST)
+----------------------------------------
+
+Sort buses BEFORE rendering.
+
+Rules:
+- "Arriving" buses must always be on top
+- Then sort by lowest ETA
+- Then by lowest crowd level
+
+Implementation:
+
+const crowdOrder = {
+  "Low": 1,
+  "Medium": 2,
+  "High": 3,
+  "Very High": 4,
+};
+
+const getEtaValue = (bus) => {
+  if (bus.distanceToNextStop < 30 || bus.eta < 2) return 0;
+  return bus.eta ?? 999;
+};
+
+const sortedBuses = [...buses].sort((a, b) => {
+  const etaDiff = getEtaValue(a) - getEtaValue(b);
+  if (etaDiff !== 0) return etaDiff;
+
+  const aCrowd = crowdOrder[a.crowdLevel] ?? 2;
+  const bCrowd = crowdOrder[b.crowdLevel] ?? 2;
+  return aCrowd - bCrowd;
+});
+
+Use sortedBuses in FlatList instead of buses.
+
+----------------------------------------
+PATCH 2 — COMBINE ETA + NEXT STOP
+----------------------------------------
+
+Replace separate ETA and Next Stop fields with:
+
+const isArriving = bus.distanceToNextStop < 30 || bus.eta < 2;
+
+const nextStopShort =
+  bus.nextStop.length > 20
+    ? bus.nextStop.slice(0, 20) + "…"
+    : bus.nextStop;
+
+const etaNextStop = isArriving
+  ? `Arriving • Next: ${nextStopShort}`
+  : `${bus.eta} min • Next: ${nextStopShort}`;
+
+Display:
+
+<Text style={{ 
+  fontSize: 13, 
+  fontWeight: "500", 
+  color: isArriving ? "#60A5FA" : theme.text 
+}}>
+  {etaNextStop}
+</Text>
+
+Remove old ETA + Next Stop fields.
+
+----------------------------------------
+PATCH 3 — DISTANCE FROM USER
+----------------------------------------
+
+Get location once on mount:
+
+const [userLocation, setUserLocation] = useState(null);
+
+useEffect(() => {
+  navigator.geolocation.getCurrentPosition(
+    pos => setUserLocation({
+      lat: pos.coords.latitude,
+      lng: pos.coords.longitude,
+    }),
+    () => setUserLocation(null),
+    { timeout: 5000, maximumAge: 30000 }
+  );
+}, []);
+
+Distance function:
+
+function getDistanceKm(lat1, lng1, lat2, lng2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * (Math.PI / 180);
+  const dLng = (lng2 - lng1) * (Math.PI / 180);
+  const a =
+    Math.sin(dLat/2)**2 +
+    Math.cos(lat1*(Math.PI/180)) *
+    Math.cos(lat2*(Math.PI/180)) *
+    Math.sin(dLng/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+Use memoized distance per bus:
+
+const distLabel = useMemo(() => {
+  if (!userLocation) return null;
+
+  const distKm = getDistanceKm(
+    userLocation.lat,
+    userLocation.lng,
+    bus.lat,
+    bus.lng
+  );
+
+  return distKm < 1
+    ? `${Math.round(distKm * 1000)} m away`
+    : `${distKm.toFixed(1)} km away`;
+}, [userLocation, bus.lat, bus.lng]);
+
+Render:
+
+{distLabel && (
+  <Text style={{ fontSize: 11, color: theme.muted }}>
+    {distLabel}
+  </Text>
+)}
+
+----------------------------------------
+PATCH 4 — LIVE PULSING DOT
+----------------------------------------
+
+Add pulsing dot near "Updated Xs ago":
+
+const pulseAnim = useRef(new Animated.Value(1)).current;
+
+useEffect(() => {
+  const anim = Animated.loop(
+    Animated.sequence([
+      Animated.timing(pulseAnim, { toValue: 0.3, duration: 900, useNativeDriver: true }),
+      Animated.timing(pulseAnim, { toValue: 1, duration: 900, useNativeDriver: true }),
+    ])
+  );
+  anim.start();
+  return () => anim.stop();
+}, []);
+
+Render:
+
+<Animated.View
+  style={{
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: secondsAgo > 20 ? "#EAB308" : "#22C55E",
+    opacity: pulseAnim,
+  }}
+/>
+
+----------------------------------------
+PATCH 5 — EMPTY MESSAGE IMPROVEMENT
+----------------------------------------
+
+Replace text with:
+
+"No buses within 5 km"
+"Showing nearest available buses"
+"Pull down to refresh"
+
+Do NOT change layout.
+
+----------------------------------------
+PATCH 6 — SLOW FETCH HINT
+----------------------------------------
+
+const [showFetchHint, setShowFetchHint] = useState(false);
+
+useEffect(() => {
+  if (isFetching) {
+    const timer = setTimeout(() => setShowFetchHint(true), 5000);
+    return () => clearTimeout(timer);
+  } else {
+    setShowFetchHint(false);
+  }
+}, [isFetching]);
+
+Render:
+
+{showFetchHint && (
+  <Text style={{
+    textAlign: "center",
+    fontSize: 12,
+    color: theme.muted,
+    paddingVertical: 8,
+    fontStyle: "italic",
+  }}>
+    Fetching live buses...
+  </Text>
+)}
+
+----------------------------------------
+FINAL EXPECTED RESULT
+----------------------------------------
+
+- Cards show:
+  "Arriving • Next: KR Market"
+  OR
+  "2 min • Next: KR Market"
+
+- Distance shown:
+  "350 m away" or "1.2 km away"
+
+- Best buses appear at top automatically
+
+- Smooth live feeling with pulsing dot
+
+- No confusion in empty states
+
+- No UI redesign, no backend change
+
+----------------------------------------
+DO NOT MODIFY ANYTHING ELSE
+----------------------------------------
