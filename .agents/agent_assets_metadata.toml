@@ -54,3 +54,9 @@ id = "t1rYg_K27YMMvt4-R-DPJ"
 uri = "file://SmartBus_AI_Research_Paper.pdf"
 type = "pdf"
 title = "SmartBus AI — Research Paper (PDF, IEEE author block fixed)"
+
+[[outputs]]
+id = "rwPOME01C-s8eL5k6tWo0"
+uri = "file://smartbus-ai-full.zip"
+type = "unspecified"
+title = "SmartBus AI — Full Source + Datasets + PRD"
