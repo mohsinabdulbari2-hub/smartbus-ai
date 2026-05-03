@@ -29,8 +29,10 @@ SmartBus AI is a live bus tracking and crowd prediction system inspired by Rapid
 - **Crowd Prediction** — Low/Medium/High based on time of day, day type, route
 - **Bus Frequency** — weekday vs weekend chart (morning/afternoon/evening/night)
 - **Last Bus Alert** — warns when a bus is the last one for the night
-- **Route Search** — search by source → destination
-- **Route Detail** — stops list + frequency chart, **per-stop live status (Departed / At stop / Upcoming) + per-stop ETA** computed from all live buses on the route (bidirection-aware via `bus.direction`); next stop highlighted
+- **Route Search** — search by source → destination, with **fuzzy "Routes that look similar" suggestions** in the empty state (uses cached `getRoutes` data + client-side fuzzy ranking)
+- **Route Detail** — stops list + frequency chart, **per-stop live status (Departed / At stop / Upcoming) + per-stop ETA** computed from all live buses on the route (bidirection-aware via `bus.direction`); next stop highlighted; route detail auto-refreshes every 15s without flicker
+- **Typo-tolerant routes filter** — Routes tab uses client-side `fuzzyMatch` (token + Levenshtein ≤1/2) on name/from/to so "majstic" finds "Majestic", "indrangr" finds "Indiranagar", etc. Helper at `artifacts/smartbus-mobile/lib/fuzzy.ts` mirrors a slim subset of the server's `fuzzy.ts` (used by `/search`).
+- **Flicker-free polling** — every refetching query (live buses 8s/12s, route detail 15s, routes catalog) uses `placeholderData: (prev) => prev` so the previous frame stays mounted during background refetch.
 - **Stop Detail** — upcoming buses with ETA and crowd level
 
 ## Stop status & ETA logic

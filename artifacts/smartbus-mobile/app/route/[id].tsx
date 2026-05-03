@@ -67,6 +67,10 @@ export default function RouteDetailScreen() {
     queryKey: ["route", id],
     queryFn: () => api.getRoute(id!),
     enabled: !!id,
+    // Refetch periodically so per-stop live status / ETA stays fresh.
+    // placeholderData keeps the previous frame visible — no flicker.
+    refetchInterval: 15000,
+    placeholderData: (prev) => prev,
   });
 
   const { data: freq } = useQuery<FrequencyData>({
@@ -79,6 +83,7 @@ export default function RouteDetailScreen() {
     queryKey: ["live-buses"],
     queryFn: api.getLiveBuses,
     refetchInterval: 8000,
+    placeholderData: (prev) => prev,
   });
 
   const routeBuses = liveBuses?.filter((b) => b.routeId === id) ?? [];

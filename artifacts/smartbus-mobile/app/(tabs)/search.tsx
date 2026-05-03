@@ -1,5 +1,5 @@
 import { Feather } from "@expo/vector-icons";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import * as Haptics from "expo-haptics";
@@ -40,7 +40,8 @@ import { CardSkeleton } from "@/components/ui/Skeleton";
 import { SmartSuggestion } from "@/components/ui/SmartSuggestion";
 import Colors from "@/constants/colors";
 import { MinTouch, Radius, Shadow, Spacing, Type } from "@/constants/theme";
-import { api, type SearchResult } from "@/lib/api";
+import { api, type Route, type SearchResult } from "@/lib/api";
+import { fuzzyScore } from "@/lib/fuzzy";
 
 const POPULAR_SEARCHES = [
   { from: "Majestic", to: "Electronic City" },
@@ -129,6 +130,36 @@ export default function SearchScreen() {
   const search = useMutation({
     mutationFn: ({ s, d }: { s: string; d: string }) => api.searchRoutes(s, d),
   });
+
+  // Cached route catalog used to suggest "you might mean…" routes when a
+  // search returns zero direct matches. Loaded silently on mount; reused
+  // from the Routes tab cache when the user has already visited it.
+  const { data: allRoutes } = useQuery({
+    queryKey: ["routes"],
+    queryFn: api.getRoutes,
+    staleTime: 5 * 60_000,
+    placeholderData: (prev) => prev,
+  });
+
+  // Fuzzy-rank routes whose endpoints look like the typed source/destination.
+  // Score = best of (source vs from/to) + best of (destination vs from/to).
+  const suggestedRoutes = useMemo<Route[]>(() => {
+    if (!allRoutes || (!source.trim() && !destination.trim())) return [];
+    const scored = allRoutes
+      .map((r) => {
+        const sScore = source.trim()
+          ? Math.max(fuzzyScore(source, r.from), fuzzyScore(source, r.to))
+          : 0;
+        const dScore = destination.trim()
+          ? Math.max(fuzzyScore(destination, r.from), fuzzyScore(destination, r.to))
+          : 0;
+        return { route: r, score: sScore + dScore };
+      })
+      .filter((x) => x.score > 20)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 4);
+    return scored.map((x) => x.route);
+  }, [allRoutes, source, destination]);
 
   const onSearch = () => {
     if (!source.trim() || !destination.trim()) return;
@@ -391,9 +422,41 @@ export default function SearchScreen() {
                 <Feather name="search" size={36} color={Colors.dark.textMuted} />
                 <Text style={styles.emptyText}>No direct routes found</Text>
                 <Text style={styles.emptySub}>
-                  No single bus connects these stops. Try a nearby major landmark, or pick a popular journey below.
+                  No single bus connects these stops. Try a nearby major landmark, or pick a suggestion below.
                 </Text>
-                <View style={[styles.popularGrid, { marginTop: 18, alignSelf: "stretch" }]}>
+
+                {/* Fuzzy-matched route suggestions based on what the user typed */}
+                {suggestedRoutes.length > 0 && (
+                  <View style={{ alignSelf: "stretch", marginTop: 22, gap: 10 }}>
+                    <Text style={styles.suggestionHeading}>Routes that look similar</Text>
+                    {suggestedRoutes.map((r) => (
+                      <Pressable
+                        key={`sg-${r.id}`}
+                        onPress={() => {
+                          Haptics.selectionAsync();
+                          router.push(`/route/${r.id}` as any);
+                        }}
+                        style={styles.suggestionRow}
+                      >
+                        <View style={styles.suggestionBadge}>
+                          <Text style={styles.suggestionBadgeText} numberOfLines={1}>{r.number}</Text>
+                        </View>
+                        <View style={{ flex: 1 }}>
+                          <Text style={styles.suggestionName} numberOfLines={1}>{r.name}</Text>
+                          <Text style={styles.suggestionPath} numberOfLines={1}>
+                            {r.from} → {r.to}
+                          </Text>
+                        </View>
+                        <Feather name="chevron-right" size={16} color={Colors.dark.textMuted} />
+                      </Pressable>
+                    ))}
+                  </View>
+                )}
+
+                <Text style={[styles.suggestionHeading, { alignSelf: "stretch", marginTop: 22 }]}>
+                  Or try a popular journey
+                </Text>
+                <View style={[styles.popularGrid, { marginTop: 10, alignSelf: "stretch" }]}>
                   {POPULAR_SEARCHES.map((p) => (
                     <Pressable
                       key={`fb-${p.from}-${p.to}`}
@@ -618,7 +681,33 @@ const styles = StyleSheet.create({
   },
   errorText: { ...Type.body, color: Colors.danger, flex: 1 },
 
-  empty: { alignItems: "center", paddingVertical: 50, gap: 8, paddingHorizontal: 8 },
+  empty: { alignItems: "center", paddingVertical: 44, gap: 8, paddingHorizontal: 8 },
   emptyText: { ...Type.subtitle, color: Colors.dark.text, marginTop: 12, textAlign: "center" },
-  emptySub: { ...Type.body, color: Colors.dark.textMuted, textAlign: "center" },
+  emptySub: { ...Type.body, color: Colors.dark.textMuted, textAlign: "center", lineHeight: 22 },
+
+  suggestionHeading: {
+    ...Type.caption,
+    color: Colors.dark.textMuted,
+    fontFamily: "Inter_700Bold",
+    letterSpacing: 1,
+    textTransform: "uppercase",
+  },
+  suggestionRow: {
+    flexDirection: "row", alignItems: "center", gap: 12,
+    padding: 12,
+    backgroundColor: Colors.dark.surface,
+    borderRadius: Radius.lg,
+    borderWidth: 1, borderColor: Colors.dark.cardBorder,
+  },
+  suggestionBadge: {
+    minWidth: 52, height: 40,
+    paddingHorizontal: 8,
+    borderRadius: 10,
+    backgroundColor: "rgba(37,99,235,0.15)",
+    borderWidth: 1, borderColor: "rgba(37,99,235,0.35)",
+    alignItems: "center", justifyContent: "center",
+  },
+  suggestionBadgeText: { ...Type.body, color: Colors.primary, fontFamily: "Inter_700Bold" },
+  suggestionName: { ...Type.body, color: Colors.dark.text, fontFamily: "Inter_600SemiBold" },
+  suggestionPath: { ...Type.caption, color: Colors.dark.textMuted, marginTop: 2 },
 });

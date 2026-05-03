@@ -55,6 +55,7 @@ export default function LiveScreen() {
     queryKey: ["liveBuses"],
     queryFn: api.getLiveBuses,
     refetchInterval: 12000,
+    placeholderData: (prev) => prev,
   });
 
   useEffect(() => {

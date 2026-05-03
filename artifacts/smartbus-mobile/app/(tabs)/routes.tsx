@@ -25,6 +25,7 @@ import { BUS_TYPE_CONFIG, getBusTypeGradient } from "@/components/CrowdBadge";
 import Colors from "@/constants/colors";
 import { Radius, Spacing, Type } from "@/constants/theme";
 import { api, type Route, type BusType } from "@/lib/api";
+import { fuzzyMatch } from "@/lib/fuzzy";
 
 const FILTERS: { key: BusType | "All"; label: string; emoji: string }[] = [
   { key: "All",         label: "All",      emoji: "🚍" },
@@ -44,6 +45,8 @@ export default function RoutesScreen() {
   const { data, isLoading, refetch, isRefetching } = useQuery({
     queryKey: ["routes"],
     queryFn: api.getRoutes,
+    placeholderData: (prev) => prev,
+    staleTime: 60_000,
   });
 
   const hasFilters = filter !== "All" || query.trim().length > 0;
@@ -56,15 +59,18 @@ export default function RoutesScreen() {
   const routes = data ?? [];
 
   const filtered = useMemo(() => {
-    const q = deferredQuery.trim().toLowerCase();
+    const q = deferredQuery.trim();
     let r = routes;
     if (filter !== "All") r = r.filter((x) => x.busType === filter);
     if (q) {
+      const qLower = q.toLowerCase();
+      // Route number: keep simple substring (numbers/codes shouldn't fuzzy-match)
+      // Name / from / to: typo-tolerant fuzzy match
       r = r.filter((x) =>
-        x.number.toLowerCase().includes(q) ||
-        x.name.toLowerCase().includes(q) ||
-        x.from.toLowerCase().includes(q) ||
-        x.to.toLowerCase().includes(q),
+        x.number.toLowerCase().includes(qLower) ||
+        fuzzyMatch(q, x.name) ||
+        fuzzyMatch(q, x.from) ||
+        fuzzyMatch(q, x.to),
       );
     }
     return r.slice(0, 200); // cap to keep list snappy
