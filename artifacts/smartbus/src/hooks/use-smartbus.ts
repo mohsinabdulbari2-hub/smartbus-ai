@@ -1,5 +1,6 @@
 import {
   useGetLiveBuses,
+  getGetLiveBusesQueryKey,
   useGetRoutes,
   useGetStops,
   useSearchRoutes,
@@ -15,11 +16,13 @@ import {
  */
 
 export function useLiveBusesPolling() {
-  // Poll live buses every 3 seconds for real-time map movement
+  // Poll live buses every 8s — smooth enough for map movement without thrashing
+  // markers or hammering the server. Keeps previous frame mounted while refetching.
   return useGetLiveBuses({
     query: {
-      refetchInterval: 3000,
-      staleTime: 1000,
+      queryKey: getGetLiveBusesQueryKey(),
+      refetchInterval: 8000,
+      staleTime: 4000,
     }
   });
 }

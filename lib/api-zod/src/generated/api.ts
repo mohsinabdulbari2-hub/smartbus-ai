@@ -35,6 +35,9 @@ export const GetRouteParams = zod.object({
   routeId: zod.coerce.string(),
 });
 
+export const getRouteResponseShapeItemMin = 2;
+export const getRouteResponseShapeItemMax = 2;
+
 export const GetRouteResponse = zod.object({
   id: zod.string(),
   name: zod.string(),
@@ -53,6 +56,15 @@ export const GetRouteResponse = zod.object({
   ),
   lastBusTime: zod.string().nullish(),
   isLastBus: zod.boolean(),
+  shape: zod
+    .array(
+      zod
+        .array(zod.number())
+        .min(getRouteResponseShapeItemMin)
+        .max(getRouteResponseShapeItemMax),
+    )
+    .nullish()
+    .describe("Simplified GTFS road polyline as [[lat, lng], ...]"),
 });
 
 /**

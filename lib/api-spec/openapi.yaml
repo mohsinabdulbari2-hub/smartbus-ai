@@ -278,6 +278,16 @@ components:
           nullable: true
         isLastBus:
           type: boolean
+        shape:
+          type: array
+          nullable: true
+          description: Simplified GTFS road polyline as [[lat, lng], ...]
+          items:
+            type: array
+            items:
+              type: number
+            minItems: 2
+            maxItems: 2
       required: [id, name, number, from, to, color, stops, isLastBus]
 
     LiveBus:

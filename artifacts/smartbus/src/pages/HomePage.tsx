@@ -1,4 +1,4 @@
-import { useLiveBusesPolling, useGetStops } from "@/hooks/use-smartbus";
+import { useLiveBusesPolling, useGetStops, useGetRoutes } from "@/hooks/use-smartbus";
 import { LiveMap } from "@/components/map/LiveMap";
 import { Activity, Search, Route as RouteIcon, MapPin } from "lucide-react";
 import { Link } from "wouter";
@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 export default function HomePage() {
   const { data: buses, isLoading: busesLoading } = useLiveBusesPolling();
   const { data: stops, isLoading: stopsLoading } = useGetStops();
+  const { data: routes } = useGetRoutes();
 
   return (
     <div className="relative w-full h-full flex flex-col">
@@ -51,7 +52,7 @@ export default function HomePage() {
                 <RouteIcon className="w-4 h-4 text-primary" />
                 <span className="text-xs font-semibold uppercase">Routes</span>
               </div>
-              <div className="text-3xl font-display font-black">8</div>
+              <div className="text-3xl font-display font-black">{routes?.length?.toLocaleString() ?? "—"}</div>
             </div>
             <div>
               <div className="flex items-center gap-1.5 text-muted-foreground mb-1">

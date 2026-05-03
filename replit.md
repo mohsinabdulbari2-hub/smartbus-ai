@@ -17,7 +17,7 @@ SmartBus AI is a live bus tracking and crowd prediction system inspired by Rapid
 - **Build**: esbuild (CJS bundle)
 - **Frontend (web)**: React + Vite + Tailwind CSS v4
 - **Mobile**: Expo / React Native (Expo Router, react-query, react-native-svg, expo-blur, expo-haptics, expo-linear-gradient, react-native-reanimated 4)
-- **Map**: react-leaflet (web) + custom SVG mini-map (mobile, no API key) — mobile mini-map renders the **real GTFS-derived road polyline** (Douglas-Peucker simplified to ~50 pts/route) when available, falling back to a Bezier curve through stop coords.
+- **Map**: react-leaflet (web) + custom SVG mini-map (mobile, no API key) — mobile mini-map renders the **real GTFS-derived road polyline** (Douglas-Peucker simplified to ~50 pts/route) when available, falling back to a Bezier curve through stop coords. Web `LiveMap` uses CARTO `dark_nolabels` tiles, viewport-culled minimal markers (max 100), in-memory route shape cache, click-to-select polyline highlighting, and a floating bottom info panel.
 - **Charts**: Recharts (frequency bar charts)
 - **Animations**: framer-motion (web), react-native-reanimated (mobile)
 - **Mobile UI theme**: Premium dark palette — bg #0F172A, surface #1E293B, primary #2563EB, secondary #7C3AED. Reusable tokens in `artifacts/smartbus-mobile/constants/{colors,theme}.ts` and primitives in `artifacts/smartbus-mobile/components/ui/*` (Card, Badge, Button, PulseDot, AnimatedProgress, Skeleton, CrowdMeter, RouteMiniMap, SmartSuggestion).

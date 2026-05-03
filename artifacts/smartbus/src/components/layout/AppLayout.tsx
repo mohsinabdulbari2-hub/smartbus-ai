@@ -67,7 +67,7 @@ export function AppLayout({ children }: AppLayoutProps) {
             </span>
             <span className="font-bold text-sm text-foreground">Live Updates</span>
           </div>
-          <p className="text-xs text-muted-foreground ml-5">Refreshing every 3s</p>
+          <p className="text-xs text-muted-foreground ml-5">Refreshing every 8s</p>
         </div>
       </aside>
 

@@ -17,4 +17,6 @@ export interface BusRouteDetail {
   stops: BusStop[];
   lastBusTime?: string | null;
   isLastBus: boolean;
+  /** Simplified GTFS road polyline as [[lat, lng], ...] */
+  shape?: number[][] | null;
 }
