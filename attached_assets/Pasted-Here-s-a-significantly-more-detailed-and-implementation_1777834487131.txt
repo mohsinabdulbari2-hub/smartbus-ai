@@ -1,0 +1,153 @@
+Here's a significantly more detailed and implementation-ready version of the prompt:
+🚌 Live Bus Tracking App — Full Upgrade Specification
+Context: You are a senior frontend engineer upgrading an existing Leaflet + React live bus tracking application. The app polls a backend for bus positions, ETAs, and route data. All upgrades must be incremental, backward-compatible, and production-safe. Do not modify any backend APIs, contracts, or data shapes.
+1️⃣ CROWD CALIBRATION — Realistic Load Distribution
+Problem
+The current implementation assigns crowd levels naively, resulting in nearly all buses being marked "crowded" regardless of time of day, direction, or route. This breaks UX trust.
+Root Cause
+Load values are generated without time-of-day awareness, directional bias, or variance — producing a flat, unrealistic distribution skewed toward high values.
+Solution — 5-Step Pipeline
+Step 1: Time-Based Load Factor
+Define a getTimeFactor(hour) function that returns a base occupancy multiplier based on the current hour:
+Js
+Call this once per poll cycle using new Date().getHours(). This becomes the base load value before any further adjustments.
+Step 2: Directional Bias
+After establishing the base load, apply a direction-aware multiplier:
+During morning peak (6–10), inbound buses carry more commuters heading to city centers → multiply load by 1.2
+During evening peak (16–20), outbound buses carry more commuters heading home → multiply load by 1.2
+No bias applies outside peak hours or for the non-dominant direction
+Js
+direction should come from each bus object's existing directionId or direction field.
+Step 3: Controlled Randomness
+Add small stochastic noise to prevent all buses on the same route from showing identical crowd levels. Use a symmetric random offset centered at 0:
+Js
+This introduces ±0.1 variance — enough to feel realistic without causing wild swings.
+Step 4: Clamp to Valid Range
+After all adjustments, ensure the load value stays within a safe [0, 0.92] range. The upper cap of 0.92 prevents any bus from ever appearing "at capacity" (which would be misleading and alarming to riders):
+Js
+Step 5: Classify Load into UX Tiers
+Map the final numeric load to a human-readable crowd level:
+Js
+These four tiers map directly to UI labels and icon states. Ensure the UI uses these exact strings so downstream rendering logic doesn't break.
+Expected Distribution at Different Times:
+| Time | Expected Majority Tier |
+|---|---|
+| 6–10 AM | medium / high |
+| 11–3 PM | low / medium |
+| 4–8 PM | medium / high |
+| Night | low |
+2️⃣ FREQUENCY ENGINE — Full 4-Layer Fusion
+Goal
+Display realistic bus frequency (buses/hour) that blends backend schedule data with live observed arrival gaps, filtered by stop and direction.
+Why This Matters
+A flat frequency number from the backend (e.g., "6 buses/hr") ignores real-world congestion, service disruptions, and time-of-day dynamics. Live fusion produces numbers riders actually trust.
+Layer 1: Time Slot Bucketing
+Js
+Used as a key into the backend baseline frequency table. The backend provides a baseline object shaped like:
+Js
+If no match exists, default to 6 buses/hr.
+Layer 2: Stop-Proximity Bus Filter
+Only buses that are approaching or at the relevant stop should count toward frequency. Filter by nextStopIndex proximity (within 2 stops ahead):
+Js
+This ensures frequency shown at Stop 5 reflects only buses actually heading toward Stop 5–7, not buses on the opposite end of the route.
+Layer 3: Live Frequency from ETA Gaps
+Given a list of ETA timestamps (in seconds from now), compute live frequency by measuring the average gap between consecutive arrivals:
+Js
+Returns null if insufficient data — this is intentional and triggers fallback to baseline.
+Layer 4: Weighted Fusion
+Blend baseline and live frequency based on how many buses are actively observed. More buses = higher confidence in live data = higher live weight:
+Js
+Weight rationale:
+≥4 ETAs: High confidence → 50% live influence
+2–3 ETAs: Moderate confidence → 35% live influence
+<2 ETAs: Low confidence → 20% live influence (mostly baseline)
+3️⃣ AUTO-FOCUS ON SELECTED BUS
+Behavior
+When a user clicks a bus marker or selects a bus from a list:
+The map smoothly flies to the bus's location
+Zoom level is set to 15 (street-level)
+Animation duration is short (0.6s) to feel snappy, not sluggish
+This only triggers once per selection change — not on every poll update
+Implementation
+Js
+Trigger condition: Call focusOnBus inside a useEffect that depends on selectedBusId — NOT inside the polling effect:
+Js
+Do NOT call focusOnBus inside the polling interval. If you do, the map will jump every few seconds while following a moving bus — which is jarring and breaks UX.
+4️⃣ FOLLOW MODE — Smart Camera Tracking
+Concept
+Follow Mode lets users lock the camera to a specific bus. The map smoothly pans to keep the selected bus centered as it moves with each poll update. The user can exit Follow Mode naturally by interacting with the map.
+State
+Js
+null means Follow Mode is off. Set to a bus ID to activate.
+Toggle UI
+Render a "Follow" button in the bus detail panel or popup:
+Jsx
+This acts as a toggle — clicking again while already following deactivates it.
+Camera Tracking Effect
+Run inside the polling effect (or a separate useEffect that watches buses):
+Js
+Use panTo (not flyTo) here — flyTo during Follow Mode would cause disorienting zoom animations every few seconds.
+Exit Conditions
+Follow Mode must exit immediately when the user takes manual control of the map. Attach these Leaflet event listeners once on mount:
+Js
+This ensures Follow Mode doesn't fight the user for camera control.
+5️⃣ UI INTEGRATION RULES
+Frequency Display
+If live frequency data exists: show "~12/hr (live)" — the (live) tag signals real-time fusion
+If only baseline: show "~6/hr" — no live tag
+Use a monospace or tabular font for frequency numbers to prevent layout shift during updates
+Crowd Level Labels
+Map internal tier strings to human-readable UI labels:
+Internal Value
+UI Label
+Color Hint
+low
+Seats available
+Green
+medium
+Moderate
+Amber
+high
+Crowded
+Orange
+very_high
+Very crowded
+Red
+Visual Hierarchy
+Bus ID / route number: largest, bold
+ETA: second prominence
+Crowd level: badge/chip with color
+Frequency: subtle, smaller text below ETA
+Follow button: clear but not dominant — it's a power feature, not primary CTA
+6️⃣ HARD CONSTRAINTS — NON-NEGOTIABLE
+Rule
+Reason
+Do NOT add new API endpoints
+Backend contract is frozen
+Do NOT change existing polling interval or logic
+Stability
+Do NOT run heavy computation inside render
+Performance
+Do NOT call flyTo inside polling loop
+Prevents camera thrashing
+Do NOT re-create Leaflet map instance on re-render
+Causes map flicker
+All new useEffects must return cleanup functions
+Prevents memory leaks
+Frequency and crowd computed outside JSX
+Keep render pure
+✅ SUCCESS CRITERIA
+Feature
+Acceptance Condition
+Crowd distribution
+Mix of low/medium/high across buses at any given time
+Time-awareness
+Night buses mostly "low", peak-hour buses mostly "medium/high"
+Frequency display
+Shows (live) tag when ≥2 ETAs available
+Auto-focus
+Map smoothly flies to bus on selection, only once
+Follow Mode
+Camera pans with bus on each poll; exits on drag or zoom
+No regressions
+ETA display, route rendering, polling still work identically

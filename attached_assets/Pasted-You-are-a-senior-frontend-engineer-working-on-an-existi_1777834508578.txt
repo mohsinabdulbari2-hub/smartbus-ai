@@ -1,0 +1,254 @@
+You are a senior frontend engineer working on an existing Leaflet-based live bus tracking app.
+
+Implement the following upgrades without changing backend APIs, contracts, or existing architecture. All changes must be incremental, safe, and backward-compatible.
+
+---
+
+🎯 OBJECTIVES
+
+1. Fix crowd distribution realism
+2. Implement frequency engine (baseline + live + per-stop + direction)
+3. Add auto-focus on selected bus
+4. Add follow mode toggle (camera tracking)
+5. Preserve all existing features (ETA, polling, map rendering)
+
+---
+
+1️⃣ CROWD CALIBRATION (CRITICAL FIX)
+
+Problem
+
+Current UI shows unrealistic clustering (e.g., almost all buses "crowded").
+
+Solution
+
+Step 1 — Apply time-based load scaling
+
+function getTimeFactor(hour) {
+  if (hour >= 6 && hour < 10) return 0.55;       // morning peak
+  if (hour >= 16 && hour < 20) return 0.55;      // evening peak
+  if (hour >= 11 && hour < 15) return 0.25;      // midday
+  return 0.12;                                   // night
+}
+
+---
+
+Step 2 — Apply direction bias
+
+if (direction === "inbound" && isMorningPeak) load *= 1.2;
+if (direction === "outbound" && isEveningPeak) load *= 1.2;
+
+---
+
+Step 3 — Add controlled randomness
+
+load += (Math.random() - 0.5) * 0.2;
+
+---
+
+Step 4 — Clamp extremes
+
+load = Math.min(Math.max(load, 0), 0.92);
+
+---
+
+Step 5 — Final classification
+
+function classifyCrowd(load) {
+  if (load < 0.35) return "low";
+  if (load < 0.7) return "medium";
+  if (load < 0.9) return "high";
+  return "very_high";
+}
+
+---
+
+2️⃣ FREQUENCY ENGINE (ALL 4 COMBINED)
+
+Goal
+
+Compute realistic bus frequency using:
+
+- backend baseline
+- live ETA gaps
+- per-stop filtering
+- direction separation
+
+---
+
+Step 1 — Time slot
+
+function getTimeSlot(hour) {
+  if (hour >= 6 && hour < 10) return "6-10";
+  if (hour >= 11 && hour < 15) return "11-15";
+  if (hour >= 16 && hour < 20) return "16-20";
+  return "21+";
+}
+
+---
+
+Step 2 — Filter buses for stop
+
+function getBusesForStop(buses, stopIndex) {
+  return buses.filter(
+    b =>
+      b.nextStopIndex != null &&
+      b.nextStopIndex >= stopIndex &&
+      b.nextStopIndex <= stopIndex + 2
+  );
+}
+
+---
+
+Step 3 — Live frequency
+
+function getLiveFrequency(etas) {
+  if (!etas || etas.length < 2) return null;
+
+  const sorted = [...etas].sort((a, b) => a - b);
+  const gaps = [];
+
+  for (let i = 1; i < sorted.length; i++) {
+    const gap = sorted[i] - sorted[i - 1];
+    if (gap > 0) gaps.push(gap);
+  }
+
+  if (!gaps.length) return null;
+
+  const avg = gaps.reduce((a, b) => a + b, 0) / gaps.length;
+  return Math.round(3600 / avg);
+}
+
+---
+
+Step 4 — Final fusion
+
+function getFinalFrequency({
+  routeId,
+  directionId,
+  stopIndex,
+  buses,
+  baseline
+}) {
+  const hour = new Date().getHours();
+  const slot = getTimeSlot(hour);
+
+  const key = `${routeId}_${directionId}`;
+  const base = baseline[key]?.[slot] ?? 6;
+
+  const relevant = getBusesForStop(
+    buses.filter(b => b.directionId === directionId),
+    stopIndex
+  );
+
+  const etas = relevant.map(b => b.eta).filter(Boolean);
+  const live = getLiveFrequency(etas);
+
+  if (!live) return base;
+
+  const weight =
+    etas.length >= 4 ? 0.5 :
+    etas.length >= 2 ? 0.35 :
+    0.2;
+
+  return Math.round(base * (1 - weight) + live * weight);
+}
+
+---
+
+3️⃣ AUTO-FOCUS ON SELECTED BUS
+
+Behavior
+
+When user selects a bus:
+
+- map centers on it smoothly
+- does NOT constantly jump
+
+---
+
+function focusOnBus(map, lat, lng) {
+  map.flyTo([lat, lng], 15, {
+    duration: 0.6
+  });
+}
+
+Call ONLY on selection change.
+
+---
+
+4️⃣ FOLLOW MODE (SMART CAMERA)
+
+State
+
+const [followBusId, setFollowBusId] = useState(null);
+
+---
+
+Toggle UI
+
+<button onClick={() => setFollowBusId(bus.id)}>
+  Follow
+</button>
+
+---
+
+Behavior
+
+useEffect(() => {
+  if (!followBusId) return;
+
+  const bus = buses.find(b => b.id === followBusId);
+  if (!bus) return;
+
+  map.panTo([bus.lat, bus.lng], {
+    animate: true
+  });
+
+}, [buses]);
+
+---
+
+Exit conditions
+
+map.on("dragstart", () => setFollowBusId(null));
+map.on("zoomstart", () => setFollowBusId(null));
+
+---
+
+5️⃣ UI INTEGRATION RULES
+
+- Show:
+  - "~12/hr (live)" if live data exists
+- Group crowd:
+  - Seats available
+  - Moderate
+  - Crowded
+  - Very crowded
+- Maintain visual hierarchy (no clutter)
+
+---
+
+6️⃣ NON-NEGOTIABLE CONSTRAINTS
+
+DO NOT:
+
+- change APIs
+- add new endpoints
+- introduce heavy computation
+- break polling or ETA
+- re-render map excessively
+
+---
+
+✅ SUCCESS CRITERIA
+
+- Balanced crowd distribution (not all crowded)
+- Frequency adapts realistically to live data
+- Map smoothly focuses on selected bus
+- Follow mode works and exits naturally
+- No regressions anywhere
+
+---
+
+Implement exactly this—clean, minimal, and production-safe.
