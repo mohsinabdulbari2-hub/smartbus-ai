@@ -60,3 +60,9 @@ id = "rwPOME01C-s8eL5k6tWo0"
 uri = "file://smartbus-ai-full.zip"
 type = "unspecified"
 title = "SmartBus AI — Full Source + Datasets + PRD"
+
+[[outputs]]
+id = "CsIKbbPH6hn7vj10xWKYY"
+uri = "file://smartbus-ai-complete.zip"
+type = "unspecified"
+title = "SmartBus AI — Complete Implementation Package"
