@@ -167,10 +167,12 @@ async function getRouteStopsCache() {
 
 // How many routes do we simulate live buses for? With 4,200+ routes, simulating
 // every one would create thousands of buses. Cap to a representative sample.
-// 100 routes × 9 buses = 900 live buses — matches the spec's ~900 target,
-// still under ~250KB on the wire.
-const MAX_LIVE_ROUTES = 100;
-const BUSES_PER_ROUTE = 9;
+// 1,200 routes × 8 buses = 9,600 live buses — matches the real BMTC fleet
+// scale. The /live response is still hard-capped at 100 buses per request
+// (X-Total-Count header carries the true total), so wire payload stays small;
+// only in-memory simulation cost grows linearly with fleet size.
+const MAX_LIVE_ROUTES = 1200;
+const BUSES_PER_ROUTE = 8;
 
 async function initializeBuses() {
   if (initialized) return;
