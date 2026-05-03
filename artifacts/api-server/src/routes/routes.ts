@@ -2,6 +2,7 @@ import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
 import { busRoutesTable, busStopsTable, routeStopsTable, busFrequencyTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
+import { classifyBusType } from "../lib/busType.js";
 
 const router: IRouter = Router();
 
@@ -17,7 +18,7 @@ router.get("/", async (req, res) => {
       color: r.color,
       totalStops: r.totalStops,
       lastBusTime: r.lastBusTime,
-      busType: r.busType,
+      busType: classifyBusType(r),
       depot: r.depot,
       distance: r.distance,
     })));
@@ -98,7 +99,7 @@ router.get("/:routeId", async (req, res) => {
       color: route.color,
       totalStops: route.totalStops,
       lastBusTime: route.lastBusTime,
-      busType: route.busType,
+      busType: classifyBusType(route),
       depot: route.depot,
       distance: route.distance,
       isLastBus,

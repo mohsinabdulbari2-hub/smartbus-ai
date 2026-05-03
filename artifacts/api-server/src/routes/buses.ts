@@ -2,6 +2,7 @@ import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
 import { busRoutesTable, busStopsTable, routeStopsTable, busFrequencyTable } from "@workspace/db";
 import { eq, inArray } from "drizzle-orm";
+import { classifyBusType, type NormalizedBusType } from "../lib/busType.js";
 
 const router: IRouter = Router();
 
@@ -111,17 +112,36 @@ async function initializeBuses() {
   const allRoutes = await db.select().from(busRoutesTable);
   const cache = await getRouteStopsCache();
 
-  // Pick the routes with the most stops (the long, well-known city corridors)
-  const ranked = allRoutes
-    .map((r) => ({ route: r, len: cache.get(r.id)?.length ?? 0 }))
+  // Annotate every route with its normalised type + stop count
+  const annotated = allRoutes
+    .map((r) => ({ route: r, type: classifyBusType(r as any), len: cache.get(r.id)?.length ?? 0 }))
     .filter((x) => x.len >= 5)
-    .sort((a, b) => b.len - a.len)
-    .slice(0, MAX_LIVE_ROUTES)
-    .map((x) => x.route);
+    .sort((a, b) => b.len - a.len);
 
-  console.log(`[buses] initializing ~${ranked.length * BUSES_PER_ROUTE} live buses across ${ranked.length} routes`);
+  // Pick a balanced sample so every filter chip has buses to show
+  const TYPES: NormalizedBusType[] = ["Ordinary", "Vajra", "Volvo", "Airport", "MetroFeeder", "Night"];
+  const PER_TYPE: Record<NormalizedBusType, number> = {
+    Ordinary: 30, Vajra: 14, Volvo: 12, Airport: 8, MetroFeeder: 10, Night: 6,
+  };
+  const picked: Array<{ route: typeof allRoutes[number]; type: NormalizedBusType }> = [];
+  for (const t of TYPES) {
+    const pool = annotated.filter((x) => x.type === t).slice(0, PER_TYPE[t]);
+    for (const x of pool) picked.push({ route: x.route, type: x.type });
+  }
+  // Top up with the longest remaining routes if any quota was short
+  if (picked.length < MAX_LIVE_ROUTES) {
+    const used = new Set(picked.map((p) => p.route.id));
+    for (const x of annotated) {
+      if (picked.length >= MAX_LIVE_ROUTES) break;
+      if (!used.has(x.route.id)) picked.push({ route: x.route, type: x.type });
+    }
+  }
+  const ranked = picked.slice(0, MAX_LIVE_ROUTES);
 
-  for (const route of ranked) {
+  const breakdown = ranked.reduce((acc, p) => { acc[p.type] = (acc[p.type] || 0) + 1; return acc; }, {} as Record<string, number>);
+  console.log(`[buses] initializing ~${ranked.length * BUSES_PER_ROUTE} live buses across ${ranked.length} routes`, breakdown);
+
+  for (const { route, type } of ranked) {
     const stops = cache.get(route.id) ?? [];
     if (stops.length < 2) continue;
 
@@ -136,7 +156,7 @@ async function initializeBuses() {
       const speedByType: Record<string, number> = {
         Ordinary: 22, Vajra: 30, Volvo: 35, Airport: 55, MetroFeeder: 25, Night: 28,
       };
-      const baseSpeed = speedByType[(route as any).busType ?? "Ordinary"] ?? 25;
+      const baseSpeed = speedByType[type] ?? 25;
 
       const busId = `${route.id}-bus-${i}`;
       busState.set(busId, {
@@ -145,7 +165,7 @@ async function initializeBuses() {
         routeNumber: route.number,
         routeName: route.name,
         routeColor: route.color,
-        busType: (route as any).busType ?? "Ordinary",
+        busType: type,
         depot: (route as any).depot ?? null,
         lat: currentStop.lat,
         lng: currentStop.lng,
