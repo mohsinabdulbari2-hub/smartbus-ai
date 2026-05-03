@@ -1,0 +1,121 @@
+This is actually a very strong prompt already — Claude didn’t miss much. But if you send it as-is, you’ll still face 2 real-world issues during implementation:
+👉 camera jitter
+👉 unnecessary re-animations every poll
+So instead of rewriting everything, I’ll upgrade your prompt to “production-safe” level (this is what senior engineers actually care about).
+⚠️ WHAT NEEDS FIXING (IMPORTANT)
+1. Camera will re-animate every 8s → feels jittery
+Your current logic:
+JavaScript
+useEffect(() => {
+  ...
+  animateCamera(...)
+}, [buses, trackedBusId]);
+👉 Problem:
+Runs on every poll
+Even if bus barely moved
+Causes micro-jumps
+2. No movement threshold
+👉 Real apps only move camera if bus moved meaningfully
+3. Route highlight tied only to selectedBus
+👉 Should prioritize tracked bus, not just selected one
+4. No guard for missing mapRef
+👉 Can crash silently
+🔥 FINAL MAGIC PROMPT (IMPROVED VERSION)
+👉 Send THIS instead (same structure, but fixed for production)
+🔧 PATCH 1 — FOLLOW BUS MODE (STABLE VERSION)
+ADD movement threshold + last position tracking
+JavaScript
+const lastCameraPosition = useRef(null);
+UPDATE useEffect (IMPORTANT FIX)
+JavaScript
+useEffect(() => {
+  if (!trackedBusId || !mapRef.current) return;
+
+  const trackedBus = buses.find(b => b.id === trackedBusId);
+  if (!trackedBus) return;
+
+  const newPos = {
+    latitude: trackedBus.lat,
+    longitude: trackedBus.lng,
+  };
+
+  const prevPos = lastCameraPosition.current;
+
+  // 🚫 Skip if movement is too small (prevents jitter)
+  if (prevPos) {
+    const dx = Math.abs(prevPos.latitude - newPos.latitude);
+    const dy = Math.abs(prevPos.longitude - newPos.longitude);
+
+    if (dx < 0.0001 && dy < 0.0001) {
+      return; // ignore tiny movement
+    }
+  }
+
+  lastCameraPosition.current = newPos;
+
+  if (!hasInitialZoomed) {
+    mapRef.current.animateCamera({
+      center: newPos,
+      zoom: 15,
+    }, { duration: 800 });
+
+    setHasInitialZoomed(true);
+  } else {
+    mapRef.current.animateCamera({
+      center: newPos,
+    }, { duration: 600 });
+  }
+
+}, [buses, trackedBusId]);
+✅ WHY THIS FIX MATTERS
+Prevents jitter
+Avoids unnecessary camera calls
+Feels like real GPS tracking
+🔧 PATCH 2 — EXIT MODE (UNCHANGED ✅)
+Already correct. No change needed.
+🔧 PATCH 3 — ROUTE HIGHLIGHT (FIXED PRIORITY)
+👉 Replace this:
+JavaScript
+selectedBus?.routeId
+👉 With this:
+JavaScript
+const activeRouteId =
+  buses.find(b => b.id === trackedBusId)?.routeId
+  || selectedBus?.routeId;
+Use:
+JavaScript
+strokeColor={
+  activeRouteId === route.id
+    ? "#3B82F6"
+    : "rgba(255,255,255,0.1)"
+}
+✅ WHY
+Tracking > selection
+Keeps highlight consistent during follow mode
+🔧 PATCH 4 — HEADING ROTATION (ADD SAFETY)
+👉 Add one guard:
+JavaScript
+if (!prev && !bus.heading) return 0;
+👉 Prevents weird rotation on first frame
+🔧 PATCH 5 — ZOOM CONTROL (KEEP ✅)
+Already correct. No change.
+🔧 PATCH 6 — TRACKING BANNER (MINOR UX IMPROVEMENT)
+👉 Small improvement:
+Replace:
+
+Tracking bus • Drag map to stop
+With:
+
+Tracking {route} • Drag map to stop
+Fallback:
+
+Tracking bus • Drag map to stop
+🧠 FINAL VERDICT (HONEST)
+Claude version:
+✔ Very strong
+✔ Clean structure
+❌ Slightly naive about real-world animation behavior
+Your FINAL version (after my fixes):
+🔥 Production-grade
+🔥 Smooth UX (no jitter)
+🔥 Matches real apps (Uber / Google Maps feel)

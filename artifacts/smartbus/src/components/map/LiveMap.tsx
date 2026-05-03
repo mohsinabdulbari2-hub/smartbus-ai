@@ -141,6 +141,66 @@ function MapClickHandler({ onClick }: { onClick: () => void }) {
   return null;
 }
 
+// ---------------- Follow-bus camera (Uber/Maps-style tracking) ----------------
+// Watches the currently tracked bus and pans the camera to it on every update.
+// First update flies to zoom 15; subsequent updates only pan (no zoom change),
+// so the user can pinch-zoom freely without us snapping back. A small
+// movement threshold (~11m) suppresses sub-tile jitter from the 5s tick.
+
+const FOLLOW_MIN_DELTA_DEG = 0.0001; // ≈ 11 meters
+const FOLLOW_ZOOM = 15;
+
+function BusFollower({
+  trackedBus,
+  onUserDrag,
+}: {
+  trackedBus: LiveBus | null;
+  onUserDrag: () => void;
+}) {
+  const map = useMap();
+  const lastPos = useRef<{ lat: number; lng: number } | null>(null);
+  const hasZoomed = useRef(false);
+
+  // Reset internal state whenever the tracked bus IDENTITY changes — including
+  // switching from one bus to another, not just stopping. Without this, the
+  // second bus inherits hasZoomed=true and only pans, skipping the intended
+  // fly-to-zoom-15 entrance animation.
+  useEffect(() => {
+    lastPos.current = null;
+    hasZoomed.current = false;
+  }, [trackedBus?.id]);
+
+  // Pan/zoom to the tracked bus when its coordinates change.
+  useEffect(() => {
+    if (!trackedBus) return;
+    const next = { lat: trackedBus.lat, lng: trackedBus.lng };
+    const prev = lastPos.current;
+    if (prev) {
+      const dx = Math.abs(prev.lat - next.lat);
+      const dy = Math.abs(prev.lng - next.lng);
+      if (dx < FOLLOW_MIN_DELTA_DEG && dy < FOLLOW_MIN_DELTA_DEG) return;
+    }
+    lastPos.current = next;
+    if (!hasZoomed.current) {
+      map.flyTo([next.lat, next.lng], FOLLOW_ZOOM, { duration: 0.8 });
+      hasZoomed.current = true;
+    } else {
+      map.panTo([next.lat, next.lng], { animate: true, duration: 0.6 });
+    }
+  }, [trackedBus?.lat, trackedBus?.lng, trackedBus, map]);
+
+  // Only user-initiated drags fire `dragstart` — programmatic panTo does not,
+  // so this safely distinguishes "user wants to look elsewhere" from our own
+  // follow updates.
+  useMapEvents({
+    dragstart: () => {
+      if (trackedBus) onUserDrag();
+    },
+  });
+
+  return null;
+}
+
 // ---------------- Helpers ----------------
 
 function distanceSq(lat1: number, lng1: number, lat2: number, lng2: number) {
@@ -171,6 +231,7 @@ export function LiveMap({
   nearbyRadiusKm = 5,
 }: LiveMapProps) {
   const [selectedBusId, setSelectedBusId] = useState<string | null>(null);
+  const [trackedBusId, setTrackedBusId] = useState<string | null>(null);
   const [bounds, setBounds] = useState<L.LatLngBounds | null>(null);
   const [shapeTick, setShapeTick] = useState(0); // bump to re-render once shape arrives
 
@@ -183,7 +244,18 @@ export function LiveMap({
   }, [buses]);
 
   const selectedBus = selectedBusId ? busesById.get(selectedBusId) ?? null : null;
-  const selectedRouteId = selectedBus?.routeId ?? null;
+  const trackedBus = trackedBusId ? busesById.get(trackedBusId) ?? null : null;
+  // Tracked bus takes priority for route highlight — selection is the
+  // fallback when nothing is being followed.
+  const selectedRouteId = (trackedBus ?? selectedBus)?.routeId ?? null;
+
+  // If the tracked bus disappears from the feed (left service / out of
+  // viewport), exit follow mode silently rather than panning to stale data.
+  useEffect(() => {
+    if (trackedBusId && !busesById.has(trackedBusId)) {
+      setTrackedBusId(null);
+    }
+  }, [trackedBusId, busesById]);
 
   // Fetch + cache route detail (shape + ordered stops) for the selected route
   useEffect(() => {
@@ -281,7 +353,16 @@ export function LiveMap({
         />
 
         <ViewportTracker onBounds={setBounds} />
-        <MapClickHandler onClick={() => setSelectedBusId(null)} />
+        <MapClickHandler
+          onClick={() => {
+            setSelectedBusId(null);
+            setTrackedBusId(null);
+          }}
+        />
+        <BusFollower
+          trackedBus={trackedBus}
+          onUserDrag={() => setTrackedBusId(null)}
+        />
 
         {/* Selected route polyline — drawn first so markers sit on top */}
         {selectedShape && selectedShape.length >= 2 && (
@@ -351,12 +432,36 @@ export function LiveMap({
                 click: (e) => {
                   L.DomEvent.stopPropagation(e);
                   setSelectedBusId(bus.id);
+                  // Tapping a marker also starts following it. BusFollower
+                  // resets its internal "has zoomed" flag whenever the
+                  // tracked id changes, so each new tap re-centers cleanly.
+                  setTrackedBusId(bus.id);
                 },
               }}
             />
           );
         })}
       </MapContainer>
+
+      {/* Tracking banner — only visible while actively following a bus.
+          Sits above the "Showing X of Y" pill via z-index so it never gets
+          obscured. Drag the map (or close the panel) to exit. */}
+      {trackedBus && (
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[600] pointer-events-none">
+          <div className="flex items-center gap-2 bg-card/90 backdrop-blur-md border border-primary/40 rounded-full px-3.5 py-1.5 shadow-lg">
+            <span
+              className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"
+              aria-hidden
+            />
+            <span className="text-xs font-semibold text-foreground">
+              Tracking {trackedBus.routeNumber}
+            </span>
+            <span className="text-xs text-muted-foreground">
+              • Drag map to stop
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* Top-center: "Showing X of Y" caption + Nearby fallback message.
           Sits below the floating top-right pills so it never overlaps them. */}
@@ -401,7 +506,10 @@ export function LiveMap({
                 </div>
                 <button
                   type="button"
-                  onClick={() => setSelectedBusId(null)}
+                  onClick={() => {
+                    setSelectedBusId(null);
+                    setTrackedBusId(null);
+                  }}
                   aria-label="Close panel"
                   className="w-8 h-8 rounded-full bg-secondary/60 hover:bg-secondary text-muted-foreground hover:text-foreground flex items-center justify-center transition-colors flex-shrink-0"
                 >
