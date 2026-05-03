@@ -26,8 +26,8 @@ export function useLiveBusesPolling(params?: GetLiveBusesParams) {
   return useGetLiveBuses(params, {
     query: {
       queryKey: getGetLiveBusesQueryKey(params),
-      refetchInterval: 8000,
-      staleTime: 4000,
+      refetchInterval: 10000,
+      staleTime: 5000,
       placeholderData: keepPreviousData,
     },
   });

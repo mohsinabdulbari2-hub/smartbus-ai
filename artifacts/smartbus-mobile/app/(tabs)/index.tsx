@@ -608,9 +608,10 @@ function BusCard({
                 ]}
                 numberOfLines={1}
               >
-                {isUrgent
-                  ? `⚡ Move now — ${Math.ceil(walkMin!)} min walk`
-                  : `✓ You can catch this — ${Math.ceil(walkMin!)} min walk`}
+                {/* Short, scannable copy per spec. We still gate on
+                    catchability (walk ≤ eta+1) so we never falsely
+                    promise a bus the user physically can't reach. */}
+                {isUrgent ? "⚡ Leaving soon" : "✓ Good chance"}
               </Text>
             ) : isGoodOption ? (
               <Text style={styles.goodOptionText} numberOfLines={1}>

@@ -393,13 +393,15 @@ async function updateBusPositions() {
   }
 }
 
+// 8s sim tick — slow enough to cut backend cost ~37% vs 5s while still
+// fast enough that client polls (10–12s) usually see fresh data.
 setInterval(async () => {
   try {
     await ensureInitialized();
     await updateBusPositions();
   } catch {
   }
-}, 5000);
+}, 8000);
 
 // Simple haversine distance in km
 function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number) {
