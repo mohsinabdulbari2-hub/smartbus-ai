@@ -129,11 +129,9 @@ function getCrowdLevel(routeId: string, stopIndex: number): CrowdLevel {
   return "Low";
 }
 
-// Stable per-bus online flag — about 80% of buses are "running" at any time.
-function getInitialOnline(busId: string): boolean {
-  let h = 0;
-  for (let i = 0; i < busId.length; i++) h = (h * 31 + busId.charCodeAt(i)) | 0;
-  return Math.abs(h) % 10 >= 2; // ~80% online
+// All buses are online — every simulated bus in the fleet is "running".
+function getInitialOnline(_busId: string): boolean {
+  return true;
 }
 
 function isLastBus(lastBusTime: string | null): boolean {
@@ -313,12 +311,8 @@ async function updateBusPositions() {
     const stops = routeStopsCache.get(bus.routeId);
     if (!stops || stops.length < 2) continue;
 
-    // Tiny chance per tick to flip online/offline (so the fleet feels alive).
-    if (Math.random() < 0.01) bus.isOnline = !bus.isOnline;
-    if (!bus.isOnline) {
-      bus.lastUpdated = new Date().toISOString();
-      continue; // offline buses don't move
-    }
+    // All buses stay online — no offline flipping.
+    bus.isOnline = true;
 
     bus.progress += 0.003 + Math.random() * 0.002;
 
