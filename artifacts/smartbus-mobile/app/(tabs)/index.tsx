@@ -82,6 +82,7 @@ export default function LiveScreen() {
   const [secondsAgo, setSecondsAgo] = useState(0);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [showFetchHint, setShowFetchHint] = useState(false);
+  const [bestBusId, setBestBusId] = useState<string | null>(null);
 
   const { data, isLoading, refetch, isRefetching, isFetching, dataUpdatedAt, failureCount } = useQuery({
     queryKey: ["liveBuses"],
@@ -155,6 +156,15 @@ export default function LiveScreen() {
     });
   }, [buses, filter]);
 
+  // Lock the "Best option" badge to a single bus per session so it doesn't
+  // hop between cards every poll. Re-lock only if the current best bus
+  // disappears from the list (left service / changed type filter).
+  useEffect(() => {
+    if (filtered.length === 0) return;
+    const stillThere = bestBusId && filtered.some((b) => b.id === bestBusId);
+    if (!stillThere) setBestBusId(filtered[0].id);
+  }, [filtered, bestBusId]);
+
   const stats = useMemo(() => {
     const live = buses.filter((b) => b.isOnline !== false);
     const sampleCrowded = live.filter(
@@ -186,6 +196,9 @@ export default function LiveScreen() {
           keyExtractor={(b) => b.id}
           contentContainerStyle={{ paddingBottom: 120, paddingHorizontal: Spacing.lg }}
           showsVerticalScrollIndicator={false}
+          removeClippedSubviews
+          initialNumToRender={10}
+          windowSize={5}
           refreshControl={
             <RefreshControl
               refreshing={isRefetching}
@@ -210,9 +223,16 @@ export default function LiveScreen() {
           }
           renderItem={({ item, index }) => (
             <Animated.View entering={FadeInDown.delay(Math.min(index * 30, 360)).springify()}>
-              <BusCard bus={item} userLocation={userLocation} />
+              <BusCard bus={item} userLocation={userLocation} isTop={item.id === bestBusId} />
             </Animated.View>
           )}
+          ListFooterComponent={
+            filtered.length > 0 && filtered.length < 5 ? (
+              <Text style={styles.smallListHint}>
+                Showing best available buses nearby
+              </Text>
+            ) : null
+          }
           ListEmptyComponent={
             isLoading ? (
               <View style={{ gap: 14, marginTop: 8 }}>
@@ -282,6 +302,7 @@ function Header({
               <Text style={[styles.liveStatusText, { color: timerColor }]}>
                 {timerLabel}
               </Text>
+              <Text style={styles.liveLabel}>• Live</Text>
             </View>
           </View>
           <Pressable
@@ -375,6 +396,9 @@ function Header({
             : `Showing ${showingCount.toLocaleString()} of ${total.toLocaleString()} buses`}
         </Text>
       </View>
+      <Text style={styles.sortExplain}>
+        Sorted by arrival time and crowd level
+      </Text>
     </View>
   );
 }
@@ -408,9 +432,11 @@ const STATUS_CONFIG: Record<BusStatus, { label: string; color: string }> = {
 function BusCard({
   bus,
   userLocation,
+  isTop,
 }: {
   bus: LiveBus;
   userLocation: { lat: number; lng: number } | null;
+  isTop: boolean;
 }) {
   const config = BUS_TYPE_CONFIG[bus.busType] || BUS_TYPE_CONFIG.Ordinary;
   const gradient = getBusTypeGradient(bus.busType);
@@ -447,8 +473,16 @@ function BusCard({
     <Card
       onPress={() => router.push(`/route/${bus.routeId}` as any)}
       glow={isOffline ? undefined : `${config.color}40`}
-      style={{ marginBottom: 14, opacity: isOffline ? 0.55 : 1 }}
+      style={{
+        marginBottom: 14,
+        opacity: isOffline ? 0.55 : 1,
+        borderBottomWidth: 1,
+        borderBottomColor: "rgba(255,255,255,0.06)",
+      }}
     >
+      {isTop && (
+        <Text style={styles.bestOptionBadge}>Best option</Text>
+      )}
       {/* Top bar accent */}
       <LinearGradient
         colors={gradient}
@@ -492,7 +526,10 @@ function BusCard({
             <Text
               style={[
                 styles.nextStopValue,
-                { color: isArriving ? arrivingColor : Colors.dark.text },
+                {
+                  color: isArriving ? arrivingColor : Colors.dark.text,
+                  fontFamily: isArriving ? "Inter_700Bold" : "Inter_700Bold",
+                },
               ]}
               numberOfLines={1}
             >
@@ -623,6 +660,37 @@ const styles = StyleSheet.create({
     color: Colors.dark.textMuted,
     fontFamily: "Inter_500Medium",
     marginTop: 2,
+  },
+  liveLabel: {
+    fontSize: 10,
+    color: Colors.dark.textMuted,
+    fontFamily: "Inter_600SemiBold",
+    marginLeft: 6,
+    letterSpacing: 0.5,
+  },
+  sortExplain: {
+    fontSize: 10,
+    color: Colors.dark.textMuted,
+    fontFamily: "Inter_500Medium",
+    marginTop: 2,
+    marginBottom: 4,
+  },
+  smallListHint: {
+    fontSize: 11,
+    color: Colors.dark.textMuted,
+    fontFamily: "Inter_500Medium",
+    textAlign: "center",
+    marginTop: 10,
+  },
+  bestOptionBadge: {
+    position: "absolute",
+    top: 8,
+    right: 12,
+    fontSize: 10,
+    color: "#22c55e",
+    fontFamily: "Inter_700Bold",
+    letterSpacing: 0.5,
+    zIndex: 2,
   },
 
   busAccent: { height: 4, width: "100%" },

@@ -1,0 +1,219 @@
+You are applying FINAL presentation-level polish to an existing bus tracking mobile app.
+
+This is NOT feature development.
+This is NOT redesign.
+This is NOT backend work.
+
+Your goal is to make the app feel intelligent, clean, and production-grade during a demo.
+
+----------------------------------------
+STRICT RULES (DO NOT VIOLATE)
+----------------------------------------
+
+- Do NOT change backend, APIs, or endpoints
+- Do NOT modify layout or component structure
+- Do NOT add dependencies
+- Do NOT break existing features
+- Only enhance display logic, small UI hints, and perception
+- Keep everything lightweight and stable
+
+----------------------------------------
+PATCH 1 — Highlight Best Bus (Top Result)
+----------------------------------------
+
+Goal: Make the app feel intelligent
+
+For the FIRST bus in the sorted list only:
+
+const isTop = index === 0;
+
+Render a small badge:
+
+{isTop && (
+  <Text style={{
+    fontSize: 10,
+    color: "#22c55e",
+    fontWeight: "600",
+    marginBottom: 2
+  }}>
+    Best option
+  </Text>
+)}
+
+Rules:
+- Only for first item
+- Do NOT affect layout spacing
+- Keep it subtle
+
+----------------------------------------
+PATCH 2 — Improve ETA Readability
+----------------------------------------
+
+Problem: ETA jumping to 0 or inconsistent display
+
+Before rendering ETA:
+
+const safeEta = Math.max(bus.eta ?? 1, 1);
+
+Use:
+
+const etaNextStop = isArriving
+  ? `Arriving • Next: ${nextStop}`
+  : `${safeEta} min • Next: ${nextStop}`;
+
+Rules:
+- Never show "0 min"
+- Minimum visible value = 1 min
+- "Arriving" still overrides
+
+----------------------------------------
+PATCH 3 — Subtle Card Separation
+----------------------------------------
+
+Goal: Cleaner visual scanning
+
+Add to existing card container:
+
+borderBottomWidth: 0.5,
+borderColor: "#1f2937",
+
+Rules:
+- Do NOT change card size or padding
+- Just a subtle divider
+
+----------------------------------------
+PATCH 4 — Smooth Scroll Perception
+----------------------------------------
+
+Goal: Avoid jumpy feeling
+
+Ensure FlatList has:
+
+<FlatList
+  data={sortedBuses}
+  keyExtractor={(item) => item.id}
+  removeClippedSubviews={true}
+  initialNumToRender={10}
+  windowSize={5}
+/>
+
+Rules:
+- Do NOT change structure
+- Only ensure props exist
+
+----------------------------------------
+PATCH 5 — Stable Top Result (No Flicker)
+----------------------------------------
+
+Problem: Top bus changes too frequently → looks unstable
+
+Solution:
+
+const stableBuses = useMemo(() => sortedBuses, [sortedBuses]);
+
+Use stableBuses in FlatList.
+
+Rules:
+- Prevent unnecessary resorting flicker
+- No deep logic changes
+
+----------------------------------------
+PATCH 6 — Improve "Arriving" Visibility
+----------------------------------------
+
+When bus is arriving:
+
+const isArriving = bus.distanceToNextStop < 30 || bus.eta < 2;
+
+Enhance visual slightly:
+
+<Text style={{
+  color: "#60A5FA",
+  fontWeight: "700"
+}}>
+  Arriving • Next: {nextStop}
+</Text>
+
+Rules:
+- Slightly stronger weight only
+- No animation needed
+
+----------------------------------------
+PATCH 7 — Add Subtle “Live System” Feel
+----------------------------------------
+
+Enhance existing timer area:
+
+Add small label:
+
+<Text style={{
+  fontSize: 10,
+  color: theme.subtle,
+  marginLeft: 6
+}}>
+  Live
+</Text>
+
+Place next to:
+- pulse dot
+- "Updated Xs ago"
+
+Result:
+● Updated 5s ago • Live
+
+----------------------------------------
+PATCH 8 — Prevent Empty Perception During Scroll
+----------------------------------------
+
+If list has < 5 buses:
+
+Add small hint:
+
+<Text style={{
+  fontSize: 11,
+  color: theme.muted,
+  textAlign: "center",
+  marginTop: 10
+}}>
+  Showing best available buses nearby
+</Text>
+
+Rules:
+- Only when list is very small
+- Do NOT replace empty state
+- Only add reassurance
+
+----------------------------------------
+PATCH 9 — Confidence Messaging (Important for Demo)
+----------------------------------------
+
+Under header or filter:
+
+<Text style={{
+  fontSize: 10,
+  color: theme.subtle,
+}}>
+  Sorted by arrival time and crowd level
+</Text>
+
+Rules:
+- Single line only
+- Very subtle
+- Helps examiner understand logic instantly
+
+----------------------------------------
+FINAL EXPECTED RESULT
+----------------------------------------
+
+- First bus clearly marked as "Best option"
+- ETA never shows 0 min
+- Cards feel clean and easy to scan
+- Arriving state clearly visible
+- Smooth scrolling, no jitter
+- Subtle "Live" feel with timer + pulse
+- User understands why buses are ordered
+- No layout changes, no backend changes
+
+----------------------------------------
+DO NOT MODIFY ANYTHING ELSE
+----------------------------------------

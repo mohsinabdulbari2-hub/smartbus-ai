@@ -1,0 +1,169 @@
+You are applying FINAL UX polish to an existing bus tracking mobile app.
+
+This is the last refinement pass.
+
+----------------------------------------
+STRICT RULES (DO NOT VIOLATE)
+----------------------------------------
+
+- Do NOT change backend, APIs, or endpoints
+- Do NOT redesign layout or components
+- Do NOT add dependencies
+- Do NOT break existing features
+- Only adjust display logic, sorting, and minor UI hints
+
+----------------------------------------
+PATCH 1 — SORT + STABILIZE BEST BUS (DO FIRST)
+----------------------------------------
+
+Move sorting INSIDE useMemo (IMPORTANT FIX):
+
+const crowdOrder = {
+  "Low": 1,
+  "Medium": 2,
+  "High": 3,
+  "Very High": 4,
+};
+
+const sortedBuses = useMemo(() => {
+  return [...buses].sort((a, b) => {
+    const getEtaValue = (bus) => {
+      if (bus.distanceToNextStop < 30 || bus.eta < 2) return 0;
+      return bus.eta ?? 999;
+    };
+
+    const etaDiff = getEtaValue(a) - getEtaValue(b);
+    if (etaDiff !== 0) return etaDiff;
+
+    const aCrowd = crowdOrder[a.crowdLevel] ?? 2;
+    const bCrowd = crowdOrder[b.crowdLevel] ?? 2;
+    return aCrowd - bCrowd;
+  });
+}, [buses]);
+
+----------------------------------------
+PATCH 2 — STABLE "BEST OPTION" BADGE
+----------------------------------------
+
+Prevent badge flickering across refreshes.
+
+const [bestBusId, setBestBusId] = useState(null);
+
+useEffect(() => {
+  if (sortedBuses.length > 0 && !bestBusId) {
+    setBestBusId(sortedBuses[0].id);
+  }
+}, [sortedBuses, bestBusId]);
+
+Render:
+
+const isTop = bus.id === bestBusId;
+
+{isTop && (
+  <Text style={{
+    fontSize: 10,
+    color: "#22c55e",
+    fontWeight: "600",
+    marginBottom: 2
+  }}>
+    Best option
+  </Text>
+)}
+
+----------------------------------------
+PATCH 3 — ETA FLOOR (NO 0 MIN BUG)
+----------------------------------------
+
+const safeEta = Math.max(bus.eta ?? 1, 1);
+
+const etaNextStop = isArriving
+  ? `Arriving • Next: ${nextStop}`
+  : `${safeEta} min • Next: ${nextStop}`;
+
+----------------------------------------
+PATCH 4 — CARD DIVIDER (ANDROID SAFE)
+----------------------------------------
+
+Use full pixel border:
+
+borderBottomWidth: 1,
+borderColor: "rgba(255,255,255,0.06)",
+
+----------------------------------------
+PATCH 5 — ARRIVING VISUAL CLARITY
+----------------------------------------
+
+<Text style={{
+  color: "#60A5FA",
+  fontWeight: "700"
+}}>
+  {etaNextStop}
+</Text>
+
+----------------------------------------
+PATCH 6 — FLATLIST PERFORMANCE (KEEP)
+----------------------------------------
+
+<FlatList
+  data={sortedBuses}
+  keyExtractor={(item) => item.id}
+  removeClippedSubviews={true}
+  initialNumToRender={10}
+  windowSize={5}
+/>
+
+----------------------------------------
+PATCH 7 — LIVE LABEL ADDITION
+----------------------------------------
+
+<Text style={{
+  fontSize: 10,
+  color: theme.subtle,
+  marginLeft: 6
+}}>
+  Live
+</Text>
+
+----------------------------------------
+PATCH 8 — SMALL LIST HINT (SAFE GUARD)
+----------------------------------------
+
+Only show when list is small but NOT empty:
+
+{buses.length > 0 && buses.length < 5 && (
+  <Text style={{
+    fontSize: 11,
+    color: theme.muted,
+    textAlign: "center",
+    marginTop: 10
+  }}>
+    Showing best available buses nearby
+  </Text>
+)}
+
+----------------------------------------
+PATCH 9 — SORT EXPLANATION (KEEP)
+----------------------------------------
+
+<Text style={{
+  fontSize: 10,
+  color: theme.subtle,
+}}>
+  Sorted by arrival time and crowd level
+</Text>
+
+----------------------------------------
+FINAL EXPECTED RESULT
+----------------------------------------
+
+- Best bus clearly highlighted and stable (no flicker)
+- ETA never shows 0 min
+- Arriving state clearly visible
+- Smooth list performance
+- Clean card separation
+- Live system feel (dot + label)
+- No confusing empty/small list states
+
+----------------------------------------
+DO NOT MODIFY ANYTHING ELSE
+----------------------------------------

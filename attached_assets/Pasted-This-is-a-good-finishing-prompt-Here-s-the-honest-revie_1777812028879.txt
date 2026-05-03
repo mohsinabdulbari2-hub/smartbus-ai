@@ -1,0 +1,71 @@
+This is a good finishing prompt. Here's the honest review:
+✅ What Works Well
+Patch 1 — "Best option" badge
+Simple, subtle, high examiner impact. The green color ties to the existing crowd/status color system. Good constraint — first item only.
+Patch 2 — ETA floor at 1 min
+Math.max(bus.eta ?? 1, 1) is a one-liner that prevents the "0 min" visual bug. Should have been in the original ETA patch. Correct fix.
+Patch 4 — FlatList performance props
+removeClippedSubviews, initialNumToRender, windowSize are real React Native performance flags. Low risk, measurable smoothness improvement with 700 buses.
+Patch 9 — Sort explanation line
+"Sorted by arrival time and crowd level" is the smartest patch in the list. It tells the examiner your ranking logic without them having to ask. One line, zero effort, maximum clarity.
+⚠️ Gaps to Watch
+Patch 5 — useMemo for stable sort
+Javascript
+This does nothing useful as written. useMemo with [sortedBuses] as dependency will recompute every time sortedBuses changes — which is exactly when the sort already runs.
+Fix it properly:
+Javascript
+Move the sort inside the memo. That actually prevents resorting on unrelated re-renders.
+Patch 3 — Border divider
+borderBottomWidth: 0.5 may render inconsistently on Android (sub-pixel borders often disappear). Use 1 with a more transparent color instead:
+Javascript
+Patch 8 — "Showing best available buses"
+The condition list < 5 buses is fine but this message could conflict with the existing empty state message. Make sure the condition is mutually exclusive:
+Javascript
+📊 Patch-by-Patch Rating
+Patch
+Value
+Risk
+Verdict
+1 — Best option badge
+High
+None
+✅ Ship it
+2 — ETA floor
+High
+None
+✅ Ship it
+3 — Card border
+Medium
+Low
+⚠️ Fix sub-pixel issue
+4 — FlatList props
+High
+None
+✅ Ship it
+5 — useMemo stable
+Low
+Low
+⚠️ Rewrite the memo
+6 — Arriving bold
+Medium
+None
+✅ Ship it
+7 — Live label
+Medium
+None
+✅ Ship it
+8 — Small list hint
+Low
+Low
+⚠️ Add length > 0 guard
+9 — Sort explanation
+High
+None
+✅ Ship it
+One Addition Worth Including
+None of the patches address what happens when the "Best option" bus changes between polls. If bus A is best, then bus B jumps to top next poll, the badge flickers between cards. Add one guard:
+Javascript
+This makes the "Best option" badge feel stable and deliberate rather than jumping around every 8 seconds.
+Final Verdict
+7 of 9 patches are ready to ship as-is. Fix Patch 5's useMemo dependency and add the length guard to Patch 8. Add the best bus ID lock if you want the badge to feel truly stable.
+The prompt is clean, well-constrained, and safe. Send it with the two fixes noted above.
