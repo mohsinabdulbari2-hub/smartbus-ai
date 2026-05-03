@@ -1,0 +1,109 @@
+✅ Excellent Upgraded Prompt (Production-Ready Version)
+Prompt for AI/Codebase Upgrade:
+Task: Upgrade the existing bus tracking Android/iOS app into a production-ready MVP by moving all accuracy-critical and simulation logic to the backend, while strictly keeping the current UI and APK/frontend structure unchanged.
+Core Principles (Mandatory)
+Do NOT rebuild the frontend from scratch.
+Do NOT change UI/UX or break existing APK compatibility.
+Keep all frontend components, screens, map logic structure, and styling exactly as they are.
+Only modify frontend where absolutely necessary (API integration, data consumption, and performance optimizations).
+Move all simulation, movement, ETA, and business logic to backend for consistency and accuracy.
+1. Backend Architecture (New Core)
+Bus Fleet Management (600–800 buses)
+Backend generates and maintains 600–800 active buses.
+Each bus must:
+Belong to a valid GTFS route (using routes.txt, trips.txt, stop_times.txt, shapes.txt).
+Strictly follow stop sequence.
+Have unique bus_id, route_id, trip_id.
+Fixed realistic speed (20–35 km/h, configurable per route type).
+Database fields per bus:
+bus_id, route_id, trip_id, current_stop_index
+current_position (lat, lon)
+current_speed
+direction (forward/backward)
+last_updated
+status (Running / At_Stop / Delayed)
+Bus Movement Engine (Backend Only)
+Cron/job runs every 5–8 seconds.
+Move each bus along its route using stop sequence + linear interpolation between stops (no complex physics).
+At the end of route → loop back to first stop (or next trip).
+Handle dwell time at stops (30–90 seconds).
+Frontend Role: Only fetch and render latest positions. No local simulation.
+2. Core APIs (Must Be Efficient & Lightweight)
+GET /buses/live
+Returns only necessary fields (bus_id, lat, lon, route_id, bearing, crowd_level, eta_to_next_stop).
+Support bounding box filter for viewport (lat_min, lat_max, lng_min, lng_max).
+Limit: max 100 buses per request.
+GET /nearby-buses
+Params: user_lat, user_lng, radius_km (default 8)
+Returns buses within radius. If none → nearest 20 buses sorted by distance.
+GET /routes/from-to
+Params: source_stop_id, destination_stop_id
+Returns best route + 1–2 alternatives with:
+Total ETA
+Number of transfers
+Crowd prediction
+Recommended bus(es)
+GET /stop/{stop_id}/status
+Returns upcoming buses with status: Departed | At_Stop | Approaching | Upcoming
+Includes live ETA.
+GET /bus/{bus_id}/details
+Full details + predicted ETAs for remaining stops.
+3. Backend Intelligence (Lightweight Rule Engine)
+ETA Calculation (Backend)
+ETA_minutes = (remaining_distance_km / speed_kmh) * 60 + dwell_adjustment
+Use actual GTFS distance where possible, fallback to haversine.
+Update ETA for every stop on the route.
+Crowd Prediction (Rule-based, No ML)
+Base level by time:
+Peak hours (7-10 AM, 5-9 PM) → High
+Normal hours → Medium
+Night (10 PM - 6 AM) → Low
+Busy stops adjustment: +1 level
+Return: Low | Medium | High | Very High
+Stop Status Logic
+At_Stop: bus within 50m of stop and speed < 5 km/h
+Departed: passed current stop
+Upcoming: next stops
+4. Frontend Requirements (Minimal Changes)
+Map Performance (Critical)
+Show only buses inside current viewport + buffer.
+Hard limit: 50–100 markers maximum.
+Use marker clustering if needed.
+Update every 5–8 seconds (WebSocket preferred, fallback to polling).
+Cache GTFS shapes and stops locally (SQLite / MMKV).
+Search
+Keep entirely on frontend: fuzzy search + spelling correction (use existing library).
+Voice input → auto search (unchanged).
+Local Intelligence
+Store user’s frequent routes/searches locally.
+Prioritize them in suggestions.
+UI/Theme (Unchanged)
+Dark map theme.
+Highlight selected route using shapes.txt.
+Floating bottom panel for details.
+5. Non-Functional Requirements
+Performance & Scale
+Support 600–800 concurrent buses smoothly.
+Backend should handle 10k+ concurrent users.
+Low latency (< 800ms for position updates).
+Reliability
+All users see consistent bus positions and ETAs.
+Graceful degradation if backend is slow.
+Cost Efficiency
+No heavy ML models.
+No expensive third-party APIs for core functionality.
+Use PostgreSQL + PostGIS (or equivalent lightweight spatial DB).
+Future-Proofing
+Clean, well-documented codebase.
+Proper error handling and retry logic on frontend.
+Versioned APIs.
+Deliverables Expected:
+Backend architecture + tech stack recommendation.
+Complete API contract (OpenAPI/Swagger style).
+List of minimal frontend changes needed.
+Database schema for buses & GTFS integration.
+Movement & ETA calculation logic (pseudocode or code).
+Performance optimization strategy.
+Priority: Accuracy > Consistency > Smoothness > Low Cost.
+This prompt is now much more excellent — clearer, more structured, professional, and precise for any senior developer or AI coding agent. It strongly enforces constraints while giving complete clarity.
+Would you like a Backend-Focused version or a Developer Handover version next?
