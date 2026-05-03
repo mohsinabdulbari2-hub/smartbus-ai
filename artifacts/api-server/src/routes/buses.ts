@@ -86,46 +86,47 @@ function getCrowdLevel(routeId: string, stopIndex: number): CrowdLevel {
   const dayOfWeek = now.getDay();
   const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
 
-  // 1) Time-of-day demand (0..1)
-  let timeFactor = 0.4;
-  if (hour >= 8 && hour <= 10) timeFactor = 0.7;        // morning peak
-  else if (hour >= 17 && hour <= 20) timeFactor = 0.72; // evening peak
-  else if (hour >= 12 && hour <= 14) timeFactor = 0.5;  // lunch
-  else if (hour >= 6 && hour < 8) timeFactor = 0.45;    // early morning
-  else if (hour >= 21 || hour < 6) timeFactor = 0.2;    // night
-  else timeFactor = 0.4;
+  // 1) Time-of-day demand (0..1) — calibrated so peak hours realistically
+  //    produce ~40-55% High/VeryHigh, off-peak ~5-15%, night <5%.
+  let timeFactor: number;
+  if (hour >= 8 && hour <= 10) timeFactor = 0.52;        // morning peak
+  else if (hour >= 17 && hour <= 20) timeFactor = 0.55;  // evening peak
+  else if (hour >= 12 && hour <= 14) timeFactor = 0.35;  // lunch
+  else if (hour >= 6 && hour < 8) timeFactor = 0.28;     // early morning
+  else if (hour >= 21 || hour < 6) timeFactor = 0.12;    // night
+  else timeFactor = 0.25;                                  // regular off-peak
 
-  if (isWeekend) timeFactor *= 0.75;
+  if (isWeekend) timeFactor *= 0.70; // weekends significantly quieter
 
   // 2) Route popularity boost (longer/major corridors carry more passengers).
-  //    Normalized 0..0.18 — capped so it never overrides time-of-day.
-  const popularity = Math.min(routePopularity.get(routeId) ?? 0, 1) * 0.18;
+  //    Capped at 0.10 so it never dominates the time signal.
+  const popularity = Math.min(routePopularity.get(routeId) ?? 0, 1) * 0.10;
 
-  // 3) Stop density boost: middle of the route is the busiest segment;
-  //    endpoints are quieter. Triangular weighting in 0..0.12.
+  // 3) Stop density boost: middle of the route is the busiest segment.
+  //    Triangular weighting in 0..0.06 — kept small.
   let densityBoost = 0;
   const len = routePopularity.get(routeId);
   if (len && len > 1) {
-    // Use stopIndex relative to a notional length anchor — peak at midpoint.
     const t = Math.min(1, Math.max(0, stopIndex / Math.max(1, (len * 30))));
-    densityBoost = (1 - Math.abs(0.5 - t) * 2) * 0.12;
+    densityBoost = (1 - Math.abs(0.5 - t) * 2) * 0.06;
   } else {
-    densityBoost = 0.05;
+    densityBoost = 0.02;
   }
 
-  // 4) Per-bus pseudo-random jitter so buses on the same route differ.
+  // 4) Per-bus deterministic jitter so buses on the same route differ,
+  //    narrowed to ±0.12 to avoid overwhelming the time-of-day signal.
   let h = 0;
   const seed = `${routeId}-${stopIndex}`;
   for (let i = 0; i < seed.length; i++) {
     h = (h * 31 + seed.charCodeAt(i)) | 0;
   }
-  const jitter = ((Math.abs(h) % 100) / 100) * 0.7 - 0.35; // -0.35..+0.35
+  const jitter = ((Math.abs(h) % 100) / 100) * 0.24 - 0.12; // -0.12..+0.12
 
   const score = timeFactor + popularity + densityBoost + jitter;
 
-  if (score >= 0.9) return "VeryHigh";
-  if (score >= 0.65) return "High";
-  if (score >= 0.35) return "Medium";
+  if (score >= 0.75) return "VeryHigh";
+  if (score >= 0.52) return "High";
+  if (score >= 0.28) return "Medium";
   return "Low";
 }
 
