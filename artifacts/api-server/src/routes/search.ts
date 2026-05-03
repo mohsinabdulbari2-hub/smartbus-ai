@@ -2,6 +2,7 @@ import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
 import { busRoutesTable, busStopsTable, routeStopsTable, busFrequencyTable } from "@workspace/db";
 import { busState, getCrowdLevel } from "./buses.js";
+import { fuzzyScoreTokens, tokenize, normalize } from "../lib/fuzzy.js";
 
 const router: IRouter = Router();
 
@@ -11,8 +12,15 @@ type StopRow = { id: string; name: string; [key: string]: unknown };
 type RouteRow = { id: string; number: string; name: string; color: string | null; busType: string | null; lastBusTime: string | null; [key: string]: unknown };
 type FreqRow = { routeId: string; dayType: string; morning: number; afternoon: number; evening: number; night: number; [key: string]: unknown };
 
+interface StopWithTokens {
+  stop: StopRow;
+  tokens: string[];
+  lower: string;
+}
+
 interface CachedTransitData {
   allStops: StopRow[];
+  stopsTokenized: StopWithTokens[];
   allRoutes: RouteRow[];
   allFreq: FreqRow[];
   routeStopIndex: Map<string, string[]>;
@@ -41,8 +49,15 @@ async function fetchFreshData(): Promise<CachedTransitData> {
       entries.sort((a, b) => Number(a.split(":")[1]) - Number(b.split(":")[1])).map((e) => e.split(":")[0])
     );
   }
+  const stopRows = allStops as StopRow[];
+  const stopsTokenized: StopWithTokens[] = stopRows.map((s) => ({
+    stop: s,
+    tokens: tokenize(s.name),
+    lower: normalize(s.name),
+  }));
   return {
-    allStops: allStops as StopRow[],
+    allStops: stopRows,
+    stopsTokenized,
     allRoutes: allRoutes as RouteRow[],
     allFreq: allFreq as FreqRow[],
     routeStopIndex,
@@ -81,21 +96,26 @@ router.get("/", async (req, res) => {
       return;
     }
 
-    const { allStops, allRoutes, allFreq, routeStopIndex } = await getTransitData();
+    const { stopsTokenized, allRoutes, allFreq, routeStopIndex } = await getTransitData();
 
-    const sourceLower = source.toLowerCase().trim();
-    const destLower = destination.toLowerCase().trim();
+    const srcTokens = tokenize(source);
+    const srcLower = normalize(source);
+    const dstTokens = tokenize(destination);
+    const dstLower = normalize(destination);
 
-    const matchingSourceStops = allStops.filter(
-      (s) =>
-        s.name.toLowerCase().includes(sourceLower) ||
-        sourceLower.includes(s.name.toLowerCase().split(" ")[0])
-    );
-    const matchingDestStops = allStops.filter(
-      (s) =>
-        s.name.toLowerCase().includes(destLower) ||
-        destLower.includes(s.name.toLowerCase().split(" ")[0])
-    );
+    const scoredSource = stopsTokenized
+      .map((x) => ({ stop: x.stop, fs: fuzzyScoreTokens(srcTokens, srcLower, x.tokens, x.lower) }))
+      .filter((x) => x.fs.matched)
+      .sort((a, b) => b.fs.score - a.fs.score)
+      .slice(0, 60);
+    const scoredDest = stopsTokenized
+      .map((x) => ({ stop: x.stop, fs: fuzzyScoreTokens(dstTokens, dstLower, x.tokens, x.lower) }))
+      .filter((x) => x.fs.matched)
+      .sort((a, b) => b.fs.score - a.fs.score)
+      .slice(0, 60);
+
+    const matchingSourceStops = scoredSource.map((x) => x.stop);
+    const matchingDestStops = scoredDest.map((x) => x.stop);
 
     const results: Array<{
       routeId: string;
