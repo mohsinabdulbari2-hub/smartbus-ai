@@ -62,12 +62,12 @@ router.get("/:stopId/eta", async (req, res) => {
       if (!route) continue;
 
       const routeBuses = Array.from(busState.values()).filter(
-        (b) => b.routeId === routeId && b.nextStopId === stopId
+        (b) => b.routeId === routeId && b.nextStopId === stopId && b.isOnline !== false
       );
 
       if (routeBuses.length === 0) {
         const allRouteBuses = Array.from(busState.values()).filter(
-          (b) => b.routeId === routeId
+          (b) => b.routeId === routeId && b.isOnline !== false
         );
 
         if (allRouteBuses.length > 0) {

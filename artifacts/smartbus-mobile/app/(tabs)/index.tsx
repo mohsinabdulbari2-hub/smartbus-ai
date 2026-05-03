@@ -74,9 +74,12 @@ export default function LiveScreen() {
   );
 
   const stats = useMemo(() => {
-    const total = buses.length;
-    const crowded = buses.filter((b) => b.crowdLevel === "High").length;
-    const empty = buses.filter((b) => b.crowdLevel === "Low").length;
+    const live = buses.filter((b) => b.isOnline !== false);
+    const total = live.length;
+    const crowded = live.filter(
+      (b) => b.crowdLevel === "High" || b.crowdLevel === "VeryHigh",
+    ).length;
+    const empty = live.filter((b) => b.crowdLevel === "Low").length;
     return { total, crowded, empty };
   }, [buses]);
 
@@ -126,8 +129,23 @@ export default function LiveScreen() {
             ) : (
               <View style={styles.empty}>
                 <Feather name="wifi-off" size={36} color={Colors.dark.textMuted} />
-                <Text style={styles.emptyText}>No buses match this filter</Text>
-                <Text style={styles.emptySub}>Try a different bus type</Text>
+                <Text style={styles.emptyText}>
+                  {filter === "All" ? "No buses on the road right now" : `No ${filter} buses running`}
+                </Text>
+                <Text style={styles.emptySub}>
+                  {filter === "All"
+                    ? "Pull down to refresh in a moment"
+                    : "Try another bus type or tap All to see everything"}
+                </Text>
+                {filter !== "All" && (
+                  <Pressable
+                    onPress={() => { Haptics.selectionAsync(); setFilter("All"); }}
+                    style={styles.emptyCta}
+                  >
+                    <Feather name="refresh-cw" size={14} color={Colors.primary} />
+                    <Text style={styles.emptyCtaText}>Show all buses</Text>
+                  </Pressable>
+                )}
               </View>
             )
           }
@@ -257,12 +275,13 @@ function BusCard({ bus }: { bus: LiveBus }) {
   const config = BUS_TYPE_CONFIG[bus.busType] || BUS_TYPE_CONFIG.Ordinary;
   const gradient = getBusTypeGradient(bus.busType);
   const progress = bus.totalStops > 0 ? bus.stopsCovered / bus.totalStops : 0;
+  const isOffline = bus.isOnline === false;
 
   return (
     <Card
       onPress={() => router.push(`/route/${bus.routeId}` as any)}
-      glow={`${config.color}40`}
-      style={{ marginBottom: 14 }}
+      glow={isOffline ? undefined : `${config.color}40`}
+      style={{ marginBottom: 14, opacity: isOffline ? 0.55 : 1 }}
     >
       {/* Top bar accent */}
       <LinearGradient
@@ -330,6 +349,11 @@ function BusCard({ bus }: { bus: LiveBus }) {
         {/* Footer badges */}
         <View style={styles.busFooter}>
           <Badge variant="primary" emoji={config.icon} label={config.label} size="md" />
+          {isOffline ? (
+            <Badge variant="neutral" emoji="⚪" label="Offline" size="md" />
+          ) : (
+            <Badge variant="success" emoji="🟢" label="Live" size="md" />
+          )}
           {bus.isLastBus && <LastBusBadge size="md" />}
         </View>
       </View>
@@ -431,6 +455,15 @@ const styles = StyleSheet.create({
   busFooter: { flexDirection: "row", gap: 8, flexWrap: "wrap" },
 
   empty: { alignItems: "center", paddingVertical: 60, gap: 8 },
-  emptyText: { ...Type.subtitle, color: Colors.dark.text, marginTop: 12 },
-  emptySub: { ...Type.body, color: Colors.dark.textMuted },
+  emptyText: { ...Type.subtitle, color: Colors.dark.text, marginTop: 12, textAlign: "center" },
+  emptySub: { ...Type.body, color: Colors.dark.textMuted, textAlign: "center", paddingHorizontal: 20 },
+  emptyCta: {
+    flexDirection: "row", alignItems: "center", gap: 8,
+    marginTop: 16,
+    paddingHorizontal: 18, paddingVertical: 12,
+    backgroundColor: "rgba(37,99,235,0.15)",
+    borderRadius: Radius.pill,
+    borderWidth: 1, borderColor: "rgba(37,99,235,0.4)",
+  },
+  emptyCtaText: { ...Type.body, color: Colors.primary, fontFamily: "Inter_700Bold" },
 });

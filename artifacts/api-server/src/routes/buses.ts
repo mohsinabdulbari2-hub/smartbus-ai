@@ -6,6 +6,8 @@ import { classifyBusType, type NormalizedBusType } from "../lib/busType.js";
 
 const router: IRouter = Router();
 
+type CrowdLevel = "Low" | "Medium" | "High" | "VeryHigh";
+
 interface BusPosition {
   id: string;
   routeId: string;
@@ -21,8 +23,9 @@ interface BusPosition {
   nextStop: string;
   nextStopId: string;
   distanceToNextStop: number;
-  crowdLevel: "Low" | "Medium" | "High";
+  crowdLevel: CrowdLevel;
   isLastBus: boolean;
+  isOnline: boolean;
   lastUpdated: string;
   stopIndex: number;
   direction: number;
@@ -36,7 +39,7 @@ interface BusPosition {
 const busState = new Map<string, BusPosition>();
 let initialized = false;
 
-function getCrowdLevel(routeId: string, stopIndex: number): "Low" | "Medium" | "High" {
+function getCrowdLevel(routeId: string, stopIndex: number): CrowdLevel {
   const now = new Date();
   const hour = now.getHours();
   const dayOfWeek = now.getDay();
@@ -44,8 +47,8 @@ function getCrowdLevel(routeId: string, stopIndex: number): "Low" | "Medium" | "
 
   // Base "demand" varies by time of day (0..1)
   let timeFactor = 0.4;
-  if (hour >= 8 && hour <= 10) timeFactor = 0.65;       // morning peak
-  else if (hour >= 17 && hour <= 20) timeFactor = 0.65; // evening peak
+  if (hour >= 8 && hour <= 10) timeFactor = 0.7;        // morning peak
+  else if (hour >= 17 && hour <= 20) timeFactor = 0.72; // evening peak
   else if (hour >= 12 && hour <= 14) timeFactor = 0.5;  // lunch
   else if (hour >= 6 && hour < 8) timeFactor = 0.45;    // early morning
   else if (hour >= 21 || hour < 6) timeFactor = 0.2;    // night
@@ -54,19 +57,27 @@ function getCrowdLevel(routeId: string, stopIndex: number): "Low" | "Medium" | "
   if (isWeekend) timeFactor *= 0.75;
 
   // Per-bus pseudo-random variation so different buses on the same route
-  // don't all show the same crowd level (wide range so all 3 levels appear).
+  // don't all show the same crowd level (wide range so all 4 levels appear).
   let h = 0;
   const seed = `${routeId}-${stopIndex}`;
   for (let i = 0; i < seed.length; i++) {
     h = (h * 31 + seed.charCodeAt(i)) | 0;
   }
-  const jitter = ((Math.abs(h) % 100) / 100) * 0.8 - 0.4; // -0.4..+0.4
+  const jitter = ((Math.abs(h) % 100) / 100) * 0.9 - 0.45; // -0.45..+0.45
 
   const score = timeFactor + jitter;
 
-  if (score >= 0.65) return "High";
-  if (score >= 0.35) return "Medium";
+  if (score >= 0.85) return "VeryHigh";
+  if (score >= 0.6) return "High";
+  if (score >= 0.32) return "Medium";
   return "Low";
+}
+
+// Stable per-bus online flag — about 80% of buses are "running" at any time.
+function getInitialOnline(busId: string): boolean {
+  let h = 0;
+  for (let i = 0; i < busId.length; i++) h = (h * 31 + busId.charCodeAt(i)) | 0;
+  return Math.abs(h) % 10 >= 2; // ~80% online
 }
 
 function isLastBus(lastBusTime: string | null): boolean {
@@ -159,6 +170,7 @@ async function initializeBuses() {
       const baseSpeed = speedByType[type] ?? 25;
 
       const busId = `${route.id}-bus-${i}`;
+      const online = getInitialOnline(busId);
       busState.set(busId, {
         id: busId,
         routeId: route.id,
@@ -176,6 +188,7 @@ async function initializeBuses() {
         distanceToNextStop: 500 + Math.random() * 1000,
         crowdLevel: getCrowdLevel(route.id, stopIndex),
         isLastBus: isLastBus(route.lastBusTime),
+        isOnline: online,
         lastUpdated: new Date().toISOString(),
         stopIndex,
         direction: 1,
@@ -195,6 +208,13 @@ async function updateBusPositions() {
   for (const [busId, bus] of busState) {
     const stops = routeStopsCache.get(bus.routeId);
     if (!stops || stops.length < 2) continue;
+
+    // Tiny chance per tick to flip online/offline (so the fleet feels alive).
+    if (Math.random() < 0.01) bus.isOnline = !bus.isOnline;
+    if (!bus.isOnline) {
+      bus.lastUpdated = new Date().toISOString();
+      continue; // offline buses don't move
+    }
 
     bus.progress += 0.003 + Math.random() * 0.002;
 

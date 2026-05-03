@@ -8,6 +8,8 @@ async function get<T>(path: string): Promise<T> {
 
 export type BusType = "Ordinary" | "Vajra" | "Volvo" | "Airport" | "MetroFeeder" | "Night";
 
+export type CrowdLevel = "Low" | "Medium" | "High" | "VeryHigh";
+
 export type LiveBus = {
   id: string;
   routeId: string;
@@ -19,10 +21,11 @@ export type LiveBus = {
   lat: number;
   lng: number;
   speed: number;
-  crowdLevel: "Low" | "Medium" | "High";
+  crowdLevel: CrowdLevel;
   nextStop: string;
   nextStopId: string;
   isLastBus: boolean;
+  isOnline?: boolean;
   totalStops: number;
   stopsCovered: number;
   stopsRemaining: number;
@@ -70,13 +73,13 @@ export type EtaEntry = {
   routeName: string;
   routeColor: string;
   etaMinutes: number;
-  crowdLevel: "Low" | "Medium" | "High";
+  crowdLevel: CrowdLevel;
   isLastBus: boolean;
 };
 
 export type CrowdInfo = {
   stopId: string;
-  level: "Low" | "Medium" | "High";
+  level: CrowdLevel;
   estimatedPassengers: number;
   reason: string;
 };
@@ -89,7 +92,7 @@ export type SearchResult = {
   sourceStop: string;
   destinationStop: string;
   etaMinutes: number;
-  crowdLevel: "Low" | "Medium" | "High";
+  crowdLevel: CrowdLevel;
   isLastBus: boolean;
   frequency: number;
   stopCount: number;

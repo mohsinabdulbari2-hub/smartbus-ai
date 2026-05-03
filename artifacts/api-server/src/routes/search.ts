@@ -151,7 +151,7 @@ router.get("/", async (req, res) => {
           }
 
           const routeBuses = Array.from(busState.values()).filter(
-            (b) => b.routeId === route.id
+            (b) => b.routeId === route.id && b.isOnline !== false
           );
 
           // More realistic ETA: base on stops + live bus proximity
@@ -172,7 +172,8 @@ router.get("/", async (req, res) => {
           })();
 
           // Scoring: lower is better (faster + less crowded + more frequent)
-          const crowdPenalty = level === "High" ? 15 : level === "Medium" ? 5 : 0;
+          const crowdPenalty =
+            level === "VeryHigh" ? 25 : level === "High" ? 15 : level === "Medium" ? 5 : 0;
           const freqBonus = Math.round(60 / Math.max(frequency, 1));
           const score = etaMinutes + crowdPenalty + freqBonus;
 
@@ -227,7 +228,7 @@ router.get("/", async (req, res) => {
     }
 
     // Tag: Least Crowded (lowest crowd penalty)
-    const crowdOrder = { Low: 0, Medium: 1, High: 2 };
+    const crowdOrder = { Low: 0, Medium: 1, High: 2, VeryHigh: 3 };
     const leastCrowdedIdx = results.reduce(
       (bestIdx, r, idx) =>
         (crowdOrder[r.crowdLevel as keyof typeof crowdOrder] ?? 1) <

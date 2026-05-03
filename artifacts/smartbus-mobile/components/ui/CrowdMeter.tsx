@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from "react-native";
 import Colors from "@/constants/colors";
 import { AnimatedProgress } from "./AnimatedProgress";
 
-type Level = "Low" | "Medium" | "High";
+type Level = "Low" | "Medium" | "High" | "VeryHigh";
 
 interface CrowdMeterProps {
   level: Level;
@@ -12,9 +12,10 @@ interface CrowdMeterProps {
 }
 
 const CONFIG: Record<Level, { value: number; color: string; gradient: [string, string]; label: string; emoji: string }> = {
-  Low:    { value: 0.22, color: Colors.success, gradient: Colors.gradients.success, label: "Seats available", emoji: "🟢" },
-  Medium: { value: 0.55, color: Colors.warning, gradient: Colors.gradients.warning, label: "Moderate crowd",  emoji: "🟡" },
-  High:   { value: 0.92, color: Colors.danger,  gradient: Colors.gradients.danger,  label: "Very crowded",    emoji: "🔴" },
+  Low:      { value: 0.22, color: Colors.success, gradient: Colors.gradients.success, label: "Seats available", emoji: "🟢" },
+  Medium:   { value: 0.55, color: Colors.warning, gradient: Colors.gradients.warning, label: "Moderate crowd",  emoji: "🟡" },
+  High:     { value: 0.85, color: Colors.danger,  gradient: Colors.gradients.danger,  label: "Crowded",          emoji: "🔴" },
+  VeryHigh: { value: 1.0,  color: "#B91C1C",      gradient: ["#B91C1C", "#7F1D1D"],   label: "Packed",           emoji: "🟥" },
 };
 
 export function CrowdMeter({ level, showLabel = true, compact }: CrowdMeterProps) {

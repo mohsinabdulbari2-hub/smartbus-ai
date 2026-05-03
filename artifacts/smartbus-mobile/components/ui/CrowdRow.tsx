@@ -4,7 +4,7 @@ import { StyleSheet, Text, View } from "react-native";
 import Colors from "@/constants/colors";
 import { Radius, Type } from "@/constants/theme";
 
-type Level = "Low" | "Medium" | "High";
+type Level = "Low" | "Medium" | "High" | "VeryHigh";
 
 const CONFIG: Record<
   Level,
@@ -30,9 +30,17 @@ const CONFIG: Record<
     color: Colors.danger,
     bg: "rgba(239,68,68,0.14)",
     border: "rgba(239,68,68,0.4)",
-    label: "Very crowded",
+    label: "Crowded",
     icon: "alert-triangle",
     dot: "🔴",
+  },
+  VeryHigh: {
+    color: "#B91C1C",
+    bg: "rgba(185,28,28,0.18)",
+    border: "rgba(185,28,28,0.5)",
+    label: "Packed — try the next bus",
+    icon: "alert-octagon",
+    dot: "🟥",
   },
 };
 
