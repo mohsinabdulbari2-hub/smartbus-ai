@@ -60,6 +60,25 @@ export function CardSkeleton() {
   );
 }
 
+// Slimmer skeleton matching the route list row (no progress bar, no badges row)
+export function RouteRowSkeleton() {
+  return (
+    <View style={[styles.card, { padding: 14, marginBottom: 10 }]}>
+      <View style={{ flexDirection: "row", gap: 12, alignItems: "center" }}>
+        <Skeleton width={60} height={50} radius={12} />
+        <View style={{ flex: 1, gap: 7 }}>
+          <Skeleton width="70%" height={13} />
+          <Skeleton width="90%" height={11} />
+          <View style={{ flexDirection: "row", gap: 6, marginTop: 4 }}>
+            <Skeleton width={64} height={18} radius={9} />
+            <Skeleton width={54} height={18} radius={9} />
+          </View>
+        </View>
+      </View>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   base: { backgroundColor: "rgba(148,163,184,0.15)" },
   card: {

@@ -115,7 +115,7 @@ export default function LiveScreen() {
             />
           }
           renderItem={({ item, index }) => (
-            <Animated.View entering={FadeInDown.delay(Math.min(index * 40, 600)).springify()}>
+            <Animated.View entering={FadeInDown.delay(Math.min(index * 30, 360)).springify()}>
               <BusCard bus={item} />
             </Animated.View>
           )}

@@ -387,11 +387,27 @@ export default function SearchScreen() {
 
             {/* No results */}
             {search.data && search.data.length === 0 && (
-              <View style={styles.empty}>
+              <Animated.View entering={FadeIn} style={styles.empty}>
                 <Feather name="search" size={36} color={Colors.dark.textMuted} />
                 <Text style={styles.emptyText}>No direct routes found</Text>
-                <Text style={styles.emptySub}>Try nearby stops or major landmarks</Text>
-              </View>
+                <Text style={styles.emptySub}>
+                  No single bus connects these stops. Try a nearby major landmark, or pick a popular journey below.
+                </Text>
+                <View style={[styles.popularGrid, { marginTop: 18, alignSelf: "stretch" }]}>
+                  {POPULAR_SEARCHES.map((p) => (
+                    <Pressable
+                      key={`fb-${p.from}-${p.to}`}
+                      onPress={() => onPopular(p.from, p.to)}
+                      style={styles.popularChip}
+                    >
+                      <Feather name="trending-up" size={12} color={Colors.dark.textMuted} />
+                      <Text style={styles.popularText} numberOfLines={1}>
+                        {p.from} → {p.to}
+                      </Text>
+                    </Pressable>
+                  ))}
+                </View>
+              </Animated.View>
             )}
           </ScrollView>
         </KeyboardAvoidingView>
@@ -602,7 +618,7 @@ const styles = StyleSheet.create({
   },
   errorText: { ...Type.body, color: Colors.danger, flex: 1 },
 
-  empty: { alignItems: "center", paddingVertical: 60, gap: 8 },
-  emptyText: { ...Type.subtitle, color: Colors.dark.text, marginTop: 12 },
-  emptySub: { ...Type.body, color: Colors.dark.textMuted },
+  empty: { alignItems: "center", paddingVertical: 50, gap: 8, paddingHorizontal: 8 },
+  emptyText: { ...Type.subtitle, color: Colors.dark.text, marginTop: 12, textAlign: "center" },
+  emptySub: { ...Type.body, color: Colors.dark.textMuted, textAlign: "center" },
 });

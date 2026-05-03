@@ -8,6 +8,7 @@ import React, { useDeferredValue, useMemo, useState } from "react";
 import {
   FlatList,
   Pressable,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
@@ -19,7 +20,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
-import { CardSkeleton } from "@/components/ui/Skeleton";
+import { RouteRowSkeleton } from "@/components/ui/Skeleton";
 import { BUS_TYPE_CONFIG, getBusTypeGradient } from "@/components/CrowdBadge";
 import Colors from "@/constants/colors";
 import { Radius, Spacing, Type } from "@/constants/theme";
@@ -40,10 +41,17 @@ export default function RoutesScreen() {
   const [filter, setFilter] = useState<BusType | "All">("All");
   const deferredQuery = useDeferredValue(query);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, refetch, isRefetching } = useQuery({
     queryKey: ["routes"],
     queryFn: api.getRoutes,
   });
+
+  const hasFilters = filter !== "All" || query.trim().length > 0;
+  const clearFilters = () => {
+    Haptics.selectionAsync();
+    setQuery("");
+    setFilter("All");
+  };
 
   const routes = data ?? [];
 
@@ -72,6 +80,14 @@ export default function RoutesScreen() {
           keyExtractor={(r) => r.id}
           contentContainerStyle={{ paddingBottom: 120, paddingHorizontal: Spacing.lg }}
           showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefetching}
+              onRefresh={refetch}
+              tintColor={Colors.primary}
+              colors={[Colors.primary]}
+            />
+          }
           ListHeaderComponent={
             <Header
               query={query}
@@ -84,23 +100,37 @@ export default function RoutesScreen() {
           }
           renderItem={({ item, index }) => (
             <Animated.View
-              entering={FadeInDown.delay(Math.min(index * 25, 400)).springify()}
+              entering={FadeInDown.delay(Math.min(index * 20, 280)).springify()}
             >
               <RouteCard route={item} />
             </Animated.View>
           )}
           ListEmptyComponent={
             isLoading ? (
-              <View style={{ gap: 14 }}>
-                <CardSkeleton />
-                <CardSkeleton />
-                <CardSkeleton />
+              <View style={{ gap: 10 }}>
+                <RouteRowSkeleton />
+                <RouteRowSkeleton />
+                <RouteRowSkeleton />
+                <RouteRowSkeleton />
+                <RouteRowSkeleton />
               </View>
             ) : (
               <View style={styles.empty}>
                 <Feather name="map" size={36} color={Colors.dark.textMuted} />
-                <Text style={styles.emptyText}>No routes match your search</Text>
-                <Text style={styles.emptySub}>Try a different number or area</Text>
+                <Text style={styles.emptyText}>
+                  {hasFilters ? "No routes match your search" : "No routes loaded yet"}
+                </Text>
+                <Text style={styles.emptySub}>
+                  {hasFilters
+                    ? "Even with typos we couldn't find a match. Try a shorter word or a major area name."
+                    : "Pull down to refresh"}
+                </Text>
+                {hasFilters && (
+                  <Pressable onPress={clearFilters} style={styles.emptyCta}>
+                    <Feather name="refresh-cw" size={14} color={Colors.primary} />
+                    <Text style={styles.emptyCtaText}>Clear filters</Text>
+                  </Pressable>
+                )}
               </View>
             )
           }
@@ -283,7 +313,16 @@ const styles = StyleSheet.create({
   routeName: { ...Type.subtitle, color: Colors.dark.text },
   routePath: { ...Type.caption, color: Colors.dark.textMuted },
 
-  empty: { alignItems: "center", paddingVertical: 60, gap: 8 },
-  emptyText: { ...Type.subtitle, color: Colors.dark.text, marginTop: 12 },
-  emptySub: { ...Type.caption, color: Colors.dark.textMuted },
+  empty: { alignItems: "center", paddingVertical: 60, gap: 8, paddingHorizontal: 20 },
+  emptyText: { ...Type.subtitle, color: Colors.dark.text, marginTop: 12, textAlign: "center" },
+  emptySub: { ...Type.caption, color: Colors.dark.textMuted, textAlign: "center" },
+  emptyCta: {
+    flexDirection: "row", alignItems: "center", gap: 8,
+    marginTop: 16,
+    paddingHorizontal: 18, paddingVertical: 12,
+    backgroundColor: "rgba(37,99,235,0.15)",
+    borderRadius: Radius.pill,
+    borderWidth: 1, borderColor: "rgba(37,99,235,0.4)",
+  },
+  emptyCtaText: { ...Type.body, color: Colors.primary, fontFamily: "Inter_700Bold" },
 });
