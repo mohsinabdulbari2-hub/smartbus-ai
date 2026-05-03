@@ -13,4 +13,5 @@ export const LiveBusCrowdLevel = {
   Low: "Low",
   Medium: "Medium",
   High: "High",
+  VeryHigh: "VeryHigh",
 } as const;

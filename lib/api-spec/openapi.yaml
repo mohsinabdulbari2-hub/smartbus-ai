@@ -95,6 +95,35 @@ paths:
       operationId: getLiveBuses
       tags: [buses]
       summary: Get all live bus positions
+      parameters:
+        - name: lat_min
+          in: query
+          required: false
+          schema:
+            type: number
+          description: Viewport south edge — when all four bbox params are present, only buses inside the box are returned (with fallback to nearest if fewer than 20).
+        - name: lat_max
+          in: query
+          required: false
+          schema:
+            type: number
+        - name: lng_min
+          in: query
+          required: false
+          schema:
+            type: number
+        - name: lng_max
+          in: query
+          required: false
+          schema:
+            type: number
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            maximum: 100
+          description: Hard server cap is 100 buses per response.
       responses:
         "200":
           description: Live bus positions
@@ -315,11 +344,18 @@ components:
           type: string
         nextStopId:
           type: string
+        currentStop:
+          type: string
+          description: Name of the most recently passed stop on the bus's current trip.
         distanceToNextStop:
           type: number
         crowdLevel:
           type: string
-          enum: [Low, Medium, High]
+          enum: [Low, Medium, High, VeryHigh]
+        status:
+          type: string
+          enum: [At_Stop, Approaching, Departed, Upcoming]
+          description: Where the bus is in its current leg. At_Stop = within 50m of next stop and speed < 5 km/h; Approaching = within 500m of next stop; Departed = just left previous stop; Upcoming = mid-leg.
         isLastBus:
           type: boolean
         lastUpdated:

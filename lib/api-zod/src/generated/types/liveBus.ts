@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { LiveBusCrowdLevel } from "./liveBusCrowdLevel";
+import type { LiveBusStatus } from "./liveBusStatus";
 
 export interface LiveBus {
   id: string;
@@ -19,8 +20,12 @@ export interface LiveBus {
   heading: number;
   nextStop: string;
   nextStopId: string;
+  /** Name of the most recently passed stop on the bus's current trip. */
+  currentStop?: string;
   distanceToNextStop: number;
   crowdLevel: LiveBusCrowdLevel;
+  /** Where the bus is in its current leg. At_Stop = within 50m of next stop and speed < 5 km/h; Approaching = within 500m of next stop; Departed = just left previous stop; Upcoming = mid-leg. */
+  status?: LiveBusStatus;
   isLastBus: boolean;
   lastUpdated: string;
 }

@@ -48,6 +48,19 @@ export const LiveBusCrowdLevel = {
   Low: "Low",
   Medium: "Medium",
   High: "High",
+  VeryHigh: "VeryHigh",
+} as const;
+
+/**
+ * Where the bus is in its current leg. At_Stop = within 50m of next stop and speed < 5 km/h; Approaching = within 500m of next stop; Departed = just left previous stop; Upcoming = mid-leg.
+ */
+export type LiveBusStatus = (typeof LiveBusStatus)[keyof typeof LiveBusStatus];
+
+export const LiveBusStatus = {
+  At_Stop: "At_Stop",
+  Approaching: "Approaching",
+  Departed: "Departed",
+  Upcoming: "Upcoming",
 } as const;
 
 export interface LiveBus {
@@ -62,8 +75,12 @@ export interface LiveBus {
   heading: number;
   nextStop: string;
   nextStopId: string;
+  /** Name of the most recently passed stop on the bus's current trip. */
+  currentStop?: string;
   distanceToNextStop: number;
   crowdLevel: LiveBusCrowdLevel;
+  /** Where the bus is in its current leg. At_Stop = within 50m of next stop and speed < 5 km/h; Approaching = within 500m of next stop; Departed = just left previous stop; Upcoming = mid-leg. */
+  status?: LiveBusStatus;
   isLastBus: boolean;
   lastUpdated: string;
 }
@@ -151,6 +168,21 @@ export const GetRouteFrequencyDayType = {
   weekday: "weekday",
   weekend: "weekend",
 } as const;
+
+export type GetLiveBusesParams = {
+  /**
+   * Viewport south edge — when all four bbox params are present, only buses inside the box are returned (with fallback to nearest if fewer than 20).
+   */
+  lat_min?: number;
+  lat_max?: number;
+  lng_min?: number;
+  lng_max?: number;
+  /**
+   * Hard server cap is 100 buses per response.
+   * @maximum 100
+   */
+  limit?: number;
+};
 
 export type GetStopCrowdParams = {
   routeId?: string;

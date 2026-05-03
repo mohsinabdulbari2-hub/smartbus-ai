@@ -90,6 +90,25 @@ export const GetRouteFrequencyResponse = zod.object({
 /**
  * @summary Get all live bus positions
  */
+export const getLiveBusesQueryLimitMax = 100;
+
+export const GetLiveBusesQueryParams = zod.object({
+  lat_min: zod.coerce
+    .number()
+    .optional()
+    .describe(
+      "Viewport south edge — when all four bbox params are present, only buses inside the box are returned (with fallback to nearest if fewer than 20).",
+    ),
+  lat_max: zod.coerce.number().optional(),
+  lng_min: zod.coerce.number().optional(),
+  lng_max: zod.coerce.number().optional(),
+  limit: zod.coerce
+    .number()
+    .max(getLiveBusesQueryLimitMax)
+    .optional()
+    .describe("Hard server cap is 100 buses per response."),
+});
+
 export const GetLiveBusesResponseItem = zod.object({
   id: zod.string(),
   routeId: zod.string(),
@@ -102,8 +121,20 @@ export const GetLiveBusesResponseItem = zod.object({
   heading: zod.number(),
   nextStop: zod.string(),
   nextStopId: zod.string(),
+  currentStop: zod
+    .string()
+    .optional()
+    .describe(
+      "Name of the most recently passed stop on the bus's current trip.",
+    ),
   distanceToNextStop: zod.number(),
-  crowdLevel: zod.enum(["Low", "Medium", "High"]),
+  crowdLevel: zod.enum(["Low", "Medium", "High", "VeryHigh"]),
+  status: zod
+    .enum(["At_Stop", "Approaching", "Departed", "Upcoming"])
+    .optional()
+    .describe(
+      "Where the bus is in its current leg. At_Stop = within 50m of next stop and speed < 5 km\/h; Approaching = within 500m of next stop; Departed = just left previous stop; Upcoming = mid-leg.",
+    ),
   isLastBus: zod.boolean(),
   lastUpdated: zod.string(),
 });
@@ -128,8 +159,20 @@ export const GetBusResponse = zod.object({
   heading: zod.number(),
   nextStop: zod.string(),
   nextStopId: zod.string(),
+  currentStop: zod
+    .string()
+    .optional()
+    .describe(
+      "Name of the most recently passed stop on the bus's current trip.",
+    ),
   distanceToNextStop: zod.number(),
-  crowdLevel: zod.enum(["Low", "Medium", "High"]),
+  crowdLevel: zod.enum(["Low", "Medium", "High", "VeryHigh"]),
+  status: zod
+    .enum(["At_Stop", "Approaching", "Departed", "Upcoming"])
+    .optional()
+    .describe(
+      "Where the bus is in its current leg. At_Stop = within 50m of next stop and speed < 5 km\/h; Approaching = within 500m of next stop; Departed = just left previous stop; Upcoming = mid-leg.",
+    ),
   isLastBus: zod.boolean(),
   lastUpdated: zod.string(),
 });

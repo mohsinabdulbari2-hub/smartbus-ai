@@ -20,6 +20,7 @@ import type {
   BusStop,
   CrowdPrediction,
   FrequencyData,
+  GetLiveBusesParams,
   GetRouteFrequencyParams,
   GetStopCrowdParams,
   HealthStatus,
@@ -382,41 +383,57 @@ export function useGetRouteFrequency<
 /**
  * @summary Get all live bus positions
  */
-export const getGetLiveBusesUrl = () => {
-  return `/api/buses/live`;
+export const getGetLiveBusesUrl = (params?: GetLiveBusesParams) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/buses/live?${stringifiedParams}`
+    : `/api/buses/live`;
 };
 
 export const getLiveBuses = async (
+  params?: GetLiveBusesParams,
   options?: RequestInit,
 ): Promise<LiveBus[]> => {
-  return customFetch<LiveBus[]>(getGetLiveBusesUrl(), {
+  return customFetch<LiveBus[]>(getGetLiveBusesUrl(params), {
     ...options,
     method: "GET",
   });
 };
 
-export const getGetLiveBusesQueryKey = () => {
-  return [`/api/buses/live`] as const;
+export const getGetLiveBusesQueryKey = (params?: GetLiveBusesParams) => {
+  return [`/api/buses/live`, ...(params ? [params] : [])] as const;
 };
 
 export const getGetLiveBusesQueryOptions = <
   TData = Awaited<ReturnType<typeof getLiveBuses>>,
   TError = ErrorType<unknown>,
->(options?: {
-  query?: UseQueryOptions<
-    Awaited<ReturnType<typeof getLiveBuses>>,
-    TError,
-    TData
-  >;
-  request?: SecondParameter<typeof customFetch>;
-}) => {
+>(
+  params?: GetLiveBusesParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getLiveBuses>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
-  const queryKey = queryOptions?.queryKey ?? getGetLiveBusesQueryKey();
+  const queryKey = queryOptions?.queryKey ?? getGetLiveBusesQueryKey(params);
 
   const queryFn: QueryFunction<Awaited<ReturnType<typeof getLiveBuses>>> = ({
     signal,
-  }) => getLiveBuses({ signal, ...requestOptions });
+  }) => getLiveBuses(params, { signal, ...requestOptions });
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getLiveBuses>>,
@@ -437,15 +454,18 @@ export type GetLiveBusesQueryError = ErrorType<unknown>;
 export function useGetLiveBuses<
   TData = Awaited<ReturnType<typeof getLiveBuses>>,
   TError = ErrorType<unknown>,
->(options?: {
-  query?: UseQueryOptions<
-    Awaited<ReturnType<typeof getLiveBuses>>,
-    TError,
-    TData
-  >;
-  request?: SecondParameter<typeof customFetch>;
-}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-  const queryOptions = getGetLiveBusesQueryOptions(options);
+>(
+  params?: GetLiveBusesParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getLiveBuses>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetLiveBusesQueryOptions(params, options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;

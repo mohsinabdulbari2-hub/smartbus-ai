@@ -108,9 +108,19 @@ artifacts-monorepo/
 
 Run: `pnpm --filter @workspace/scripts run seed`
 
+## Backend Lean MVP slice (May 2026)
+- Fleet bumped 500 → **700 live buses** (100 routes × 7) — matches spec target of 600–800.
+- `/api/buses/live` now accepts viewport bbox params `lat_min`, `lat_max`, `lng_min`, `lng_max` plus a `limit` (hard server cap = 100).
+  - When bbox is provided, returns buses inside the box. If fewer than 20 are inside, tops up with nearest-to-center buses outside so the map is never empty.
+  - Without bbox, response is still capped at 100; `X-Total-Count` header exposes the full fleet size (700).
+  - Backward compatible — old clients that don't pass any params still get a (now capped) list.
+- Each LiveBus now carries a **`status`** field: `At_Stop` (≤50m from next stop & speed <5 km/h), `Approaching` (≤500m), `Departed` (just left previous stop), `Upcoming` (mid-leg).
+- **Crowd levels**: enum widened to `Low | Medium | High | VeryHigh`. Time-of-day rules (morning/evening peak, lunch, night, weekend dampening) drive distribution.
+- Bug fix: per-tick `isLastBus` check no longer references an undefined `routes` variable — now reads from a `routeLastBusTime` map populated at init.
+
 ## API Endpoints
 
-- `GET /api/buses/live` — live bus positions (poll every 3s)
+- `GET /api/buses/live` — live bus positions; supports `lat_min/lat_max/lng_min/lng_max` viewport, `limit` (≤100), legacy `lat/lng/radius`. Frontend polls every 8s.
 - `GET /api/routes` — all routes
 - `GET /api/routes/:id` — route detail + stops
 - `GET /api/routes/:id/frequency` — frequency by day type

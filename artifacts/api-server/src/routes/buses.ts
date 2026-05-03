@@ -7,6 +7,7 @@ import { classifyBusType, type NormalizedBusType } from "../lib/busType.js";
 const router: IRouter = Router();
 
 type CrowdLevel = "Low" | "Medium" | "High" | "VeryHigh";
+type BusStatus = "At_Stop" | "Approaching" | "Departed" | "Upcoming";
 
 interface BusPosition {
   id: string;
@@ -18,12 +19,16 @@ interface BusPosition {
   depot: string | null;
   lat: number;
   lng: number;
+  /** Live km/h reported to clients; modulated by approach-to-stop. */
   speed: number;
+  /** Cruising speed for the bus; held constant from init. */
+  baseSpeed: number;
   heading: number;
   nextStop: string;
   nextStopId: string;
   distanceToNextStop: number;
   crowdLevel: CrowdLevel;
+  status: BusStatus;
   isLastBus: boolean;
   isOnline: boolean;
   lastUpdated: string;
@@ -36,8 +41,40 @@ interface BusPosition {
   currentStop: string;
 }
 
+// routeId → lastBusTime so the per-tick "is this the last bus?" check no
+// longer depends on a stale module-level variable that was never defined.
+const routeLastBusTime = new Map<string, string | null>();
+
+// Compute per-bus operational status from distance + speed. The thresholds
+// match the spec: At_Stop = ≤50m & <5 km/h, Approaching = ≤500m, Departed =
+// just left the previous stop, otherwise Upcoming.
+function computeStatus(
+  distanceToNextStopMeters: number,
+  speedKmh: number,
+  progress: number,
+): BusStatus {
+  if (distanceToNextStopMeters <= 50 && speedKmh < 5) return "At_Stop";
+  if (distanceToNextStopMeters <= 500) return "Approaching";
+  if (progress < 0.1) return "Departed";
+  return "Upcoming";
+}
+
 export const busState = new Map<string, BusPosition>();
 let initialized = false;
+// Shared promise gate so concurrent /live requests during cold-start don't see
+// a partially populated busState (architect-flagged init race).
+let initializationPromise: Promise<void> | null = null;
+function ensureInitialized(): Promise<void> {
+  if (initialized) return Promise.resolve();
+  if (!initializationPromise) {
+    initializationPromise = initializeBuses().catch((err) => {
+      // On failure, allow a future caller to retry.
+      initializationPromise = null;
+      throw err;
+    });
+  }
+  return initializationPromise;
+}
 
 // Popularity weight per route: longer routes = busier corridors.
 // Populated during initializeBuses(); falls back to 0 if missing.
@@ -132,14 +169,13 @@ async function getRouteStopsCache() {
 
 // How many routes do we simulate live buses for? With 4,200+ routes, simulating
 // every one would create thousands of buses. Cap to a representative sample.
-// 100 routes × 5 buses ≈ 500 live buses — large enough to feel like a city
-// fleet, small enough to keep payloads under ~150KB.
+// 100 routes × 7 buses = 700 live buses — matches the spec's 600–800 target,
+// still under ~250KB on the wire.
 const MAX_LIVE_ROUTES = 100;
-const BUSES_PER_ROUTE = 5;
+const BUSES_PER_ROUTE = 7;
 
 async function initializeBuses() {
   if (initialized) return;
-  initialized = true;
 
   const allRoutes = await db.select().from(busRoutesTable);
   const cache = await getRouteStopsCache();
@@ -180,6 +216,8 @@ async function initializeBuses() {
   const breakdown = ranked.reduce((acc, p) => { acc[p.type] = (acc[p.type] || 0) + 1; return acc; }, {} as Record<string, number>);
   console.log(`[buses] initializing ~${ranked.length * BUSES_PER_ROUTE} live buses across ${ranked.length} routes`, breakdown);
 
+  // Flip the readiness flag *after* the loop so concurrent callers awaiting
+  // ensureInitialized() can never see a half-built busState.
   for (const { route, type } of ranked) {
     const stops = cache.get(route.id) ?? [];
     if (stops.length < 2) continue;
@@ -206,6 +244,10 @@ async function initializeBuses() {
 
       const busId = `${route.id}-bus-${i}`;
       const online = getInitialOnline(busId);
+      const speed = baseSpeed + Math.random() * 10;
+      const initialDistance = 500 + Math.random() * 1000;
+      const initialProgress = Math.random();
+      routeLastBusTime.set(route.id, route.lastBusTime);
       busState.set(busId, {
         id: busId,
         routeId: route.id,
@@ -216,18 +258,20 @@ async function initializeBuses() {
         depot: (route as any).depot ?? null,
         lat: currentStop.lat,
         lng: currentStop.lng,
-        speed: baseSpeed + Math.random() * 10,
+        speed,
+        baseSpeed: speed,
         heading: 0,
         nextStop: nextStop.name,
         nextStopId: nextStop.id,
-        distanceToNextStop: 500 + Math.random() * 1000,
+        distanceToNextStop: initialDistance,
         crowdLevel: getCrowdLevel(route.id, stopIndex),
+        status: computeStatus(initialDistance, speed, initialProgress),
         isLastBus: isLastBus(route.lastBusTime),
         isOnline: online,
         lastUpdated: new Date().toISOString(),
         stopIndex,
         direction: 1,
-        progress: Math.random(),
+        progress: initialProgress,
         totalStops: stops.length,
         stopsCovered: stopIndex,
         stopsRemaining: stops.length - 1 - stopIndex,
@@ -235,6 +279,8 @@ async function initializeBuses() {
       });
     }
   }
+
+  initialized = true;
 }
 
 async function updateBusPositions() {
@@ -278,21 +324,31 @@ async function updateBusPositions() {
     bus.nextStopId = to.id;
     bus.currentStop = from.name;
     bus.distanceToNextStop = Math.round((1 - bus.progress) * 1200);
+    // Modulate speed near the stop so At_Stop is actually reachable: bus
+    // decelerates within 200m, dwells very slowly under 50m, then resumes
+    // cruising once it's back into the open leg.
+    if (bus.distanceToNextStop <= 50) {
+      bus.speed = 2;
+    } else if (bus.distanceToNextStop <= 200) {
+      bus.speed = Math.max(8, bus.baseSpeed * 0.4);
+    } else {
+      bus.speed = bus.baseSpeed;
+    }
     bus.crowdLevel = getCrowdLevel(bus.routeId, currentIdx);
+    bus.status = computeStatus(bus.distanceToNextStop, bus.speed, bus.progress);
     bus.totalStops = stops.length;
     // Stops covered along the current direction of travel
     bus.stopsCovered = bus.direction === 1 ? currentIdx : stops.length - 1 - currentIdx;
     bus.stopsRemaining = stops.length - 1 - bus.stopsCovered;
 
-    const route = routes.find((r) => r.id === bus.routeId);
-    bus.isLastBus = isLastBus(route?.lastBusTime ?? null);
+    bus.isLastBus = isLastBus(routeLastBusTime.get(bus.routeId) ?? null);
     bus.lastUpdated = new Date().toISOString();
   }
 }
 
 setInterval(async () => {
   try {
-    if (!initialized) await initializeBuses();
+    await ensureInitialized();
     await updateBusPositions();
   } catch {
   }
@@ -310,31 +366,85 @@ function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number) {
   return 2 * R * Math.asin(Math.sqrt(a));
 }
 
+// Hard server cap on /buses/live response size — the spec requires no more
+// than 100 buses per request to keep payloads small and rendering snappy.
+const LIVE_RESPONSE_HARD_CAP = 100;
+const LIVE_RESPONSE_MIN_FALLBACK = 20;
+
 router.get("/live", async (req, res) => {
   try {
-    if (!initialized) await initializeBuses();
+    await ensureInitialized();
     let buses = Array.from(busState.values());
 
     // Optional server-side filtering (keeps payload small; backward-compatible:
     // old clients that don't pass these get the full list as before).
-    const { busType, lat, lng, radius, limit, offset } = req.query as Record<string, string>;
+    const {
+      busType,
+      lat,
+      lng,
+      radius,
+      limit,
+      offset,
+      lat_min,
+      lat_max,
+      lng_min,
+      lng_max,
+    } = req.query as Record<string, string>;
 
     if (busType && busType.toLowerCase() !== "all") {
       const want = busType.toLowerCase();
       buses = buses.filter((b) => b.busType.toLowerCase() === want);
     }
 
-    if (lat && lng) {
+    // ----- Viewport bounding-box filter (preferred over lat/lng radius) -----
+    // When all four bbox params are present, return buses inside the box.
+    // If fewer than 20 fall inside, top up with the nearest buses to the box
+    // center so the map is never visibly empty.
+    const latMin = parseFloat(lat_min);
+    const latMax = parseFloat(lat_max);
+    const lngMin = parseFloat(lng_min);
+    const lngMax = parseFloat(lng_max);
+    const allBboxNumbers =
+      !Number.isNaN(latMin) && !Number.isNaN(latMax) &&
+      !Number.isNaN(lngMin) && !Number.isNaN(lngMax);
+    // A degenerate (zero-area / inverted) box is treated as a valid request
+    // for the bbox path — we just won't have any "inside" buses, so the
+    // nearest-to-center fallback returns the closest 20. Returning citywide
+    // results would be surprising to the client.
+    const bboxDegenerate = allBboxNumbers && (latMax <= latMin || lngMax <= lngMin);
+    const bboxValid = allBboxNumbers && !bboxDegenerate;
+    const bboxPathRequested = allBboxNumbers;
+
+    if (bboxPathRequested) {
+      const inside = bboxValid
+        ? buses.filter(
+            (b) => b.lat >= latMin && b.lat <= latMax && b.lng >= lngMin && b.lng <= lngMax,
+          )
+        : [];
+      if (inside.length >= LIVE_RESPONSE_MIN_FALLBACK) {
+        buses = inside;
+      } else {
+        // Top up with nearest-to-center buses outside the viewport.
+        // For degenerate boxes the "center" is just the (latMin, lngMin) point.
+        const centerLat = (latMin + latMax) / 2;
+        const centerLng = (lngMin + lngMax) / 2;
+        const insideIds = new Set(inside.map((b) => b.id));
+        const outsideRanked = buses
+          .filter((b) => !insideIds.has(b.id))
+          .map((b) => ({ b, d: haversineKm(centerLat, centerLng, b.lat, b.lng) }))
+          .sort((a, b) => a.d - b.d)
+          .slice(0, LIVE_RESPONSE_MIN_FALLBACK - inside.length)
+          .map((x) => x.b);
+        buses = [...inside, ...outsideRanked];
+      }
+    } else if (lat && lng) {
+      // Legacy radius mode (kept for backward compatibility).
       const la = parseFloat(lat);
       const ln = parseFloat(lng);
-      const radKm = radius ? parseFloat(radius) : 8; // default 8 km
+      const radKm = radius ? parseFloat(radius) : 8;
       if (!Number.isNaN(la) && !Number.isNaN(ln)) {
-        // Annotate with distance once
         const withDist = buses.map((b) => ({ b, d: haversineKm(la, ln, b.lat, b.lng) }));
         let nearby = withDist.filter((x) => x.d <= radKm);
-        // Fallback: if the requested radius yields nothing, return the 20
-        // closest buses regardless — guarantees the "Nearby" screen never
-        // shows an empty list when buses exist on the network.
         if (nearby.length === 0 && withDist.length > 0) {
           nearby = withDist.sort((a, b) => a.d - b.d).slice(0, 20);
         } else {
@@ -346,11 +456,17 @@ router.get("/live", async (req, res) => {
 
     const total = buses.length;
 
+    // Apply pagination if requested, else just enforce the hard cap of 100.
     if (offset || limit) {
       const off = Math.max(0, parseInt(offset ?? "0", 10) || 0);
-      const lim = Math.max(1, Math.min(200, parseInt(limit ?? "30", 10) || 30));
+      const lim = Math.max(
+        1,
+        Math.min(LIVE_RESPONSE_HARD_CAP, parseInt(limit ?? "30", 10) || 30),
+      );
       buses = buses.slice(off, off + lim);
-      // When pagination is requested, return an envelope so clients can know total.
+      res.set("X-Total-Count", String(total));
+    } else if (buses.length > LIVE_RESPONSE_HARD_CAP) {
+      buses = buses.slice(0, LIVE_RESPONSE_HARD_CAP);
       res.set("X-Total-Count", String(total));
     }
 
@@ -363,7 +479,7 @@ router.get("/live", async (req, res) => {
 
 router.get("/:busId", async (req, res) => {
   try {
-    if (!initialized) await initializeBuses();
+    await ensureInitialized();
     const bus = busState.get(req.params.busId);
     if (!bus) {
       res.status(404).json({ error: "Bus not found" });
