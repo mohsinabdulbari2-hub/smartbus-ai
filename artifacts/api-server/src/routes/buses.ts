@@ -169,10 +169,10 @@ async function getRouteStopsCache() {
 
 // How many routes do we simulate live buses for? With 4,200+ routes, simulating
 // every one would create thousands of buses. Cap to a representative sample.
-// 100 routes × 7 buses = 700 live buses — matches the spec's 600–800 target,
+// 100 routes × 9 buses = 900 live buses — matches the spec's ~900 target,
 // still under ~250KB on the wire.
 const MAX_LIVE_ROUTES = 100;
-const BUSES_PER_ROUTE = 7;
+const BUSES_PER_ROUTE = 9;
 
 async function initializeBuses() {
   if (initialized) return;
