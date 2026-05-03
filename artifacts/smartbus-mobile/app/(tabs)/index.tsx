@@ -29,7 +29,7 @@ import { CrowdRow } from "@/components/ui/CrowdRow";
 import Colors from "@/constants/colors";
 import { MinTouch, Radius, Shadow, Spacing, Type } from "@/constants/theme";
 import { api, type LiveBus, type BusType, type BusStatus } from "@/lib/api";
-import { fuseFrequency } from "@/lib/frequency";
+import { fuseFrequency, getBaselineFreq } from "@/lib/frequency";
 
 const FILTERS: { key: BusType | "All"; label: string; emoji: string }[] = [
   { key: "All",         label: "All",      emoji: "🚍" },
@@ -184,6 +184,11 @@ export default function LiveScreen() {
   // Each route's buses have known distance-to-next-stop and speed, so we can
   // derive ETA-in-seconds and use gap analysis to estimate buses/hr.
   const routeFreqMap = useMemo(() => {
+    const now = new Date();
+    const hour = now.getHours();
+    const isWeekend = [0, 6].includes(now.getDay());
+    const base = getBaselineFreq(hour, isWeekend);
+
     const groups = new Map<string, LiveBus[]>();
     for (const bus of buses) {
       if (!groups.has(bus.routeId)) groups.set(bus.routeId, []);
@@ -195,7 +200,7 @@ export default function LiveScreen() {
         .filter((b) => b.speed >= 5 && b.distanceToNextStop != null && b.distanceToNextStop > 0)
         .map((b) => b.distanceToNextStop! / (b.speed * (1000 / 3600)))
         .filter((s) => s > 0 && s < 3600);
-      map.set(routeId, fuseFrequency(6, etaSec));
+      map.set(routeId, fuseFrequency(base, etaSec));
     }
     return map;
   }, [buses]);

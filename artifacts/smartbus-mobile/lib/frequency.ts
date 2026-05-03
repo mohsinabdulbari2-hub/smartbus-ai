@@ -21,6 +21,30 @@ export function getTimeSlot(hour: number): TimeSlot {
   return "night";
 }
 
+/**
+ * BMTC-realistic baseline frequency (buses/hr) for a given hour and day type.
+ *
+ * Weekday patterns:
+ *   Late night  (23:00–04:59) →  3/hr  (Night Owl only)
+ *   Pre-dawn    (05:00–05:59) →  5/hr  (early depot departures)
+ *   Morning pk  (06:00–09:59) → 16/hr  (max fleet)
+ *   Midday      (10:00–15:59) → 11/hr  (steady off-peak)
+ *   Evening pk  (16:00–20:59) → 17/hr  (highest demand)
+ *   Wind-down   (21:00–21:59) →  6/hr  (post-peak taper)
+ *   Late eve    (22:00–22:59) →  4/hr
+ *
+ * Weekend: ~55–60% of weekday volumes.
+ */
+export function getBaselineFreq(hour: number, isWeekend: boolean): number {
+  if (hour >= 23 || hour < 5) return isWeekend ? 2 : 3;
+  if (hour < 6)               return isWeekend ? 3 : 5;
+  if (hour < 10)              return isWeekend ? 9 : 16;
+  if (hour < 16)              return isWeekend ? 7 : 11;
+  if (hour < 21)              return isWeekend ? 10 : 17;
+  if (hour < 22)              return isWeekend ? 4 : 6;
+  return                             isWeekend ? 2 : 4;
+}
+
 export function getLiveFrequency(etaSeconds: number[]): number | null {
   if (!etaSeconds || etaSeconds.length < 2) return null;
   const sorted = [...etaSeconds].sort((a, b) => a - b);
@@ -38,20 +62,24 @@ export function fuseFrequency(
   base: number,
   liveEtaSeconds: number[],
 ): { freq: number; isLive: boolean } {
-  const live = getLiveFrequency(liveEtaSeconds);
-  const hour = new Date().getHours();
-  const isNight = hour < 6 || hour >= 21;
+  const now = new Date();
+  const hour = now.getHours();
+  const isWeekend = [0, 6].includes(now.getDay());
 
+  // Time-aware ceiling replaces the old flat 30/8 caps.
+  const ceiling = getBaselineFreq(hour, isWeekend);
+  const effectiveBase = Math.min(base, ceiling);
+
+  const live = getLiveFrequency(liveEtaSeconds);
   let freq: number;
   let isLive: boolean;
   if (!live || live <= 0 || live > 120) {
-    freq = base; isLive = false;
+    freq = effectiveBase; isLive = false;
   } else {
     const weight = liveEtaSeconds.length >= 4 ? 0.5 : liveEtaSeconds.length >= 2 ? 0.35 : 0.2;
-    freq = Math.round(base * (1 - weight) + live * weight);
+    freq = Math.round(effectiveBase * (1 - weight) + live * weight);
     isLive = true;
   }
-  freq = Math.min(freq, 30);
-  if (isNight) freq = Math.min(freq, 8);
+  freq = Math.min(freq, ceiling);
   return { freq, isLive };
 }
