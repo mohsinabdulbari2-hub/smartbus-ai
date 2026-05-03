@@ -18,8 +18,6 @@ import {
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { Card } from "@/components/ui/Card";
-import { Badge } from "@/components/ui/Badge";
 import { RouteRowSkeleton } from "@/components/ui/Skeleton";
 import { BUS_TYPE_CONFIG, getBusTypeGradient } from "@/components/CrowdBadge";
 import Colors from "@/constants/colors";
@@ -27,14 +25,14 @@ import { Radius, Spacing, Type } from "@/constants/theme";
 import { api, type Route, type BusType } from "@/lib/api";
 import { fuzzyMatch } from "@/lib/fuzzy";
 
-const FILTERS: { key: BusType | "All"; label: string; emoji: string }[] = [
-  { key: "All",         label: "All",      emoji: "🚍" },
-  { key: "Vajra",       label: "Vajra",    emoji: "❄️" },
-  { key: "Volvo",       label: "Volvo",    emoji: "🌟" },
-  { key: "Ordinary",    label: "Ordinary", emoji: "🚌" },
-  { key: "Airport",     label: "Airport",  emoji: "✈️" },
-  { key: "MetroFeeder", label: "Metro",    emoji: "🚇" },
-  { key: "Night",       label: "Night",    emoji: "🌙" },
+const FILTERS: { key: BusType | "All"; label: string; icon: string }[] = [
+  { key: "All",         label: "All routes",  icon: "grid" },
+  { key: "Vajra",       label: "Vajra AC",    icon: "wind" },
+  { key: "Volvo",       label: "Volvo",       icon: "star" },
+  { key: "Ordinary",    label: "Ordinary",    icon: "truck" },
+  { key: "Airport",     label: "Airport",     icon: "send" },
+  { key: "MetroFeeder", label: "Metro",       icon: "map" },
+  { key: "Night",       label: "Night Owl",   icon: "moon" },
 ];
 
 export default function RoutesScreen() {
@@ -50,12 +48,7 @@ export default function RoutesScreen() {
   });
 
   const hasFilters = filter !== "All" || query.trim().length > 0;
-  const clearFilters = () => {
-    Haptics.selectionAsync();
-    setQuery("");
-    setFilter("All");
-  };
-
+  const clearFilters = () => { Haptics.selectionAsync(); setQuery(""); setFilter("All"); };
   const routes = data ?? [];
 
   const filtered = useMemo(() => {
@@ -64,22 +57,17 @@ export default function RoutesScreen() {
     if (filter !== "All") r = r.filter((x) => x.busType === filter);
     if (q) {
       const qLower = q.toLowerCase();
-      // Route number: keep simple substring (numbers/codes shouldn't fuzzy-match)
-      // Name / from / to: typo-tolerant fuzzy match
       r = r.filter((x) =>
         x.number.toLowerCase().includes(qLower) ||
-        fuzzyMatch(q, x.name) ||
-        fuzzyMatch(q, x.from) ||
-        fuzzyMatch(q, x.to),
+        fuzzyMatch(q, x.name) || fuzzyMatch(q, x.from) || fuzzyMatch(q, x.to),
       );
     }
-    return r.slice(0, 200); // cap to keep list snappy
+    return r.slice(0, 200);
   }, [routes, deferredQuery, filter]);
 
   return (
     <View style={styles.root}>
       <StatusBar style="light" />
-      <LinearGradient colors={["#1E293B", "#0F172A"]} style={StyleSheet.absoluteFillObject} />
       <SafeAreaView style={{ flex: 1 }} edges={["top"]}>
         <FlatList
           data={filtered}
@@ -87,54 +75,36 @@ export default function RoutesScreen() {
           contentContainerStyle={{ paddingBottom: 120, paddingHorizontal: Spacing.lg }}
           showsVerticalScrollIndicator={false}
           refreshControl={
-            <RefreshControl
-              refreshing={isRefetching}
-              onRefresh={refetch}
-              tintColor={Colors.primary}
-              colors={[Colors.primary]}
-            />
+            <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={Colors.primary} colors={[Colors.primary]} />
           }
           ListHeaderComponent={
-            <Header
-              query={query}
-              setQuery={setQuery}
-              filter={filter}
-              setFilter={setFilter}
-              total={routes.length}
-              filteredCount={filtered.length}
-            />
+            <Header query={query} setQuery={setQuery} filter={filter} setFilter={setFilter} total={routes.length} filteredCount={filtered.length} hasFilters={hasFilters} clearFilters={clearFilters} />
           }
           renderItem={({ item, index }) => (
-            <Animated.View
-              entering={FadeInDown.delay(Math.min(index * 20, 280)).springify()}
-            >
+            <Animated.View entering={FadeInDown.delay(Math.min(index * 18, 260)).springify()}>
               <RouteCard route={item} />
             </Animated.View>
           )}
           ListEmptyComponent={
             isLoading ? (
-              <View style={{ gap: 10 }}>
-                <RouteRowSkeleton />
-                <RouteRowSkeleton />
-                <RouteRowSkeleton />
-                <RouteRowSkeleton />
-                <RouteRowSkeleton />
+              <View style={{ gap: 8 }}>
+                {[0,1,2,3,4].map((i) => <RouteRowSkeleton key={i} />)}
               </View>
             ) : (
-              <View style={styles.empty}>
-                <Feather name="map" size={36} color={Colors.dark.textMuted} />
-                <Text style={styles.emptyText}>
-                  {hasFilters ? "No routes match your search" : "No routes loaded yet"}
+              <View style={styles.emptyState}>
+                <View style={styles.emptyIcon}>
+                  <Feather name="map" size={26} color={Colors.dark.textMuted} />
+                </View>
+                <Text style={styles.emptyTitle}>
+                  {hasFilters ? "No matching routes" : "No routes loaded yet"}
                 </Text>
                 <Text style={styles.emptySub}>
-                  {hasFilters
-                    ? "Even with typos we couldn't find a match. Try a shorter word or a major area name."
-                    : "Pull down to refresh"}
+                  {hasFilters ? "Try a shorter term or a major area name." : "Pull down to refresh"}
                 </Text>
                 {hasFilters && (
-                  <Pressable onPress={clearFilters} style={styles.emptyCta}>
-                    <Feather name="refresh-cw" size={14} color={Colors.primary} />
-                    <Text style={styles.emptyCtaText}>Clear filters</Text>
+                  <Pressable onPress={clearFilters} style={styles.clearBtn}>
+                    <Feather name="refresh-cw" size={13} color={Colors.primary} />
+                    <Text style={styles.clearBtnText}>Clear filters</Text>
                   </Pressable>
                 )}
               </View>
@@ -146,67 +116,83 @@ export default function RoutesScreen() {
   );
 }
 
-function Header({
-  query, setQuery, filter, setFilter, total, filteredCount,
-}: {
+function Header({ query, setQuery, filter, setFilter, total, filteredCount, hasFilters, clearFilters }: {
   query: string; setQuery: (q: string) => void;
   filter: BusType | "All"; setFilter: (f: BusType | "All") => void;
-  total: number; filteredCount: number;
+  total: number; filteredCount: number; hasFilters: boolean; clearFilters: () => void;
 }) {
   return (
-    <View style={{ paddingTop: 8, paddingBottom: 14 }}>
-      <Animated.View entering={FadeInUp.duration(450)}>
-        <Text style={styles.eyebrow}>BMTC NETWORK</Text>
-        <Text style={styles.title}>All routes</Text>
-        <Text style={styles.subtitle}>
-          {total.toLocaleString()} routes across Bengaluru
-        </Text>
+    <View style={{ paddingTop: 8, paddingBottom: 16 }}>
+      {/* Page header */}
+      <Animated.View entering={FadeInUp.duration(400)} style={styles.pageHeader}>
+        <View>
+          <Text style={styles.eyebrow}>BMTC NETWORK</Text>
+          <Text style={styles.title}>All Routes</Text>
+          <Text style={styles.subtitle}>{total.toLocaleString()} routes across Bengaluru</Text>
+        </View>
+        <View style={styles.headerBadge}>
+          <Text style={styles.headerBadgeText}>{total.toLocaleString()}</Text>
+        </View>
       </Animated.View>
 
-      <Animated.View entering={FadeInUp.delay(80)} style={styles.searchBar}>
+      {/* Search bar */}
+      <Animated.View entering={FadeInUp.delay(60).duration(400)} style={styles.searchBar}>
         <Feather name="search" size={16} color={Colors.dark.textMuted} />
         <TextInput
           value={query}
           onChangeText={setQuery}
-          placeholder="Search by number, name, or stop"
+          placeholder="Route number, name or stop…"
           placeholderTextColor={Colors.dark.textFaint}
           style={styles.searchInput}
           autoCapitalize="none"
           autoCorrect={false}
         />
         {query.length > 0 && (
-          <Pressable
-            onPress={() => { Haptics.selectionAsync(); setQuery(""); }}
-            style={styles.clearBtn}
-          >
-            <Feather name="x" size={14} color={Colors.dark.textMuted} />
+          <Pressable onPress={() => { Haptics.selectionAsync(); setQuery(""); }} style={styles.clearX}>
+            <Feather name="x" size={13} color={Colors.dark.textMuted} />
           </Pressable>
         )}
       </Animated.View>
 
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ gap: 8, paddingVertical: 4, paddingRight: 16, marginTop: 6 }}
-      >
-        {FILTERS.map((f) => {
-          const active = filter === f.key;
-          return (
-            <Pressable
-              key={f.key}
-              onPress={() => { Haptics.selectionAsync(); setFilter(f.key); }}
-              style={[styles.chip, active && styles.chipActive]}
-            >
-              <Text style={{ fontSize: 13 }}>{f.emoji}</Text>
-              <Text style={[styles.chipText, active && styles.chipTextActive]}>{f.label}</Text>
-            </Pressable>
-          );
-        })}
-      </ScrollView>
+      {/* Filter chips */}
+      <Animated.View entering={FadeInUp.delay(100).duration(400)}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingVertical: 6 }}>
+          {FILTERS.map((f) => {
+            const active = filter === f.key;
+            return (
+              <Pressable
+                key={f.key}
+                onPress={() => { Haptics.selectionAsync(); setFilter(f.key); }}
+                style={[styles.chip, active && styles.chipActive]}
+              >
+                {active ? (
+                  <LinearGradient colors={["#2563eb", "#1d4ed8"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.chipGradient}>
+                    <Feather name={f.icon as any} size={12} color="#fff" />
+                    <Text style={styles.chipTextActive}>{f.label}</Text>
+                  </LinearGradient>
+                ) : (
+                  <View style={styles.chipInner}>
+                    <Feather name={f.icon as any} size={12} color={Colors.dark.textMuted} />
+                    <Text style={styles.chipText}>{f.label}</Text>
+                  </View>
+                )}
+              </Pressable>
+            );
+          })}
+        </ScrollView>
+      </Animated.View>
 
-      <Text style={styles.resultCount}>
-        Showing {filteredCount.toLocaleString()} of {total.toLocaleString()}
-      </Text>
+      {/* Result count */}
+      <View style={styles.countRow}>
+        <Text style={styles.countText}>
+          {filteredCount.toLocaleString()} {hasFilters ? "matching" : "routes"}{filteredCount < total && ` of ${total.toLocaleString()}`}
+        </Text>
+        {hasFilters && (
+          <Pressable onPress={clearFilters} style={styles.clearLink}>
+            <Text style={styles.clearLinkText}>Clear</Text>
+          </Pressable>
+        )}
+      </View>
     </View>
   );
 }
@@ -216,119 +202,88 @@ function RouteCard({ route }: { route: Route }) {
   const gradient = getBusTypeGradient(route.busType);
 
   return (
-    <Card
-      onPress={() => router.push(`/route/${route.id}` as any)}
-      style={{ marginBottom: 10 }}
+    <Pressable
+      onPress={() => { Haptics.selectionAsync(); router.push(`/route/${route.id}` as any); }}
+      style={({ pressed }) => [styles.card, pressed && { opacity: 0.82 }]}
     >
-      <View style={styles.routeRow}>
-        <LinearGradient
-          colors={gradient}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.routeBadge}
-        >
-          <Text style={styles.routeBadgeText} numberOfLines={1}>{route.number}</Text>
-        </LinearGradient>
+      {/* Route number badge */}
+      <LinearGradient colors={gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.badge}>
+        <Text style={styles.badgeText} numberOfLines={2} adjustsFontSizeToFit minimumFontScale={0.55}>{route.number}</Text>
+      </LinearGradient>
 
-        <View style={{ flex: 1, gap: 4 }}>
-          <Text style={styles.routeName} numberOfLines={1}>{route.name}</Text>
-          <Text style={styles.routePath} numberOfLines={1}>
-            {route.from} → {route.to}
-          </Text>
-          <View style={{ flexDirection: "row", gap: 5, flexWrap: "wrap", marginTop: 4 }}>
-            <Badge variant="primary" emoji={config.icon} label={config.label} size="sm" />
-            <Badge
-              variant="neutral"
-              icon="map-pin"
-              label={`${route.totalStops} stops`}
-              size="sm"
-            />
-            {route.distance ? (
-              <Badge
-                variant="neutral"
-                icon="navigation-2"
-                label={`${route.distance} km`}
-                size="sm"
-              />
-            ) : null}
-          </View>
+      {/* Info */}
+      <View style={{ flex: 1, gap: 4 }}>
+        <Text style={styles.routeName} numberOfLines={1}>{route.name}</Text>
+        <View style={styles.pathRow}>
+          <Feather name="circle" size={6} color={Colors.primary} />
+          <Text style={styles.pathStop} numberOfLines={1}>{route.from}</Text>
         </View>
-
-        <Feather name="chevron-right" size={18} color={Colors.dark.textMuted} />
+        <View style={styles.pathRow}>
+          <Feather name="map-pin" size={9} color="#a78bfa" />
+          <Text style={styles.pathStop} numberOfLines={1}>{route.to}</Text>
+        </View>
+        <View style={styles.metaRow}>
+          <View style={styles.metaChip}>
+            <Text style={styles.metaText}>{config.icon} {config.label}</Text>
+          </View>
+          <View style={styles.metaChip}>
+            <Feather name="map-pin" size={10} color={Colors.dark.textMuted} />
+            <Text style={styles.metaText}>{route.totalStops} stops</Text>
+          </View>
+          {route.distance ? (
+            <View style={styles.metaChip}>
+              <Feather name="navigation-2" size={10} color={Colors.dark.textMuted} />
+              <Text style={styles.metaText}>{route.distance} km</Text>
+            </View>
+          ) : null}
+        </View>
       </View>
-    </Card>
+
+      <Feather name="chevron-right" size={16} color={Colors.dark.textMuted} style={{ marginLeft: 4 }} />
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: Colors.dark.background },
+  root: { flex: 1, backgroundColor: "#0F172A" },
 
-  eyebrow: { ...Type.micro, color: Colors.accent, letterSpacing: 1.5 },
-  title: { ...Type.display, color: Colors.dark.text, marginTop: 2 },
-  subtitle: { ...Type.caption, color: Colors.dark.textMuted, marginTop: 4 },
+  pageHeader: { flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 16 },
+  eyebrow: { fontSize: 10, fontFamily: "Inter_700Bold", color: Colors.primary, letterSpacing: 2, marginBottom: 4 },
+  title: { fontSize: 26, fontFamily: "Inter_700Bold", color: Colors.dark.text, lineHeight: 30 },
+  subtitle: { fontSize: 13, fontFamily: "Inter_400Regular", color: Colors.dark.textMuted, marginTop: 3 },
+  headerBadge: { backgroundColor: "rgba(37,99,235,0.15)", borderWidth: 1, borderColor: "rgba(37,99,235,0.3)", borderRadius: 12, paddingHorizontal: 12, paddingVertical: 6 },
+  headerBadgeText: { fontSize: 13, fontFamily: "Inter_700Bold", color: Colors.primary },
 
-  searchBar: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    backgroundColor: Colors.dark.surface,
-    borderRadius: Radius.lg,
-    borderWidth: 1,
-    borderColor: Colors.dark.cardBorder,
-    marginTop: 18,
-  },
-  searchInput: {
-    flex: 1,
-    color: Colors.dark.text,
-    fontSize: 14,
-    fontFamily: "Inter_500Medium",
-    padding: 0,
-  },
-  clearBtn: {
-    width: 22, height: 22, borderRadius: 11,
-    backgroundColor: Colors.dark.cardBorderStrong,
-    alignItems: "center", justifyContent: "center",
-  },
+  searchBar: { flexDirection: "row", alignItems: "center", gap: 10, paddingHorizontal: 14, paddingVertical: 13, backgroundColor: Colors.dark.surface, borderRadius: 16, borderWidth: 1, borderColor: Colors.dark.cardBorder },
+  searchInput: { flex: 1, color: Colors.dark.text, fontSize: 14, fontFamily: "Inter_500Medium", padding: 0 },
+  clearX: { width: 22, height: 22, borderRadius: 11, backgroundColor: Colors.dark.cardBorderStrong, alignItems: "center", justifyContent: "center" },
 
-  chip: {
-    flexDirection: "row", alignItems: "center", gap: 6,
-    paddingHorizontal: 14, paddingVertical: 9,
-    backgroundColor: Colors.dark.surface,
-    borderRadius: Radius.pill,
-    borderWidth: 1, borderColor: Colors.dark.cardBorder,
-  },
-  chipActive: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
-  },
-  chipText: { ...Type.caption, color: Colors.dark.textSecondary },
-  chipTextActive: { color: "#fff", fontFamily: "Inter_700Bold" },
+  chip: { borderRadius: Radius.pill, overflow: "hidden", borderWidth: 1, borderColor: Colors.dark.cardBorder },
+  chipActive: { borderColor: "transparent" },
+  chipGradient: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 14, paddingVertical: 9 },
+  chipInner: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 14, paddingVertical: 9, backgroundColor: Colors.dark.surface },
+  chipText: { fontSize: 13, fontFamily: "Inter_500Medium", color: Colors.dark.textSecondary },
+  chipTextActive: { fontSize: 13, fontFamily: "Inter_700Bold", color: "#fff" },
 
-  resultCount: { ...Type.caption, color: Colors.dark.textMuted, marginTop: 12 },
+  countRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: 10 },
+  countText: { fontSize: 12, fontFamily: "Inter_500Medium", color: Colors.dark.textMuted },
+  clearLink: { paddingHorizontal: 10, paddingVertical: 4 },
+  clearLinkText: { fontSize: 12, fontFamily: "Inter_600SemiBold", color: Colors.primary },
 
-  routeRow: { flexDirection: "row", alignItems: "center", gap: 12, padding: 14 },
-  routeBadge: {
-    minWidth: 60, height: 50,
-    paddingHorizontal: 8,
-    borderRadius: 12,
-    alignItems: "center", justifyContent: "center",
-  },
-  routeBadgeText: { ...Type.heading, color: "#fff" },
-  routeName: { ...Type.subtitle, color: Colors.dark.text },
-  routePath: { ...Type.caption, color: Colors.dark.textMuted },
+  card: { flexDirection: "row", alignItems: "center", gap: 14, backgroundColor: Colors.dark.surface, borderRadius: 18, borderWidth: 1, borderColor: Colors.dark.cardBorder, padding: 14, marginBottom: 10 },
+  badge: { width: 62, height: 62, borderRadius: 14, alignItems: "center", justifyContent: "center", paddingHorizontal: 6, flexShrink: 0 },
+  badgeText: { fontSize: 13, fontFamily: "Inter_700Bold", color: "#fff", textAlign: "center", lineHeight: 17 },
+  routeName: { fontSize: 14, fontFamily: "Inter_600SemiBold", color: Colors.dark.text },
+  pathRow: { flexDirection: "row", alignItems: "center", gap: 6 },
+  pathStop: { fontSize: 12, fontFamily: "Inter_400Regular", color: Colors.dark.textMuted, flex: 1 },
+  metaRow: { flexDirection: "row", flexWrap: "wrap", gap: 5, marginTop: 4 },
+  metaChip: { flexDirection: "row", alignItems: "center", gap: 4, backgroundColor: Colors.dark.background, borderRadius: 7, paddingHorizontal: 8, paddingVertical: 4 },
+  metaText: { fontSize: 11, fontFamily: "Inter_500Medium", color: Colors.dark.textMuted },
 
-  empty: { alignItems: "center", paddingVertical: 60, gap: 8, paddingHorizontal: 20 },
-  emptyText: { ...Type.subtitle, color: Colors.dark.text, marginTop: 12, textAlign: "center" },
-  emptySub: { ...Type.caption, color: Colors.dark.textMuted, textAlign: "center" },
-  emptyCta: {
-    flexDirection: "row", alignItems: "center", gap: 8,
-    marginTop: 16,
-    paddingHorizontal: 18, paddingVertical: 12,
-    backgroundColor: "rgba(37,99,235,0.15)",
-    borderRadius: Radius.pill,
-    borderWidth: 1, borderColor: "rgba(37,99,235,0.4)",
-  },
-  emptyCtaText: { ...Type.body, color: Colors.primary, fontFamily: "Inter_700Bold" },
+  emptyState: { alignItems: "center", paddingVertical: 60, gap: 8 },
+  emptyIcon: { width: 60, height: 60, borderRadius: 20, backgroundColor: Colors.dark.surface, borderWidth: 1, borderColor: Colors.dark.cardBorder, alignItems: "center", justifyContent: "center", marginBottom: 8 },
+  emptyTitle: { fontSize: 16, fontFamily: "Inter_700Bold", color: Colors.dark.text, textAlign: "center" },
+  emptySub: { fontSize: 13, fontFamily: "Inter_400Regular", color: Colors.dark.textMuted, textAlign: "center", maxWidth: 260 },
+  clearBtn: { flexDirection: "row", alignItems: "center", gap: 8, marginTop: 14, paddingHorizontal: 18, paddingVertical: 11, backgroundColor: "rgba(37,99,235,0.12)", borderRadius: Radius.pill, borderWidth: 1, borderColor: "rgba(37,99,235,0.35)" },
+  clearBtnText: { fontSize: 13, fontFamily: "Inter_600SemiBold", color: Colors.primary },
 });
