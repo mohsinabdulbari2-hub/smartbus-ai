@@ -8,7 +8,31 @@ const router: IRouter = Router();
 
 const MIN_QUERY_LENGTH = 3;
 
-type StopRow = { id: string; name: string; [key: string]: unknown };
+type StopRow = { id: string; name: string; lat: number; lng: number; [key: string]: unknown };
+
+// Lightweight learning: count how often each route appears in search results.
+// Decays slowly — popular corridors get a small ranking boost over time.
+// Persists only for the lifetime of the server process (no DB write, no cost).
+const searchPopularity = new Map<string, number>();
+function bumpSearchPopularity(routeId: string) {
+  searchPopularity.set(routeId, (searchPopularity.get(routeId) ?? 0) + 1);
+}
+function getSearchPopularityScore(routeId: string): number {
+  const raw = searchPopularity.get(routeId) ?? 0;
+  // log-scaled so a route searched 100 times doesn't dominate one searched 5
+  return Math.min(10, Math.log2(raw + 1) * 2);
+}
+
+function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number) {
+  const R = 6371;
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(a));
+}
 type RouteRow = { id: string; number: string; name: string; color: string | null; busType: string | null; lastBusTime: string | null; [key: string]: unknown };
 type FreqRow = { routeId: string; dayType: string; morning: number; afternoon: number; evening: number; night: number; [key: string]: unknown };
 
@@ -21,6 +45,7 @@ interface StopWithTokens {
 interface CachedTransitData {
   allStops: StopRow[];
   stopsTokenized: StopWithTokens[];
+  stopById: Map<string, StopRow>;
   allRoutes: RouteRow[];
   allFreq: FreqRow[];
   routeStopIndex: Map<string, string[]>;
@@ -55,9 +80,11 @@ async function fetchFreshData(): Promise<CachedTransitData> {
     tokens: tokenize(s.name),
     lower: normalize(s.name),
   }));
+  const stopById = new Map(stopRows.map((s) => [s.id, s] as const));
   return {
     allStops: stopRows,
     stopsTokenized,
+    stopById,
     allRoutes: allRoutes as RouteRow[],
     allFreq: allFreq as FreqRow[],
     routeStopIndex,
@@ -96,7 +123,7 @@ router.get("/", async (req, res) => {
       return;
     }
 
-    const { stopsTokenized, allRoutes, allFreq, routeStopIndex } = await getTransitData();
+    const { stopsTokenized, stopById, allRoutes, allFreq, routeStopIndex } = await getTransitData();
 
     const srcTokens = tokenize(source);
     const srcLower = normalize(source);
@@ -174,11 +201,27 @@ router.get("/", async (req, res) => {
             (b) => b.routeId === route.id && b.isOnline !== false
           );
 
-          // More realistic ETA: base on stops + live bus proximity
-          const baseEta = stopsInBetween * 4 + Math.round(Math.random() * 5 + 2);
-          const etaMinutes = routeBuses.length > 0
-            ? Math.max(1, Math.min(baseEta, 35))
-            : Math.round(60 / Math.max(frequency, 1));
+          // Deterministic ETA: actual road distance / average bus speed
+          // Distance = sum of segment haversine distances along the route
+          let routeKm = 0;
+          for (let i = srcIdx; i < dstIdx; i++) {
+            const a = stopById.get(routeStopIds[i]);
+            const b = stopById.get(routeStopIds[i + 1]);
+            if (a && b) routeKm += haversineKm(a.lat, a.lng, b.lat, b.lng);
+          }
+          // Fallback if any stop coords were missing
+          if (routeKm <= 0) routeKm = stopsInBetween * 0.6;
+
+          // Average speed by bus type (km/h, includes stop dwell time)
+          const speedByType: Record<string, number> = {
+            Ordinary: 18, Vajra: 22, Volvo: 24, Airport: 32, "Metro Feeder": 20, MetroFeeder: 20, Night: 25,
+          };
+          const avgSpeed = speedByType[route.busType ?? "Ordinary"] ?? 20;
+
+          // ETA = (distance / speed) × 60. Add wait time when no live bus.
+          const travelMin = (routeKm / avgSpeed) * 60;
+          const waitMin = routeBuses.length > 0 ? 2 : Math.round(60 / Math.max(frequency, 1) / 2);
+          const etaMinutes = Math.max(1, Math.round(travelMin + waitMin));
 
           const level = getCrowdLevel(route.id, srcIdx);
 
@@ -191,11 +234,13 @@ router.get("/", async (req, res) => {
             return diff > 0 && diff < 45 * 60 * 1000;
           })();
 
-          // Scoring: lower is better (faster + less crowded + more frequent)
+          // Scoring: lower is better (faster + less crowded + more frequent + popular)
           const crowdPenalty =
             level === "VeryHigh" ? 25 : level === "High" ? 15 : level === "Medium" ? 5 : 0;
           const freqBonus = Math.round(60 / Math.max(frequency, 1));
-          const score = etaMinutes + crowdPenalty + freqBonus;
+          const popularityBonus = getSearchPopularityScore(route.id); // 0..10 (subtracts from score)
+          const score = etaMinutes + crowdPenalty + freqBonus - popularityBonus;
+          bumpSearchPopularity(route.id);
 
           results.push({
             routeId: route.id,

@@ -319,8 +319,9 @@ router.get("/live", async (req, res) => {
     // old clients that don't pass these get the full list as before).
     const { busType, lat, lng, radius, limit, offset } = req.query as Record<string, string>;
 
-    if (busType && busType !== "All") {
-      buses = buses.filter((b) => b.busType === busType);
+    if (busType && busType.toLowerCase() !== "all") {
+      const want = busType.toLowerCase();
+      buses = buses.filter((b) => b.busType.toLowerCase() === want);
     }
 
     if (lat && lng) {
@@ -328,7 +329,18 @@ router.get("/live", async (req, res) => {
       const ln = parseFloat(lng);
       const radKm = radius ? parseFloat(radius) : 8; // default 8 km
       if (!Number.isNaN(la) && !Number.isNaN(ln)) {
-        buses = buses.filter((b) => haversineKm(la, ln, b.lat, b.lng) <= radKm);
+        // Annotate with distance once
+        const withDist = buses.map((b) => ({ b, d: haversineKm(la, ln, b.lat, b.lng) }));
+        let nearby = withDist.filter((x) => x.d <= radKm);
+        // Fallback: if the requested radius yields nothing, return the 20
+        // closest buses regardless — guarantees the "Nearby" screen never
+        // shows an empty list when buses exist on the network.
+        if (nearby.length === 0 && withDist.length > 0) {
+          nearby = withDist.sort((a, b) => a.d - b.d).slice(0, 20);
+        } else {
+          nearby.sort((a, b) => a.d - b.d);
+        }
+        buses = nearby.map((x) => x.b);
       }
     }
 
