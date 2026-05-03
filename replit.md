@@ -30,8 +30,19 @@ SmartBus AI is a live bus tracking and crowd prediction system inspired by Rapid
 - **Bus Frequency** — weekday vs weekend chart (morning/afternoon/evening/night)
 - **Last Bus Alert** — warns when a bus is the last one for the night
 - **Route Search** — search by source → destination
-- **Route Detail** — stops list + frequency chart
+- **Route Detail** — stops list + frequency chart, **per-stop live status (Departed / At stop / Upcoming) + per-stop ETA** computed from all live buses on the route (bidirection-aware via `bus.direction`); next stop highlighted
 - **Stop Detail** — upcoming buses with ETA and crowd level
+
+## Stop status & ETA logic
+
+Implemented in `artifacts/api-server/src/routes/routes.ts` (GET `/:routeId`):
+- Pre-computes cumulative km between consecutive stops via haversine.
+- For each stop, scans all online live buses on the route:
+  - `bus.stopIndex === i` → **AtStop**
+  - bus is heading toward stop (forward dir + `i > stopIndex`, or reverse dir + `i < stopIndex`) → **Upcoming**, ETA = (km along route) / max(8, bus.speed) × 60
+  - else → contributes to "passed" count
+- Priority: `AtStop` > `Upcoming` (any direction) > `Departed` (only when no bus is approaching from any direction).
+- Server exports `busState` from `buses.ts` for cross-module access. `RouteStop` type in mobile `lib/api.ts` carries optional `liveStatus`, `etaMinutes`, `isNextStop`. Mobile route detail screen renders status as a pill on the existing stop row (no layout change).
 
 ## Mobile App (Expo React Native)
 

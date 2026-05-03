@@ -325,11 +325,22 @@ export default function RouteDetailScreen() {
                 {route.stops.map((stop, idx) => {
                   const isFirst = idx === 0;
                   const isLast = idx === route.stops.length - 1;
-                  const isPast = busPositionIdx != null && idx <= busPositionIdx;
+                  // Prefer server-provided live status; fall back to the
+                  // single-bus heuristic for offline/legacy cases.
+                  const status = stop.liveStatus
+                    ?? (busPositionIdx != null
+                      ? (idx < busPositionIdx ? "Departed" : idx === busPositionIdx ? "AtStop" : "Upcoming")
+                      : undefined);
+                  const isDeparted = status === "Departed";
+                  const isAtStop = status === "AtStop";
+                  const isNext = !!stop.isNextStop;
                   const dotColor = isFirst ? Colors.primary
                     : isLast ? Colors.secondary
-                    : isPast ? Colors.success
+                    : isAtStop ? Colors.success
+                    : isNext ? Colors.warning
+                    : isDeparted ? Colors.success
                     : Colors.dark.cardBorderStrong;
+                  const dotFilled = isDeparted || isAtStop || isFirst || isLast;
                   return (
                     <Pressable
                       key={stop.id}
@@ -340,20 +351,26 @@ export default function RouteDetailScreen() {
                       }}
                     >
                       <View style={styles.stopTimeline}>
-                        <View style={[
-                          styles.stopDot,
-                          { borderColor: dotColor, backgroundColor: isPast || isFirst || isLast ? dotColor : "transparent" },
-                          (isFirst || isLast) && { width: 14, height: 14, borderRadius: 7 },
-                        ]} />
+                        {isAtStop ? (
+                          <PulseDot color={Colors.success} size={12} />
+                        ) : (
+                          <View style={[
+                            styles.stopDot,
+                            { borderColor: dotColor, backgroundColor: dotFilled ? dotColor : "transparent" },
+                            (isFirst || isLast) && { width: 14, height: 14, borderRadius: 7 },
+                          ]} />
+                        )}
                         {!isLast && <View style={[
                           styles.stopLine,
-                          { backgroundColor: isPast ? Colors.success : Colors.dark.cardBorderStrong },
+                          { backgroundColor: isDeparted ? Colors.success : Colors.dark.cardBorderStrong },
                         ]} />}
                       </View>
                       <View style={styles.stopInfo}>
                         <Text style={[
                           styles.stopName,
                           (isFirst || isLast) && { color: Colors.dark.text, fontFamily: "Inter_700Bold" },
+                          isNext && { color: Colors.dark.text, fontFamily: "Inter_700Bold" },
+                          isDeparted && { color: Colors.dark.textMuted, opacity: 0.65 },
                         ]} numberOfLines={1}>
                           {stop.name}
                         </Text>
@@ -363,7 +380,25 @@ export default function RouteDetailScreen() {
                           </Text>
                         )}
                       </View>
-                      <Feather name="chevron-right" size={16} color={Colors.dark.textMuted} />
+                      {status === "AtStop" ? (
+                        <View style={[styles.stopStatusPill, { backgroundColor: Colors.successSoft }]}>
+                          <Text style={[styles.stopStatusText, { color: Colors.success }]}>At stop</Text>
+                        </View>
+                      ) : status === "Departed" ? (
+                        <View style={[styles.stopStatusPill, { backgroundColor: "rgba(148,163,184,0.12)" }]}>
+                          <Feather name="check" size={10} color={Colors.dark.textMuted} />
+                          <Text style={[styles.stopStatusText, { color: Colors.dark.textMuted }]}>Departed</Text>
+                        </View>
+                      ) : status === "Upcoming" && stop.etaMinutes != null ? (
+                        <View style={[styles.stopStatusPill, { backgroundColor: isNext ? Colors.warningSoft : "rgba(59,130,246,0.10)" }]}>
+                          <Feather name="clock" size={10} color={isNext ? Colors.warning : Colors.primary} />
+                          <Text style={[styles.stopStatusText, { color: isNext ? Colors.warning : Colors.primary }]}>
+                            {stop.etaMinutes}m
+                          </Text>
+                        </View>
+                      ) : (
+                        <Feather name="chevron-right" size={16} color={Colors.dark.textMuted} />
+                      )}
                     </Pressable>
                   );
                 })}
@@ -458,4 +493,11 @@ const styles = StyleSheet.create({
   stopInfo: { flex: 1, paddingVertical: 2, paddingBottom: 8 },
   stopName: { ...Type.body, color: Colors.dark.textMuted },
   stopTag: { ...Type.micro, letterSpacing: 1, marginTop: 2 },
+  stopStatusPill: {
+    flexDirection: "row", alignItems: "center", gap: 4,
+    paddingHorizontal: 8, paddingVertical: 4,
+    borderRadius: Radius.pill,
+    marginTop: 2,
+  },
+  stopStatusText: { ...Type.micro, fontFamily: "Inter_700Bold", letterSpacing: 0.4 },
 });

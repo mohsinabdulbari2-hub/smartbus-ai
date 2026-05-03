@@ -54,8 +54,20 @@ export type Route = {
   distance?: number;
 };
 
+export type StopLiveStatus = "Departed" | "AtStop" | "Upcoming";
+
+export type RouteStop = {
+  id: string;
+  name: string;
+  lat: number;
+  lng: number;
+  liveStatus?: StopLiveStatus;
+  etaMinutes?: number | null;
+  isNextStop?: boolean;
+};
+
 export type RouteDetail = Route & {
-  stops: { id: string; name: string; lat: number; lng: number }[];
+  stops: RouteStop[];
 };
 
 export type FrequencyData = {

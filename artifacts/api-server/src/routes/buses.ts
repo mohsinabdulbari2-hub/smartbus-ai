@@ -36,7 +36,7 @@ interface BusPosition {
   currentStop: string;
 }
 
-const busState = new Map<string, BusPosition>();
+export const busState = new Map<string, BusPosition>();
 let initialized = false;
 
 // Popularity weight per route: longer routes = busier corridors.
@@ -376,5 +376,5 @@ router.get("/:busId", async (req, res) => {
   }
 });
 
-export { initializeBuses, busState, getCrowdLevel, isLastBus as checkIsLastBus };
+export { initializeBuses, getCrowdLevel, isLastBus as checkIsLastBus };
 export default router;
