@@ -330,6 +330,16 @@ async function updateBusPositions() {
     // All buses stay online — no offline flipping.
     bus.isOnline = true;
 
+    // Dwell pause: if a bus has dwelled at a stop, freeze position until the
+    // dwell window expires. Hard cap = 90s so a stuck dwellUntil can never
+    // strand a bus permanently.
+    const now = Date.now();
+    const dwellUntil = (bus as { dwellUntil?: number }).dwellUntil ?? 0;
+    if (dwellUntil > now) {
+      bus.lastUpdated = new Date().toISOString();
+      continue;
+    }
+
     bus.progress += 0.003 + Math.random() * 0.002;
 
     if (bus.progress >= 1) {
@@ -338,6 +348,10 @@ async function updateBusPositions() {
 
       if (bus.stopIndex === stops.length - 1) bus.direction = -1;
       else if (bus.stopIndex === 0) bus.direction = 1;
+
+      // Bus just arrived at a stop → dwell 30–60s (capped 90s by fallback rule)
+      const dwellMs = Math.min(90_000, 30_000 + Math.floor(Math.random() * 30_000));
+      (bus as { dwellUntil?: number }).dwellUntil = now + dwellMs;
     }
 
     const currentIdx = bus.stopIndex;
@@ -385,7 +399,7 @@ setInterval(async () => {
     await updateBusPositions();
   } catch {
   }
-}, 2000);
+}, 5000);
 
 // Simple haversine distance in km
 function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number) {

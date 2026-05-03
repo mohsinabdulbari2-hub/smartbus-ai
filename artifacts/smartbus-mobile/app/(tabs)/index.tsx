@@ -125,6 +125,7 @@ export default function LiveScreen() {
               filter={filter}
               setFilter={setFilter}
               lastUpdate={lastUpdate}
+              showingCount={filtered.length}
             />
           }
           renderItem={({ item, index }) => (
@@ -169,11 +170,12 @@ export default function LiveScreen() {
 }
 
 function Header({
-  total, crowded, empty, filter, setFilter, lastUpdate,
+  total, crowded, empty, filter, setFilter, lastUpdate, showingCount,
 }: {
   total: number; crowded: number; empty: number;
   filter: BusType | "All"; setFilter: (f: BusType | "All") => void;
   lastUpdate: number;
+  showingCount: number;
 }) {
   return (
     <View style={{ paddingTop: 8, paddingBottom: 16 }}>
@@ -260,7 +262,14 @@ function Header({
         })}
       </ScrollView>
 
-      <Text style={styles.sectionTitle}>Live buses</Text>
+      <View style={styles.sectionTitleRow}>
+        <Text style={styles.sectionTitle}>Live buses</Text>
+        <Text style={styles.sectionCaption}>
+          {showingCount < 20 && total > showingCount
+            ? `No buses nearby • Showing nearest ${showingCount}`
+            : `Showing ${showingCount.toLocaleString()} of ${total.toLocaleString()} buses`}
+        </Text>
+      </View>
     </View>
   );
 }
@@ -423,7 +432,9 @@ const styles = StyleSheet.create({
   chipText: { ...Type.body, color: Colors.dark.textSecondary },
   chipTextActive: { color: "#fff", fontFamily: "Inter_700Bold" },
 
-  sectionTitle: { ...Type.heading, color: Colors.dark.text, marginTop: 20, marginBottom: 10 },
+  sectionTitle: { ...Type.heading, color: Colors.dark.text },
+  sectionTitleRow: { flexDirection: "row", alignItems: "baseline", justifyContent: "space-between", marginTop: 20, marginBottom: 10, gap: 8 },
+  sectionCaption: { ...Type.caption, color: Colors.dark.textMuted, flexShrink: 1, textAlign: "right" },
 
   busAccent: { height: 4, width: "100%" },
   busHeaderRow: { flexDirection: "row", alignItems: "center", gap: 14 },
