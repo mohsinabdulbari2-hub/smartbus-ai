@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "Bus Overcrowding Prediction System",
+    "name": "BusCrowd",
     "slug": "smartbus-mobile",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "smartbus-mobile",
@@ -12,7 +12,7 @@
     "splash": {
       "image": "./assets/images/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#0A0E1A"
     },
     "ios": {
       "supportsTablet": false,
@@ -24,13 +24,13 @@
     },
     "android": {
       "package": "com.busoverpredict.app",
-      "versionCode": 2,
+      "versionCode": 3,
       "permissions": [
         "android.permission.RECORD_AUDIO"
       ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#0A0E1A"
       }
     },
     "web": {
