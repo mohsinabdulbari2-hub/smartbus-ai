@@ -1,5 +1,6 @@
 {pkgs}: {
   deps = [
+    pkgs.eas-cli
     pkgs.chromium
     pkgs.xorg.libxcb
     pkgs.xorg.libXrandr
