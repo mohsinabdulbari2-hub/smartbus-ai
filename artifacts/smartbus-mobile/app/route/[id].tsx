@@ -16,6 +16,7 @@ import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { CrowdBadge, LastBusBadge, BUS_TYPE_CONFIG, getBusTypeGradient } from "@/components/CrowdBadge";
+import { fuseFrequency, getTimeSlot } from "@/lib/frequency";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { AnimatedProgress } from "@/components/ui/AnimatedProgress";
@@ -112,6 +113,18 @@ export default function RouteDetailScreen() {
   const maxFreq = freq ? Math.max(...DAY_LABELS.map((k) => (freq as any)[k] || 0), 1) : 1;
   const firstBus = routeBuses[0];
   const busPositionIdx = firstBus ? firstBus.stopsCovered : undefined;
+
+  // Live frequency: fuse baseline (from freq API) with observed ETA gaps
+  const liveFrequency = (() => {
+    const hour = new Date().getHours();
+    const slot = getTimeSlot(hour);
+    const base = freq ? ((freq as any)[slot] ?? 6) : 6;
+    const etaSec = routeBuses
+      .filter((b) => b.speed >= 5 && b.distanceToNextStop != null && b.distanceToNextStop > 0)
+      .map((b) => b.distanceToNextStop! / (b.speed * (1000 / 3600)))
+      .filter((s) => s > 0 && s < 3600);
+    return fuseFrequency(base, etaSec);
+  })();
 
   return (
     <View style={styles.root}>
@@ -293,7 +306,7 @@ export default function RouteDetailScreen() {
           <Animated.View entering={FadeInDown.delay(200)}>
             <Card>
               <View style={{ padding: 16 }}>
-                <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+                <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: liveFrequency.isLive ? 10 : 16 }}>
                   <Text style={styles.cardTitle}>Bus frequency</Text>
                   <View style={styles.dayToggle}>
                     {(["weekday", "weekend"] as const).map((k) => {
@@ -312,6 +325,20 @@ export default function RouteDetailScreen() {
                     })}
                   </View>
                 </View>
+
+                {/* Live frequency fusion banner */}
+                {liveFrequency.isLive && (
+                  <View style={styles.liveFreqBanner}>
+                    <PulseDot color="#22c55e" size={7} />
+                    <Text style={styles.liveFreqText}>
+                      Live observed: <Text style={{ fontFamily: "Inter_700Bold", color: Colors.dark.text }}>~{liveFrequency.freq}/hr</Text>
+                    </Text>
+                    <View style={styles.liveTag}>
+                      <Text style={styles.liveTagText}>live</Text>
+                    </View>
+                  </View>
+                )}
+
                 {DAY_LABELS.map((k, i) => (
                   <FrequencyBar key={k} label={k} value={(freq as any)[k] || 0} max={maxFreq} idx={i} />
                 ))}
@@ -477,6 +504,37 @@ const styles = StyleSheet.create({
   speedText: { ...Type.caption, color: Colors.warning, fontFamily: "Inter_700Bold" },
   busProgressText: { ...Type.caption, color: Colors.dark.textMuted },
 
+  liveFreqBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: "rgba(34,197,94,0.08)",
+    borderRadius: Radius.md,
+    borderWidth: 1,
+    borderColor: "rgba(34,197,94,0.25)",
+    marginBottom: 14,
+  },
+  liveFreqText: {
+    ...Type.caption,
+    color: Colors.dark.textSecondary,
+    flex: 1,
+  },
+  liveTag: {
+    backgroundColor: "rgba(34,197,94,0.18)",
+    borderRadius: Radius.pill,
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+    borderWidth: 1,
+    borderColor: "rgba(34,197,94,0.4)",
+  },
+  liveTagText: {
+    fontSize: 9,
+    fontFamily: "Inter_700Bold",
+    color: "#22c55e",
+    letterSpacing: 0.5,
+  },
   dayToggle: {
     flexDirection: "row",
     backgroundColor: Colors.dark.surface,

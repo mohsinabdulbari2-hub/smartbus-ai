@@ -3,10 +3,10 @@ import { Badge } from "@/components/ui/Badge";
 import Colors from "@/constants/colors";
 
 const CROWD_MAP: Record<string, { variant: any; emoji: string; label: string }> = {
-  Low:      { variant: "success", emoji: "🟢", label: "Low" },
-  Medium:   { variant: "warning", emoji: "🟡", label: "Medium" },
-  High:     { variant: "danger",  emoji: "🔴", label: "High" },
-  VeryHigh: { variant: "danger",  emoji: "🟥", label: "Packed" },
+  Low:      { variant: "success", emoji: "🟢", label: "Seats available" },
+  Medium:   { variant: "warning", emoji: "🟡", label: "Moderate" },
+  High:     { variant: "danger",  emoji: "🔴", label: "Crowded" },
+  VeryHigh: { variant: "danger",  emoji: "🟥", label: "Very crowded" },
 };
 
 export function CrowdBadge({

@@ -29,6 +29,7 @@ import { CrowdRow } from "@/components/ui/CrowdRow";
 import Colors from "@/constants/colors";
 import { MinTouch, Radius, Shadow, Spacing, Type } from "@/constants/theme";
 import { api, type LiveBus, type BusType, type BusStatus } from "@/lib/api";
+import { fuseFrequency } from "@/lib/frequency";
 
 const FILTERS: { key: BusType | "All"; label: string; emoji: string }[] = [
   { key: "All",         label: "All",      emoji: "🚍" },
@@ -171,9 +172,6 @@ export default function LiveScreen() {
       (b) => b.crowdLevel === "High" || b.crowdLevel === "VeryHigh",
     ).length;
     const sampleEmpty = live.filter((b) => b.crowdLevel === "Low").length;
-    // Project the sample's crowd/empty ratios onto the real fleet size so
-    // the three stat cards stay coherent (you can't have 30 crowded buses
-    // out of "65 on road" when the real fleet is 700).
     const sampleSize = Math.max(1, live.length);
     const ratio = fleetTotal / sampleSize;
     return {
@@ -182,6 +180,26 @@ export default function LiveScreen() {
       empty: Math.round(sampleEmpty * ratio),
     };
   }, [buses, fleetTotal]);
+
+  // Compute per-route live frequency from all buses in the current feed.
+  // Each route's buses have known distance-to-next-stop and speed, so we can
+  // derive ETA-in-seconds and use gap analysis to estimate buses/hr.
+  const routeFreqMap = useMemo(() => {
+    const groups = new Map<string, LiveBus[]>();
+    for (const bus of buses) {
+      if (!groups.has(bus.routeId)) groups.set(bus.routeId, []);
+      groups.get(bus.routeId)!.push(bus);
+    }
+    const map = new Map<string, { freq: number; isLive: boolean }>();
+    for (const [routeId, routeBuses] of groups) {
+      const etaSec = routeBuses
+        .filter((b) => b.speed >= 5 && b.distanceToNextStop != null && b.distanceToNextStop > 0)
+        .map((b) => b.distanceToNextStop! / (b.speed * (1000 / 3600)))
+        .filter((s) => s > 0 && s < 3600);
+      map.set(routeId, fuseFrequency(6, etaSec));
+    }
+    return map;
+  }, [buses]);
 
   return (
     <View style={styles.root}>
@@ -228,6 +246,7 @@ export default function LiveScreen() {
                 userLocation={userLocation}
                 isTop={item.id === bestBusId}
                 dataUpdatedAt={dataUpdatedAt}
+                liveFreq={routeFreqMap.get(item.routeId)}
               />
             </Animated.View>
           )}
@@ -442,11 +461,13 @@ function BusCard({
   userLocation,
   isTop,
   dataUpdatedAt,
+  liveFreq,
 }: {
   bus: LiveBus;
   userLocation: { lat: number; lng: number } | null;
   isTop: boolean;
   dataUpdatedAt: number;
+  liveFreq?: { freq: number; isLive: boolean };
 }) {
   const config = BUS_TYPE_CONFIG[bus.busType] || BUS_TYPE_CONFIG.Ordinary;
   const gradient = getBusTypeGradient(bus.busType);
@@ -650,6 +671,14 @@ function BusCard({
               </Text>
             </View>
           )}
+          {liveFreq && (
+            <View style={styles.freqPill}>
+              <Text style={styles.freqText}>~{liveFreq.freq}/hr</Text>
+              {liveFreq.isLive && (
+                <Text style={styles.freqLiveTag}>live</Text>
+              )}
+            </View>
+          )}
           {isOffline ? (
             <Badge variant="neutral" emoji="⚪" label="Offline" size="md" />
           ) : (
@@ -766,6 +795,32 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_500Medium",
     marginTop: 2,
     marginBottom: 4,
+  },
+  freqPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 5,
+    backgroundColor: "rgba(255,255,255,0.07)",
+    borderRadius: Radius.pill,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.12)",
+  },
+  freqText: {
+    fontSize: 11,
+    fontFamily: "Inter_700Bold",
+    color: Colors.dark.textSecondary,
+  },
+  freqLiveTag: {
+    fontSize: 9,
+    fontFamily: "Inter_700Bold",
+    color: "#22c55e",
+    backgroundColor: "rgba(34,197,94,0.15)",
+    borderRadius: 4,
+    paddingHorizontal: 4,
+    paddingVertical: 1,
+    overflow: "hidden",
   },
   smallListHint: {
     fontSize: 11,
