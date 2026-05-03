@@ -157,13 +157,9 @@ function getCrowdLevel(routeId: string, stopIndex: number, direction: number = 1
     densityBoost = (1 - Math.abs(0.5 - t) * 2) * 0.06;
   }
 
-  // 5) Deterministic per-bus jitter ±0.12
-  let h = 0;
-  const seed = `${routeId}-${stopIndex}`;
-  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) | 0;
-  const jitter = ((Math.abs(h) % 100) / 100) * 0.24 - 0.12;
-
-  let load = (timeFactor + popularity + densityBoost + jitter) * routeDensity;
+  // 5) Randomness — widened band ±0.20 for genuine spread across all tiers
+  let load = (timeFactor + popularity + densityBoost) * routeDensity;
+  load += (Math.random() - 0.5) * 0.4;
 
   // 6) BMTC route-tier multiplier (named routes are busier)
   load *= getRouteFactor(routeNumber);
@@ -178,11 +174,21 @@ function getCrowdLevel(routeId: string, stopIndex: number, direction: number = 1
     if (isMorningPeak || isEveningPeak) load *= 1.1;
   }
 
-  // 9) Night safety cap — buses never packed late at night
+  // 9) Global downward bias — counters accumulated upward pressure from boosts
+  load *= 0.9;
+
+  // 10) Guaranteed low segment: ~20% of buses are near-empty (just left terminus,
+  //     contra-peak direction, low-demand spur, etc.)
+  if (Math.random() < 0.20) load *= 0.5;
+
+  // 11) Rare very-crowded spike: ~8% chance during any hour
+  if (Math.random() < 0.08) load *= 1.2;
+
+  // 12) Night safety cap — buses never crowded late at night
   if (isNight) load = Math.min(load, 0.5);
 
-  // 10) Clamp
-  load = Math.max(0, Math.min(load, 0.92));
+  // 13) Clamp — raised to 0.95 so very_high tier has breathing room
+  load = Math.max(0, Math.min(load, 0.95));
 
   if (load >= 0.75) return "VeryHigh";
   if (load >= 0.52) return "High";

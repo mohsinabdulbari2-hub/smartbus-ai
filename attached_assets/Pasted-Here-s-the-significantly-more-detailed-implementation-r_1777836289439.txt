@@ -1,0 +1,123 @@
+Here's the significantly more detailed, implementation-ready version of this prompt:
+🚌 BMTC Live Bus Tracking — Crowd Distribution Realism Fix
+Context: You are a senior frontend engineer making a surgical, targeted fix to the crowd load calculation pipeline in an existing BMTC Bangalore live bus tracking app. The app already has a working crowd classification system, frequency engine, route tuning, weather adjustments, and a live UI. Your only job is to fix the statistical distribution of crowd levels so they match real Bangalore ridership patterns. Touch nothing else.
+🧠 Problem Statement
+What's Wrong
+The current crowd load pipeline produces values that cluster in a narrow range, causing one of two failure modes:
+"All Moderate" clustering — Nearly every bus shows "Moderate" because load values hover around 0.35–0.65 with no spread into low or high tiers
+"All Crowded" clustering — Load values run too hot, pushing almost every bus into high or very_high, making the UI feel broken and untrustworthy
+Both failure modes destroy rider trust. If every bus is always "Crowded," the label becomes meaningless noise.
+What Good Looks Like
+Real Bangalore bus ridership is heterogeneous. At any given moment on any given route, you'd expect a natural spread: some near-empty buses (just departed a terminus, off-peak route, contra-peak direction), some moderately full buses, some crowded ones, and occasionally a standing-room-only bus during peak crush. The fix must reproduce this spread statistically — not perfectly per bus, but correctly across the fleet.
+What This Fix Is NOT
+Not a logic rewrite
+Not a new data model
+Not a new API integration
+Not a UI redesign
+This is pure distribution tuning — adjusting the stochastic parameters of the existing load calculation to produce a realistic spread. Think of it as calibrating a probability distribution, not building a new system.
+🔬 Understanding the Existing Pipeline
+Before modifying anything, understand the shape of the existing pipeline. The load value flows through these stages in order:
+Code
+The fix targets Stage 4 (randomness injection) and adds two new micro-stages between Stage 4 and Stage 5. Stage 6 (classification thresholds) is preserved exactly. Everything before Stage 4 is untouched.
+🔧 THE COMPLETE FIX — 8 Steps in Sequence
+Apply all 8 steps in the exact order shown. Each step is additive — it modifies load in place.
+Step 1 — Widen the Randomness Band
+Current code (remove this):
+Js
+Replace with:
+Js
+Why this change:
+The current band of ±0.10 is too narrow. With a base load of ~0.45 (midday), all values end up between 0.35–0.55, which maps entirely to "medium". Doubling the band to ±0.20 creates genuine spread — some buses will fall below 0.35 (→ "low") and some above 0.65 (→ "high"). This single change is the most impactful fix in the entire list. Do it first, before any other adjustment.
+Step 2 — Apply Downward Bias
+Add after Step 1:
+Js
+Why this is needed:
+After widening the band in Step 1, the distribution is more spread but still skewed high because the base time factors (0.55 for peak, 0.25 for midday) plus directional bias and route adjustments can push load above 0.5 before randomness even applies. The 0.9 multiplier pulls the entire distribution downward by 10%, counteracting the accumulated upward pressure from prior stages. Without this, peak hours would show too many "high" buses and not enough "medium".
+Important: Apply this multiplier unconditionally — not just during peak or off-peak. It's a global calibration constant.
+Step 3 — Guaranteed Low Segment
+Add after Step 2:
+Js
+Why this is critical:
+Even with a wider band and downward bias, there's no guarantee that "low" buses will appear consistently. Real fleets always have some low-occupancy buses — buses that just left a terminus, buses on low-demand spurs, contra-peak direction buses. This block enforces that guarantee. A 20% trigger probability means roughly 1-in-5 buses will have their load halved, reliably pushing them into "low" territory (< 0.35). Without this, "Seats available" could hit 0% across the entire fleet, which is statistically implausible and looks like a UI bug.
+Target outcome: "low" appears on 15–25% of buses at any time of day.
+Step 4 — Rare Very Crowded Spikes
+Add after Step 3:
+Js
+Why this matters:
+"very_high" should be rare but real. In Bangalore, certain peak-hour buses — particularly on Outer Ring Road, MG Road, or Whitefield routes during 8–9 AM — are genuinely standing-room-only. An 8% trigger probability ensures these extreme cases appear occasionally but don't dominate. The 1.2 multiplier is conservative — just enough to push a load of ~0.78 over the 0.9 threshold into "very_high".
+Target outcome: "very_high" appears on 5–8% of buses during peak hours, and less during off-peak.
+Note: Steps 3 and 4 can both trigger for the same bus in theory. That edge case is acceptable — the final clamp in Step 5 handles any out-of-range values.
+Step 5 — Final Clamp
+Replace existing clamp (if it uses 0.92 or any other value) with:
+Js
+Why 0.95 instead of 0.92:
+The previous cap of 0.92 blocked buses from reaching "very_high" (threshold: ≥ 0.90) in practice, because the buffer was too thin. 0.95 gives the "very_high" tier actual breathing room while still preventing a load of 1.0 (which would represent a physically impossible fully-blocked bus). The lower bound of 0 is unchanged.
+Step 6 — Night Safety Cap
+Add as a separate block, immediately BEFORE the final clamp:
+Js
+Where hour comes from: new Date().getHours() — already computed earlier in the pipeline for getTimeFactor(). Reuse the same value; do not call new Date() again.
+Why this is mandatory:
+The base time factor for night is 0.12, but directional bias, route weights, and the spike logic in Step 4 can still push load above 0.5 in rare cases. A hard cap at 0.5 ensures night buses never exceed "medium" — which matches reality. Bangalore buses running after 9 PM are never crowded. The cap also makes the app feel more trustworthy to night-shift commuters who might otherwise see an alarming "Crowded" label at midnight.
+Night target distribution:
+"low" (< 0.35): 60–80% of buses
+"medium" (0.35–0.69): 20–30% of buses
+"high" or above: 0% — hard-blocked by this cap
+Step 7 — Preserve Classification Thresholds Exactly
+Do not touch this function. Leave it exactly as-is:
+Js
+Why: The UI rendering, color system, label strings, and icon states all depend on these exact return values. Changing thresholds here would require cascading updates across the UI layer, which is out of scope for this fix.
+Step 8 — Do Not Change Anything Else
+Explicitly confirm these are untouched:
+System
+Status
+getTimeFactor(hour)
+✅ Unchanged
+Directional bias multipliers
+✅ Unchanged
+getFinalFrequency() and all frequency logic
+✅ Unchanged
+Route-based adjustments
+✅ Unchanged
+Weather-based adjustments
+✅ Unchanged
+API polling interval and response handling
+✅ Unchanged
+UI component structure and labels
+✅ Unchanged
+classifyCrowd() thresholds
+✅ Unchanged
+📊 Full Annotated Pipeline (After Fix)
+Js
+✅ Acceptance Criteria — How to Verify This Works
+After deploying, open the app at different simulated hours and verify the fleet-wide distribution matches these targets:
+Time Window
+low
+medium
+high
+very_high
+Night (21:00–05:59)
+60–80%
+20–30%
+0%
+0%
+Midday (11:00–14:59)
+25–40%
+40–55%
+10–20%
+0–3%
+Peak (06:00–09:59 / 16:00–19:59)
+15–25%
+30–40%
+30–45%
+5–10%
+Spot-check rules:
+Reload the page 5–6 times at peak hours. You should see all four tiers represented in the fleet list.
+"Seats available" must appear at least once in every fleet view. If it's ever 0%, the fix failed.
+"Very crowded" must appear during peak but should never dominate (never > 15%).
+At night, "Crowded" and "Very crowded" must be completely absent.
+🚫 What NOT to Do
+Do not add new state variables to track historical distributions
+Do not add a seeded random or deterministic distribution (buses should feel alive, not patterned)
+Do not move classification thresholds to fix distribution — thresholds are correct, the input distribution was wrong
+Do not add per-route bias tables — this fix must be route-agnostic
+Do not log or instrument the distribution in production code
