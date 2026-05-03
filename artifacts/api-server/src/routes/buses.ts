@@ -80,63 +80,108 @@ function ensureInitialized(): Promise<void> {
 // Populated during initializeBuses(); falls back to 0 if missing.
 const routePopularity = new Map<string, number>();
 
-function getCrowdLevel(routeId: string, stopIndex: number, direction: number = 1): CrowdLevel {
+// ── BMTC Route tiers ────────────────────────────────────────────────────────
+// High-traffic BMTC routes (Silk Board corridor, Majestic trunk services, etc.)
+const ROUTE_TIER_HIGH = new Set(["356M","356","KBS-1","KBS-5H","500D","500C","G-2","G-6","401G","500K"]);
+const ROUTE_TIER_MED  = new Set(["201","215","600","401","402","250","210","221"]);
+function getRouteFactor(routeNumber: string): number {
+  if (ROUTE_TIER_HIGH.has(routeNumber)) return 1.25;
+  if (ROUTE_TIER_MED.has(routeNumber))  return 1.10;
+  return 0.90;
+}
+
+// ── Bangalore hotspot areas ──────────────────────────────────────────────────
+const AREA_FACTORS: [string, number][] = [
+  ["silk board",     1.25],
+  ["majestic",       1.30],
+  ["kr market",      1.20],
+  ["kempegowda",     1.20],
+  ["shivajinagar",   1.20],
+  ["electronic city",1.15],
+  ["marathahalli",   1.15],
+  ["whitefield",     1.10],
+  ["koramangala",    1.10],
+];
+function getHotspotFactor(stopName: string): number {
+  const lower = stopName.toLowerCase();
+  for (const [kw, f] of AREA_FACTORS) if (lower.includes(kw)) return f;
+  return 1.0;
+}
+
+// ── Deterministic rain simulation ────────────────────────────────────────────
+// No external API — uses day-of-year + 3-hour block as a stable seed.
+// Result: ~26% of 3-hour slots are "rainy" (realistic for Bangalore).
+let _rainCache = { ts: 0, value: false };
+function isRaining(): boolean {
+  const now = Date.now();
+  if (now - _rainCache.ts < 10_000) return _rainCache.value;
+  const d = new Date();
+  const doy = Math.floor((d.getTime() - new Date(d.getFullYear(), 0, 0).getTime()) / 86_400_000);
+  const block = Math.floor(d.getHours() / 3);
+  _rainCache = { ts: now, value: ((doy * 17 + block * 7) % 31) < 8 };
+  return _rainCache.value;
+}
+
+function getCrowdLevel(routeId: string, stopIndex: number, direction: number = 1, routeNumber: string = "", stopName: string = ""): CrowdLevel {
   const now = new Date();
   const hour = now.getHours();
   const dayOfWeek = now.getDay();
   const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-  const isMorningPeak = hour >= 8 && hour <= 10;
-  const isEveningPeak = hour >= 17 && hour <= 20;
+  // BMTC time slots: 6-10 morning peak, 10-16 midday, 16-21 evening peak, rest night
+  const isMorningPeak = hour >= 6 && hour < 10;
+  const isEveningPeak = hour >= 16 && hour < 21;
+  const isNight       = hour < 6 || hour >= 21;
 
-  // 1) Time-of-day demand (0..1) — calibrated so peak hours realistically
-  //    produce ~40-55% High/VeryHigh, off-peak ~5-15%, night <5%.
+  // 1) Base time factor (BMTC-tuned)
   let timeFactor: number;
-  if (isMorningPeak) timeFactor = 0.52;                  // morning peak
-  else if (isEveningPeak) timeFactor = 0.55;             // evening peak
-  else if (hour >= 12 && hour <= 14) timeFactor = 0.25;  // lunch (midday)
-  else if (hour >= 6 && hour < 8) timeFactor = 0.28;     // early morning
-  else if (hour >= 21 || hour < 6) timeFactor = 0.12;    // night
-  else timeFactor = 0.22;                                  // regular off-peak
+  if (isMorningPeak)                        timeFactor = 0.55;
+  else if (isEveningPeak)                   timeFactor = 0.55;
+  else if (hour >= 10 && hour < 16)         timeFactor = 0.25; // midday
+  else                                      timeFactor = 0.12; // night
 
-  if (isWeekend) timeFactor *= 0.70; // weekends significantly quieter
+  if (isWeekend) timeFactor *= 0.70;
 
-  // 2) Direction bias: inbound routes fill up at morning peak,
-  //    outbound routes at evening peak (direction: 1=inbound, -1=outbound).
+  // 2) Direction bias (Bangalore commute flow)
   if (isMorningPeak && direction === 1)  timeFactor *= 1.2;
   if (isEveningPeak && direction === -1) timeFactor *= 1.2;
 
-  // 3) Route density factor (0.8–1.2 range based on route popularity/length)
+  // 3) Popularity-based density (0.8–1.2)
   const pop = Math.min(routePopularity.get(routeId) ?? 0, 1);
   const routeDensity = 0.8 + pop * 0.4;
+  const popularity   = pop * 0.08;
 
-  // 4) Route popularity additive boost — capped at 0.08.
-  const popularity = pop * 0.08;
-
-  // 5) Stop density boost: middle of the route is the busiest segment.
+  // 4) Stop position boost (busier in middle of route)
   let densityBoost = 0.02;
   if (pop > 0) {
-    const t = Math.min(1, Math.max(0, stopIndex / Math.max(1, (pop * 30))));
+    const t = Math.min(1, Math.max(0, stopIndex / Math.max(1, pop * 30)));
     densityBoost = (1 - Math.abs(0.5 - t) * 2) * 0.06;
   }
 
-  // 6) Per-bus deterministic jitter so buses on the same route differ,
-  //    narrowed to ±0.12 to avoid overwhelming the time-of-day signal.
+  // 5) Deterministic per-bus jitter ±0.12
   let h = 0;
   const seed = `${routeId}-${stopIndex}`;
-  for (let i = 0; i < seed.length; i++) {
-    h = (h * 31 + seed.charCodeAt(i)) | 0;
-  }
-  const jitter = ((Math.abs(h) % 100) / 100) * 0.24 - 0.12; // -0.12..+0.12
+  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) | 0;
+  const jitter = ((Math.abs(h) % 100) / 100) * 0.24 - 0.12;
 
   let load = (timeFactor + popularity + densityBoost + jitter) * routeDensity;
 
-  // 7) NIGHT SAFETY RULE — cap crowd at night so buses are never unrealistically
-  //    packed when demand is minimal.
-  if (hour < 6 || hour >= 21) {
-    load = Math.min(load, 0.5);
+  // 6) BMTC route-tier multiplier (named routes are busier)
+  load *= getRouteFactor(routeNumber);
+
+  // 7) Hotspot area boost (Silk Board, Majestic, etc.)
+  load *= getHotspotFactor(stopName);
+
+  // 8) Rain: more crowd, validated by deterministic seed
+  const rainy = isRaining();
+  if (rainy) {
+    load *= 1.15;
+    if (isMorningPeak || isEveningPeak) load *= 1.1;
   }
 
-  // 8) Clamp to valid range
+  // 9) Night safety cap — buses never packed late at night
+  if (isNight) load = Math.min(load, 0.5);
+
+  // 10) Clamp
   load = Math.max(0, Math.min(load, 0.92));
 
   if (load >= 0.75) return "VeryHigh";
@@ -317,7 +362,7 @@ async function initializeBuses() {
         nextStop: nextStop.name,
         nextStopId: nextStop.id,
         distanceToNextStop: initialDistance,
-        crowdLevel: getCrowdLevel(route.id, stopIndex),
+        crowdLevel: getCrowdLevel(route.id, stopIndex, 1, route.number, nextStop.name),
         status: computeStatus(initialDistance, speed, initialProgress),
         isLastBus: isLastBus(route.lastBusTime),
         isOnline: online,
@@ -397,7 +442,7 @@ async function updateBusPositions() {
     } else {
       bus.speed = bus.baseSpeed;
     }
-    bus.crowdLevel = getCrowdLevel(bus.routeId, currentIdx, bus.direction);
+    bus.crowdLevel = getCrowdLevel(bus.routeId, currentIdx, bus.direction, bus.routeNumber, bus.nextStop);
     bus.status = computeStatus(bus.distanceToNextStop, bus.speed, bus.progress);
     bus.totalStops = stops.length;
     // Stops covered along the current direction of travel

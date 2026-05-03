@@ -39,12 +39,19 @@ export function fuseFrequency(
   liveEtaSeconds: number[],
 ): { freq: number; isLive: boolean } {
   const live = getLiveFrequency(liveEtaSeconds);
-  if (!live || live <= 0 || live > 120) return { freq: base, isLive: false };
-  const weight =
-    liveEtaSeconds.length >= 4 ? 0.5 :
-    liveEtaSeconds.length >= 2 ? 0.35 : 0.2;
-  return {
-    freq: Math.round(base * (1 - weight) + live * weight),
-    isLive: true,
-  };
+  const hour = new Date().getHours();
+  const isNight = hour < 6 || hour >= 21;
+
+  let freq: number;
+  let isLive: boolean;
+  if (!live || live <= 0 || live > 120) {
+    freq = base; isLive = false;
+  } else {
+    const weight = liveEtaSeconds.length >= 4 ? 0.5 : liveEtaSeconds.length >= 2 ? 0.35 : 0.2;
+    freq = Math.round(base * (1 - weight) + live * weight);
+    isLive = true;
+  }
+  freq = Math.min(freq, 30);
+  if (isNight) freq = Math.min(freq, 8);
+  return { freq, isLive };
 }

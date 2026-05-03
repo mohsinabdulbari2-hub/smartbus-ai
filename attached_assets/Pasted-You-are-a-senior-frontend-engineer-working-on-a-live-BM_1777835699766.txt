@@ -1,0 +1,195 @@
+You are a senior frontend engineer working on a live BMTC bus tracking app (React Native + Web). The app already includes:
+
+- Live buses with ETA
+- Crowd classification (low/medium/high/very_high)
+- Frequency engine (baseline + live fusion)
+- Map with selection and follow mode
+
+Refine the system to match real Bangalore (BMTC) patterns while keeping everything lightweight, deterministic, and non-breaking.
+
+---
+
+🎯 GOAL
+
+Make the app feel locally accurate for Bangalore routes (Silk Board, Majestic, KR Market, etc.) with:
+
+- Realistic crowd distribution
+- Realistic frequency behavior
+- Better trust in UI
+- No new APIs or heavy logic
+
+---
+
+1️⃣ BANGALORE-SPECIFIC TIME + CROWD MODEL
+
+Time slots (BMTC realistic)
+
+function getTimeSlot(hour) {
+  if (hour >= 6 && hour < 10) return "morning_peak";
+  if (hour >= 10 && hour < 16) return "midday";
+  if (hour >= 16 && hour < 21) return "evening_peak";
+  return "night";
+}
+
+---
+
+Crowd base factors (tuned for Bangalore)
+
+function getTimeFactor(slot) {
+  switch (slot) {
+    case "morning_peak": return 0.55;
+    case "evening_peak": return 0.55;
+    case "midday": return 0.25;
+    case "night": return 0.12;
+  }
+}
+
+---
+
+🚨 Night rule (MANDATORY FIX)
+
+if (slot === "night" && load > 0.5) {
+  load = 0.5;
+}
+
+👉 Prevents unrealistic night crowd (critical for trust)
+
+---
+
+2️⃣ LOCATION (HOTSPOT) BOOSTS
+
+Apply only to known dense areas:
+
+const HOTSPOTS = [
+  "Silk Board",
+  "Majestic",
+  "KR Market",
+  "Electronic City",
+  "Marathahalli",
+  "Whitefield"
+];
+
+---
+
+Apply boost near hotspots
+
+if (isNearHotspot(bus.location)) {
+  load *= 1.15;
+}
+
+👉 Keeps congestion realistic without overdoing it
+
+---
+
+3️⃣ DIRECTIONAL REALISM (VERY IMPORTANT)
+
+Bangalore flow:
+
+- Morning → towards city (Majestic, CBD)
+- Evening → away from city
+
+if (slot === "morning_peak" && direction === "inbound") {
+  load *= 1.2;
+}
+
+if (slot === "evening_peak" && direction === "outbound") {
+  load *= 1.2;
+}
+
+---
+
+4️⃣ FINAL CROWD CLASSIFICATION (KEEP CONSISTENT)
+
+if (load < 0.35) return "low";
+if (load < 0.7) return "medium";
+if (load < 0.9) return "high";
+return "very_high";
+
+---
+
+5️⃣ EXPECTED DISTRIBUTION (REFERENCE)
+
+Enforce this behavior:
+
+- Night → mostly "Seats available"
+- Midday → mix of "Seats available" + "Moderate"
+- Peak → 40–55% "Crowded"
+- Very crowded only in hotspots during peak
+
+---
+
+6️⃣ FREQUENCY ENGINE (KEEP CURRENT, JUST TUNE)
+
+You already implemented:
+
+- baseline + live fusion ✔
+- per-route ETA gap analysis ✔
+
+Just ensure:
+
+// cap unrealistic spikes
+if (liveFreq > 30) liveFreq = 30;
+
+---
+
+Bangalore expectation
+
+Route Type| Typical
+Core routes (Majestic, Silk Board)| 12–25/hr
+Normal routes| 6–12/hr
+Night| 2–6/hr
+
+---
+
+7️⃣ UI CONSISTENCY (ALREADY DONE – VERIFY)
+
+Ensure labels match exactly:
+
+- "Seats available"
+- "Moderate"
+- "Crowded"
+- "Very crowded"
+
+---
+
+Frequency chip
+
+~12/hr  [live]
+
+Show "live" only when using fused data.
+
+---
+
+8️⃣ MAP BEHAVIOR (KEEP SIMPLE)
+
+- Auto-focus on bus selection ✔
+- Follow mode ✔
+- Exit follow on user drag ✔
+
+No changes needed.
+
+---
+
+9️⃣ NON-NEGOTIABLE RULES
+
+DO NOT:
+
+- change API structure
+- add ML or predictions
+- increase polling
+- add heavy computation
+- break existing UI
+
+---
+
+✅ SUCCESS CRITERIA
+
+- Night shows mostly "Seats available"
+- Peak shows realistic congestion (not all crowded)
+- Silk Board / Majestic feel busier than suburbs
+- Frequency values feel believable
+- UI looks balanced and trustworthy
+
+---
+
+Implement exactly this—minimal code, maximum realism.
