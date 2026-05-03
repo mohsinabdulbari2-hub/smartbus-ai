@@ -1,13 +1,45 @@
-import { useLiveBusesPolling, useGetStops, useGetRoutes } from "@/hooks/use-smartbus";
-import { LiveMap } from "@/components/map/LiveMap";
+import { useLiveBusesPolling, useGetStops, useGetRoutes, useFleetTotal } from "@/hooks/use-smartbus";
+import { useGeolocation } from "@/hooks/use-geolocation";
+import { LiveMap, type LiveMapMode } from "@/components/map/LiveMap";
 import { Activity, Search, Route as RouteIcon, MapPin } from "lucide-react";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
+
+const NEARBY_RADIUS_KM = 5;
+const MODE_STORAGE_KEY = "smartbus.busMode";
 
 export default function HomePage() {
-  const { data: buses, isLoading: busesLoading } = useLiveBusesPolling();
+  // Persist the user's mode choice across reloads so they don't keep flipping
+  // back to Nearby every visit.
+  const [mode, setMode] = useState<LiveMapMode>(() => {
+    // Wrap in try/catch — Safari private mode and some enterprise policies
+    // throw SecurityError on localStorage access, which would crash render.
+    try {
+      if (typeof localStorage === "undefined") return "nearby";
+      const saved = localStorage.getItem(MODE_STORAGE_KEY);
+      return saved === "all" ? "all" : "nearby";
+    } catch {
+      return "nearby";
+    }
+  });
+  useEffect(() => {
+    try { localStorage.setItem(MODE_STORAGE_KEY, mode); } catch { /* ignore */ }
+  }, [mode]);
+
+  const geo = useGeolocation();
   const { data: stops, isLoading: stopsLoading } = useGetStops();
   const { data: routes } = useGetRoutes();
+  const fleetTotal = useFleetTotal();
+
+  // In Nearby mode, ask the server to filter by radius (it falls back to the
+  // 20 nearest if nothing's inside the 5km ring). In All mode, omit lat/lng
+  // and let the response come back capped at 100 by the server.
+  const liveParams =
+    mode === "nearby"
+      ? { lat: geo.lat, lng: geo.lng, radius: NEARBY_RADIUS_KM }
+      : undefined;
+  const { data: buses, isLoading: busesLoading } = useLiveBusesPolling(liveParams);
 
   return (
     <div className="relative w-full h-full flex flex-col">
@@ -15,16 +47,52 @@ export default function HomePage() {
       <motion.div 
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="absolute top-4 left-4 right-4 md:left-auto md:right-6 md:top-6 z-40 flex items-center justify-between md:justify-end gap-4"
+        className="absolute top-4 left-4 right-4 md:left-auto md:right-6 md:top-6 z-40 flex flex-wrap items-center justify-between md:justify-end gap-2 md:gap-4"
       >
-        <div className="bg-card/70 backdrop-blur-xl px-5 py-3 rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.4)] border border-border/50 flex items-center gap-3">
-          <div className="relative flex h-3.5 w-3.5">
+        <div className="bg-card/70 backdrop-blur-xl px-3 md:px-5 py-2.5 md:py-3 rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.4)] border border-border/50 flex items-center gap-2 md:gap-3">
+          <div className="relative flex h-3 w-3 md:h-3.5 md:w-3.5">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-success shadow-[0_0_8px_rgba(34,197,94,0.8)]"></span>
+            <span className="relative inline-flex rounded-full h-3 w-3 md:h-3.5 md:w-3.5 bg-success shadow-[0_0_8px_rgba(34,197,94,0.8)]"></span>
           </div>
-          <span className="font-bold text-sm tracking-wide">
-            {busesLoading ? "Connecting..." : `${buses?.length || 0} Live Buses`}
+          <span className="font-bold text-xs md:text-sm tracking-wide whitespace-nowrap">
+            {busesLoading
+              ? "Connecting..."
+              : `${buses?.length || 0} Live`}
           </span>
+        </div>
+
+        {/* Nearby / All toggle — segmented pill, blends with existing chips. */}
+        <div
+          role="tablist"
+          aria-label="Bus visibility"
+          className="bg-card/70 backdrop-blur-xl rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.4)] border border-border/50 p-1 flex items-center text-xs font-bold"
+        >
+          <button
+            type="button"
+            role="tab"
+            aria-selected={mode === "nearby"}
+            onClick={() => setMode("nearby")}
+            className={`px-3 py-1.5 rounded-full transition-colors ${
+              mode === "nearby"
+                ? "bg-primary text-primary-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            Nearby
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={mode === "all"}
+            onClick={() => setMode("all")}
+            className={`px-3 py-1.5 rounded-full transition-colors ${
+              mode === "all"
+                ? "bg-primary text-primary-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            All Buses
+          </button>
         </div>
 
         <Link 
@@ -67,7 +135,15 @@ export default function HomePage() {
 
       {/* Main Map */}
       <div className="flex-1 relative z-10 bg-background">
-        <LiveMap buses={buses} stops={stops} />
+        <LiveMap
+          buses={buses}
+          stops={stops}
+          mode={mode}
+          userLat={geo.lat}
+          userLng={geo.lng}
+          fleetTotal={fleetTotal}
+          nearbyRadiusKm={NEARBY_RADIUS_KM}
+        />
         
         {/* Loading overlay */}
         {(busesLoading || stopsLoading) && !buses && (

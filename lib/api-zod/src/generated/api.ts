@@ -107,6 +107,22 @@ export const GetLiveBusesQueryParams = zod.object({
     .max(getLiveBusesQueryLimitMax)
     .optional()
     .describe("Hard server cap is 100 buses per response."),
+  lat: zod.coerce
+    .number()
+    .optional()
+    .describe(
+      "User latitude for radius-based filtering (legacy mode). When lat\/lng\/radius are provided, only buses within the radius are returned, with automatic fallback to the 20 nearest if none are inside.",
+    ),
+  lng: zod.coerce
+    .number()
+    .optional()
+    .describe("User longitude for radius-based filtering (legacy mode)."),
+  radius: zod.coerce
+    .number()
+    .optional()
+    .describe(
+      "Radius in kilometers for nearby filtering (default 8 km on the server). Used together with lat\/lng.",
+    ),
 });
 
 export const GetLiveBusesResponseItem = zod.object({

@@ -4,20 +4,34 @@ import L from "leaflet";
 import { Bus, X, MapPin, Users, Clock, Navigation } from "lucide-react";
 import { Link } from "wouter";
 import { LiveBus, BusStop, BusRouteDetail } from "@workspace/api-client-react";
+import { haversineKm } from "@/hooks/use-geolocation";
+
+export type LiveMapMode = "nearby" | "all";
 
 interface LiveMapProps {
   buses?: LiveBus[];
   stops?: BusStop[];
+  /** Whether the parent is currently filtering buses by user location. */
+  mode?: LiveMapMode;
+  /** User's current (or fallback) latitude — used only for the "no buses nearby" check. */
+  userLat?: number;
+  /** User's current (or fallback) longitude. */
+  userLng?: number;
+  /** Real fleet size from X-Total-Count, used in the "Showing X of Y" pill. */
+  fleetTotal?: number | null;
+  /** Radius the parent passed to the API in Nearby mode. */
+  nearbyRadiusKm?: number;
 }
 
 const BANGALORE_CENTER: [number, number] = [12.9716, 77.5946];
 const MAX_VISIBLE_BUSES = 100;
 
-const CROWD_COLOR = {
+const CROWD_COLOR: Record<string, string> = {
   Low: "#22c55e",
   Medium: "#f59e0b",
   High: "#ef4444",
-} as const;
+  VeryHigh: "#b91c1c",
+};
 
 // ---------------- Marker factories (memoized via cache so we don't rebuild every tick) ----------------
 
@@ -147,7 +161,15 @@ function etaFromDistance(meters: number, speedKmh: number): number | null {
 // Main component
 // ===================================================================================
 
-export function LiveMap({ buses = [], stops = [] }: LiveMapProps) {
+export function LiveMap({
+  buses = [],
+  stops = [],
+  mode = "all",
+  userLat,
+  userLng,
+  fleetTotal,
+  nearbyRadiusKm = 5,
+}: LiveMapProps) {
   const [selectedBusId, setSelectedBusId] = useState<string | null>(null);
   const [bounds, setBounds] = useState<L.LatLngBounds | null>(null);
   const [shapeTick, setShapeTick] = useState(0); // bump to re-render once shape arrives
@@ -207,6 +229,35 @@ export function LiveMap({ buses = [], stops = [] }: LiveMapProps) {
     if (idx <= 0) return null;
     return cached.stops[idx - 1].id;
   }, [selectedBus, cached]);
+
+  // ---- "Showing X of Y" caption + Nearby fallback detection ----
+  // X = visible markers right now (after viewport cull).
+  // Y = real fleet size from the X-Total-Count header (falls back to the
+  //     server's returned-page size when the header isn't available yet).
+  const denominator = mode === "all" ? (fleetTotal ?? buses.length) : buses.length;
+  const showingCaption = useMemo<string | null>(() => {
+    if (visibleBuses.length === 0) return null;
+    if (mode === "all") {
+      return `Showing ${visibleBuses.length} of ${denominator} buses`;
+    }
+    // Nearby mode: only show the caption when culling is actually trimming
+    // the list, otherwise it's redundant noise.
+    if (buses.length > visibleBuses.length) {
+      return `Showing ${visibleBuses.length} of ${buses.length} nearby`;
+    }
+    return null;
+  }, [mode, visibleBuses.length, buses.length, denominator]);
+
+  // Server already returns the 20 nearest as a fallback when nothing is in
+  // the radius — surface that to the user with a subtle, non-blocking hint.
+  const nearbyFallback = useMemo<boolean>(() => {
+    if (mode !== "nearby" || buses.length === 0) return false;
+    if (typeof userLat !== "number" || typeof userLng !== "number") return false;
+    const anyInRadius = buses.some(
+      (b) => haversineKm(userLat, userLng, b.lat, b.lng) <= nearbyRadiusKm,
+    );
+    return !anyInRadius;
+  }, [mode, buses, userLat, userLng, nearbyRadiusKm]);
 
   // Distance from selected bus to its next stop → ETA for the bottom panel
   const selectedEtaMin = useMemo(() => {
@@ -307,10 +358,20 @@ export function LiveMap({ buses = [], stops = [] }: LiveMapProps) {
         })}
       </MapContainer>
 
-      {/* Top-right: count of visible buses (helps user understand the cull) */}
-      {bounds && buses.length > visibleBuses.length && (
-        <div className="absolute top-4 right-4 z-[500] bg-card/80 backdrop-blur-md border border-border/50 rounded-full px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-lg pointer-events-none">
-          Showing {visibleBuses.length} of {buses.length}
+      {/* Top-center: "Showing X of Y" caption + Nearby fallback message.
+          Sits below the floating top-right pills so it never overlaps them. */}
+      {(showingCaption || nearbyFallback) && (
+        <div className="absolute top-20 md:top-24 left-1/2 -translate-x-1/2 z-[500] flex flex-col items-center gap-1.5 pointer-events-none">
+          {showingCaption && (
+            <div className="bg-card/80 backdrop-blur-md border border-border/50 rounded-full px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-lg">
+              {showingCaption}
+            </div>
+          )}
+          {nearbyFallback && (
+            <div className="bg-amber-500/15 border border-amber-500/40 rounded-full px-3 py-1.5 text-xs font-semibold text-amber-300 shadow-lg">
+              No buses nearby • Showing nearest buses
+            </div>
+          )}
         </div>
       )}
 

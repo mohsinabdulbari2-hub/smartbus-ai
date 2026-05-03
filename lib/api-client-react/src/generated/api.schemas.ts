@@ -182,6 +182,18 @@ export type GetLiveBusesParams = {
    * @maximum 100
    */
   limit?: number;
+  /**
+   * User latitude for radius-based filtering (legacy mode). When lat/lng/radius are provided, only buses within the radius are returned, with automatic fallback to the 20 nearest if none are inside.
+   */
+  lat?: number;
+  /**
+   * User longitude for radius-based filtering (legacy mode).
+   */
+  lng?: number;
+  /**
+   * Radius in kilometers for nearby filtering (default 8 km on the server). Used together with lat/lng.
+   */
+  radius?: number;
 };
 
 export type GetStopCrowdParams = {

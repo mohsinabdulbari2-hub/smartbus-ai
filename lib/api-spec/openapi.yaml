@@ -124,6 +124,24 @@ paths:
             type: integer
             maximum: 100
           description: Hard server cap is 100 buses per response.
+        - name: lat
+          in: query
+          required: false
+          schema:
+            type: number
+          description: User latitude for radius-based filtering (legacy mode). When lat/lng/radius are provided, only buses within the radius are returned, with automatic fallback to the 20 nearest if none are inside.
+        - name: lng
+          in: query
+          required: false
+          schema:
+            type: number
+          description: User longitude for radius-based filtering (legacy mode).
+        - name: radius
+          in: query
+          required: false
+          schema:
+            type: number
+          description: Radius in kilometers for nearby filtering (default 8 km on the server). Used together with lat/lng.
       responses:
         "200":
           description: Live bus positions
