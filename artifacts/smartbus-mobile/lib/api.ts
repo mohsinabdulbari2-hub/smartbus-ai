@@ -68,6 +68,8 @@ export type RouteStop = {
 
 export type RouteDetail = Route & {
   stops: RouteStop[];
+  // Optional GTFS-simplified polyline along the real road path: [[lat,lng], ...]
+  shape?: [number, number][] | null;
 };
 
 export type FrequencyData = {

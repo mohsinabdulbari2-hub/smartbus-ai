@@ -1,4 +1,4 @@
-import { pgTable, text, real, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, real, integer, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
@@ -14,6 +14,10 @@ export const busRoutesTable = pgTable("bus_routes", {
   busType: text("bus_type").notNull().default("Ordinary"),
   depot: text("depot"),
   distance: real("distance_km"),
+  // Simplified route polyline as [[lat,lng], ...] — sourced from GTFS shapes.txt,
+  // Douglas-Peucker simplified to ~50 points. Used by the mobile mini-map to draw
+  // the real road path instead of straight lines between stops.
+  shape: jsonb("shape").$type<[number, number][]>(),
 });
 
 export const busStopsTable = pgTable("bus_stops", {

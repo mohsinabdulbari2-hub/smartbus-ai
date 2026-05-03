@@ -10,6 +10,12 @@ interface RouteMiniMapProps {
   busPositionIdx?: number; // index into stops where the bus is
   height?: number;
   color?: string;
+  /**
+   * Optional real road polyline [[lat,lng], ...] (e.g. from GTFS shapes.txt).
+   * When present, the curve is drawn through these points instead of being
+   * synthesised from the stop coordinates — gives an accurate route shape.
+   */
+  shape?: [number, number][] | null;
 }
 
 /**
@@ -17,7 +23,7 @@ interface RouteMiniMapProps {
  * and draws a smooth polyline through the stops, plus markers for start/end
  * and the bus position. Avoids heavyweight native map deps.
  */
-export function RouteMiniMap({ stops, busPositionIdx, height = 140, color = Colors.primary }: RouteMiniMapProps) {
+export function RouteMiniMap({ stops, busPositionIdx, height = 140, color = Colors.primary, shape }: RouteMiniMapProps) {
   // Filter out invalid coords (null/undefined/NaN) — defensive against bad data
   const valid = (stops ?? []).filter(
     (s) => s && Number.isFinite(s.lat) && Number.isFinite(s.lng),
@@ -26,10 +32,15 @@ export function RouteMiniMap({ stops, busPositionIdx, height = 140, color = Colo
     return <View style={[styles.empty, { height }]} />;
   }
 
-  const lats = valid.map(s => s.lat);
-  const lngs = valid.map(s => s.lng);
-  const minLat = Math.min(...lats), maxLat = Math.max(...lats);
-  const minLng = Math.min(...lngs), maxLng = Math.max(...lngs);
+  // Use real GTFS shape if provided, else fall back to stop coordinates.
+  // Bounding box must include BOTH stops and shape so nothing gets clipped.
+  const shapePts = (shape ?? []).filter(
+    (p) => Array.isArray(p) && Number.isFinite(p[0]) && Number.isFinite(p[1]),
+  );
+  const allLats = [...valid.map(s => s.lat), ...shapePts.map(p => p[0])];
+  const allLngs = [...valid.map(s => s.lng), ...shapePts.map(p => p[1])];
+  const minLat = Math.min(...allLats), maxLat = Math.max(...allLats);
+  const minLng = Math.min(...allLngs), maxLng = Math.max(...allLngs);
   const W = 320, H = height;
   const PAD = 16;
 
@@ -37,24 +48,35 @@ export function RouteMiniMap({ stops, busPositionIdx, height = 140, color = Colo
   const dLat = Math.max(0.0001, maxLat - minLat);
   const dLng = Math.max(0.0001, maxLng - minLng);
 
-  const project = (s: MapStop) => {
-    const x = PAD + ((s.lng - minLng) / dLng) * (W - PAD * 2);
-    const y = PAD + ((maxLat - s.lat) / dLat) * (H - PAD * 2);
-    return { x, y };
-  };
+  const projectLL = (lat: number, lng: number) => ({
+    x: PAD + ((lng - minLng) / dLng) * (W - PAD * 2),
+    y: PAD + ((maxLat - lat) / dLat) * (H - PAD * 2),
+  });
+  const project = (s: MapStop) => projectLL(s.lat, s.lng);
 
   const pts = stops.map(project);
 
-  // Smoothed polyline (cubic curves through every other point)
-  let d = `M ${pts[0].x} ${pts[0].y}`;
-  for (let i = 1; i < pts.length; i++) {
-    const prev = pts[i - 1];
-    const cur = pts[i];
-    const cx = (prev.x + cur.x) / 2;
-    const cy = (prev.y + cur.y) / 2;
-    d += ` Q ${prev.x} ${prev.y} ${cx} ${cy}`;
+  // Build the road path: prefer real GTFS polyline (straight segments between
+  // simplified points — already smooth at this resolution); fall back to a
+  // bezier-smoothed curve through the stops.
+  let d: string;
+  if (shapePts.length >= 2) {
+    const sp = shapePts.map(([la, ln]) => projectLL(la, ln));
+    d = `M ${sp[0].x.toFixed(2)} ${sp[0].y.toFixed(2)}`;
+    for (let i = 1; i < sp.length; i++) {
+      d += ` L ${sp[i].x.toFixed(2)} ${sp[i].y.toFixed(2)}`;
+    }
+  } else {
+    d = `M ${pts[0].x} ${pts[0].y}`;
+    for (let i = 1; i < pts.length; i++) {
+      const prev = pts[i - 1];
+      const cur = pts[i];
+      const cx = (prev.x + cur.x) / 2;
+      const cy = (prev.y + cur.y) / 2;
+      d += ` Q ${prev.x} ${prev.y} ${cx} ${cy}`;
+    }
+    d += ` T ${pts[pts.length - 1].x} ${pts[pts.length - 1].y}`;
   }
-  d += ` T ${pts[pts.length - 1].x} ${pts[pts.length - 1].y}`;
 
   const start = pts[0];
   const end = pts[pts.length - 1];

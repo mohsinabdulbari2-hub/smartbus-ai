@@ -221,6 +221,8 @@ router.get("/:routeId", async (req, res) => {
       distance: route.distance,
       isLastBus,
       stops: stopsEnriched,
+      // Real GTFS-derived road polyline for the mini-map (may be null on older seeds)
+      shape: route.shape ?? null,
     });
   } catch (err) {
     req.log.error({ err }, "Error fetching route");

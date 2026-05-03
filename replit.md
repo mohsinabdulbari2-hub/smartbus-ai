@@ -17,7 +17,7 @@ SmartBus AI is a live bus tracking and crowd prediction system inspired by Rapid
 - **Build**: esbuild (CJS bundle)
 - **Frontend (web)**: React + Vite + Tailwind CSS v4
 - **Mobile**: Expo / React Native (Expo Router, react-query, react-native-svg, expo-blur, expo-haptics, expo-linear-gradient, react-native-reanimated 4)
-- **Map**: react-leaflet (web) + custom SVG mini-map (mobile, no API key)
+- **Map**: react-leaflet (web) + custom SVG mini-map (mobile, no API key) — mobile mini-map renders the **real GTFS-derived road polyline** (Douglas-Peucker simplified to ~50 pts/route) when available, falling back to a Bezier curve through stop coords.
 - **Charts**: Recharts (frequency bar charts)
 - **Animations**: framer-motion (web), react-native-reanimated (mobile)
 - **Mobile UI theme**: Premium dark palette — bg #0F172A, surface #1E293B, primary #2563EB, secondary #7C3AED. Reusable tokens in `artifacts/smartbus-mobile/constants/{colors,theme}.ts` and primitives in `artifacts/smartbus-mobile/components/ui/*` (Card, Badge, Button, PulseDot, AnimatedProgress, Skeleton, CrowdMeter, RouteMiniMap, SmartSuggestion).
@@ -33,6 +33,17 @@ SmartBus AI is a live bus tracking and crowd prediction system inspired by Rapid
 - **Route Detail** — stops list + frequency chart, **per-stop live status (Departed / At stop / Upcoming) + per-stop ETA** computed from all live buses on the route (bidirection-aware via `bus.direction`); next stop highlighted; route detail auto-refreshes every 15s without flicker
 - **Typo-tolerant routes filter** — Routes tab uses client-side `fuzzyMatch` (token + Levenshtein ≤1/2) on name/from/to so "majstic" finds "Majestic", "indrangr" finds "Indiranagar", etc. Helper at `artifacts/smartbus-mobile/lib/fuzzy.ts` mirrors a slim subset of the server's `fuzzy.ts` (used by `/search`).
 - **Flicker-free polling** — every refetching query (live buses 8s/12s, route detail 15s, routes catalog) uses `placeholderData: (prev) => prev` so the previous frame stays mounted during background refetch.
+- **Real road polylines** — each route in the DB carries a `shape jsonb` column ([[lat,lng], …]) sourced from BMTC GTFS `shapes.txt` and Douglas-Peucker simplified by `scripts/convert_gtfs.py`. `RouteMiniMap` draws the polyline directly when present.
+
+## BMTC GTFS data pipeline
+
+Source feed: https://github.com/Vonter/bmtc-gtfs (zip in `attached_assets/`).
+Converter: `scripts/convert_gtfs.py` reads the GTFS txt files extracted to `/tmp/bmtc_extract/` and writes:
+- `lib/db/src/data/bmtc-stops.json` — 8,475 stops with lat/lng (only stops used by ≥1 route are emitted)
+- `lib/db/src/data/bmtc-routes.json` — 4,208 routes; each route picks its longest UP-direction trip as the representative stop sequence
+- `lib/db/src/data/bmtc-shapes.json` — 4,208 polylines, simplified to avg 50 pts each (~4 MB total)
+
+Re-import workflow: `python3 scripts/convert_gtfs.py` → `pnpm --filter @workspace/db push` → `pnpm --filter @workspace/scripts seed` → restart api-server.
 - **Stop Detail** — upcoming buses with ETA and crowd level
 
 ## Stop status & ETA logic

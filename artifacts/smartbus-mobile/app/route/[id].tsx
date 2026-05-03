@@ -214,6 +214,7 @@ export default function RouteDetailScreen() {
                   busPositionIdx={busPositionIdx}
                   height={150}
                   color={config.color}
+                  shape={route.shape}
                 />
                 <View style={{ flexDirection: "row", justifyContent: "space-between", gap: 12 }}>
                   <View style={styles.miniMapEnd}>
