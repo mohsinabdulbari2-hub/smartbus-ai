@@ -422,11 +422,14 @@ function StatCard({
   );
 }
 
+// Status colors follow real transit-app semantics: movement states are blue,
+// "at stop" is green. Red is reserved for crowd severity only — using red
+// for "Approaching" misreads as danger instead of motion.
 const STATUS_CONFIG: Record<BusStatus, { label: string; color: string }> = {
-  At_Stop:     { label: "🟡 At Stop",     color: "#eab308" },
-  Approaching: { label: "🟠 Approaching", color: "#f97316" },
-  Departed:    { label: "🟢 Running",     color: "#22c55e" },
-  Upcoming:    { label: "🟢 Running",     color: "#22c55e" },
+  At_Stop:     { label: "● At Stop",     color: "#22c55e" }, // green
+  Approaching: { label: "● Approaching", color: "#60A5FA" }, // light blue
+  Departed:    { label: "● Running",     color: "#3B82F6" }, // blue
+  Upcoming:    { label: "● Running",     color: "#3B82F6" }, // blue
 };
 
 function BusCard({
@@ -472,12 +475,11 @@ function BusCard({
   return (
     <Card
       onPress={() => router.push(`/route/${bus.routeId}` as any)}
-      glow={isOffline ? undefined : `${config.color}40`}
       style={{
         marginBottom: 14,
         opacity: isOffline ? 0.55 : 1,
-        borderBottomWidth: 1,
-        borderBottomColor: "rgba(255,255,255,0.06)",
+        borderWidth: 0.5,
+        borderColor: "rgba(255,255,255,0.10)",
       }}
     >
       {isTop && (
@@ -523,17 +525,22 @@ function BusCard({
             />
           </View>
           <View style={{ flex: 1 }}>
-            <Text
-              style={[
-                styles.nextStopValue,
-                {
-                  color: isArriving ? arrivingColor : Colors.dark.text,
-                  fontFamily: isArriving ? "Inter_700Bold" : "Inter_700Bold",
-                },
-              ]}
-              numberOfLines={1}
-            >
-              {etaText} • Next: {nextStopShort}
+            {/* Hierarchy: ETA is Level 2 (bold + accent), next-stop drops
+                to Level 3 (regular weight + softer color) so the eye lands
+                on the time first, the destination second. */}
+            <Text style={styles.etaLine} numberOfLines={1}>
+              <Text
+                style={{
+                  color: isArriving ? arrivingColor : "#3B82F6",
+                  fontFamily: "Inter_700Bold",
+                  fontSize: 14,
+                }}
+              >
+                {etaText}
+              </Text>
+              <Text style={styles.nextStopInline}>
+                {`  •  Next: ${nextStopShort}`}
+              </Text>
             </Text>
             {distLabel && (
               <Text style={styles.distanceText}>{distLabel}</Text>
@@ -551,10 +558,7 @@ function BusCard({
         <View>
           <View style={styles.progressMeta}>
             <Text style={styles.progressMetaText}>
-              Stop {bus.stopsCovered} of {bus.totalStops}
-            </Text>
-            <Text style={styles.progressMetaText}>
-              {Math.round(progress * 100)}% complete
+              {`Stop ${bus.stopsCovered} of ${bus.totalStops} • ${Math.round(progress * 100)}%`}
             </Text>
           </View>
           <AnimatedProgress value={progress} gradient={gradient} height={6} />
@@ -616,23 +620,29 @@ const styles = StyleSheet.create({
   },
   statIcon: { fontSize: 22 },
   statValue: { fontSize: 32, fontFamily: "Inter_700Bold", color: "#fff", marginTop: 4, letterSpacing: -0.5 },
-  statLabel: { fontSize: 12, fontFamily: "Inter_700Bold", color: "rgba(255,255,255,0.95)", letterSpacing: 0.3 },
+  statLabel: {
+    fontSize: 10,
+    fontFamily: "Inter_700Bold",
+    color: "rgba(255,255,255,0.85)",
+    letterSpacing: 1.2,
+    textTransform: "uppercase",
+    marginTop: 2,
+  },
 
   chip: {
     flexDirection: "row", alignItems: "center", gap: 6,
     paddingHorizontal: 16, paddingVertical: 12,
     backgroundColor: Colors.dark.surface,
     borderRadius: Radius.pill,
-    borderWidth: 1, borderColor: Colors.dark.cardBorder,
+    borderWidth: 1, borderColor: "rgba(255,255,255,0.10)",
     minHeight: 44,
   },
   chipActive: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
-    ...Shadow.glow(Colors.primaryGlow),
+    backgroundColor: "rgba(59,130,246,0.18)",
+    borderColor: "#3B82F6",
   },
   chipText: { ...Type.body, color: Colors.dark.textSecondary },
-  chipTextActive: { color: "#fff", fontFamily: "Inter_700Bold" },
+  chipTextActive: { color: "#3B82F6", fontFamily: "Inter_700Bold" },
 
   sectionTitle: { ...Type.heading, color: Colors.dark.text },
   sectionTitleRow: { flexDirection: "row", alignItems: "baseline", justifyContent: "space-between", marginTop: 20, marginBottom: 10, gap: 8 },
@@ -658,8 +668,17 @@ const styles = StyleSheet.create({
   distanceText: {
     fontSize: 11,
     color: Colors.dark.textMuted,
-    fontFamily: "Inter_500Medium",
+    fontFamily: "Inter_400Regular",
     marginTop: 2,
+  },
+  etaLine: {
+    fontSize: 14,
+    lineHeight: 18,
+  },
+  nextStopInline: {
+    fontSize: 13,
+    fontFamily: "Inter_400Regular",
+    color: Colors.dark.textSecondary,
   },
   liveLabel: {
     fontSize: 10,

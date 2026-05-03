@@ -1,0 +1,170 @@
+Good choice — this is where your app jumps from “polished UI” to “real product experience.”
+You don’t need more features.
+You need one killer interaction: live bus tracking like Uber/Google Maps.
+🚀 ROUND 4 — ADVANCED MAP UX (KILLER FEATURE)
+👉 This is your next magic prompt
+(again: no redesign, just layering behavior)
+🎯 GOAL
+When a user taps a bus:
+👉 The app should feel like:
+Google Maps tracking a vehicle
+Uber tracking your ride
+🧠 WHAT YOU ARE ADDING
+3 Key Behaviors:
+Camera follows the bus (smoothly)
+Route ahead is highlighted
+User sees live movement context (not just data)
+🔥 MAGIC PROMPT (SEND THIS)
+You are enhancing the map experience of an existing bus tracking mobile app.
+⚠️ STRICT RULES:
+Do NOT change APIs, backend, or data logic
+Do NOT redesign UI layout
+Do NOT add dependencies
+Only enhance map interaction + camera behavior
+All existing features must continue working
+🚀 PATCH 1 — FOLLOW BUS MODE (CORE FEATURE)
+GOAL:
+When user taps a bus marker → map follows that bus smoothly.
+STATE:
+JavaScript
+const [trackedBusId, setTrackedBusId] = useState(null);
+ON MARKER TAP:
+JavaScript
+onPress={() => {
+  setTrackedBusId(bus.id);
+  setSelectedBus(bus); // existing bottom sheet logic
+}}
+CAMERA FOLLOW LOGIC
+FIND where map region/camera is controlled.
+ADD:
+JavaScript
+useEffect(() => {
+  if (!trackedBusId) return;
+
+  const trackedBus = buses.find(b => b.id === trackedBusId);
+  if (!trackedBus) return;
+
+  mapRef.current?.animateCamera({
+    center: {
+      latitude: trackedBus.lat,
+      longitude: trackedBus.lng,
+    },
+    zoom: 15,
+  }, { duration: 800 });
+
+}, [buses, trackedBusId]);
+RULES:
+Smooth animation (duration: 600–800ms)
+DO NOT jump camera
+DO NOT reset zoom constantly if unchanged
+ONLY follow when trackedBusId is set
+🚀 PATCH 2 — EXIT FOLLOW MODE
+PROBLEM:
+User should be able to stop tracking easily
+ADD:
+When user drags map:
+JavaScript
+onPanDrag={() => {
+  setTrackedBusId(null);
+}}
+ALSO:
+When user presses ❌ on bottom sheet:
+JavaScript
+setTrackedBusId(null);
+setSelectedBus(null);
+🚀 PATCH 3 — ROUTE AHEAD HIGHLIGHT
+GOAL:
+Show where the bus is going — not just where it is
+FIND route polyline rendering
+ADD logic:
+JavaScript
+if (route.id === selectedBus?.routeId) {
+  polyline.setStyle({
+    color: "#3B82F6",
+    weight: 5,
+    opacity: 1,
+  });
+} else {
+  polyline.setStyle({
+    opacity: 0.15,
+    weight: 2,
+  });
+}
+OPTIONAL (BETTER UX):
+If route coordinates available:
+Split route into:
+completed part → faded
+upcoming part → highlighted
+🚀 PATCH 4 — BUS HEADING DIRECTION (PRO FEEL)
+GOAL:
+Show direction like real navigation apps
+IF bearing/direction available:
+Rotate marker:
+JavaScript
+rotation: bus.heading || 0
+IF NOT AVAILABLE:
+Approximate using movement:
+JavaScript
+const angle = Math.atan2(
+  bus.nextLat - bus.lat,
+  bus.nextLng - bus.lng
+);
+RULES:
+Keep rotation subtle
+Do NOT jitter → smooth updates only
+🚀 PATCH 5 — AUTO ZOOM CONTROL
+GOAL:
+Don’t annoy user with zoom changes
+RULE:
+First tap → zoom to 15
+After that → ONLY move center, DO NOT change zoom
+IMPLEMENT:
+JavaScript
+const [hasZoomed, setHasZoomed] = useState(false);
+
+if (!hasZoomed) {
+  zoom: 15;
+  setHasZoomed(true);
+}
+🚀 PATCH 6 — MINI STATUS OVERLAY
+GOAL:
+Make tracking feel “live”
+ADD small overlay above map:
+JavaScript
+{trackedBusId && (
+  <View style={styles.trackingBanner}>
+    <Text>Tracking bus • Tap map to stop</Text>
+  </View>
+)}
+STYLE:
+JavaScript
+trackingBanner: {
+  position: "absolute",
+  top: 80,
+  alignSelf: "center",
+  backgroundColor: "#1E293B",
+  paddingHorizontal: 12,
+  paddingVertical: 6,
+  borderRadius: 12,
+}
+🧪 FINAL CHECKLIST
+After implementation:
+[ ] Tapping a bus starts tracking mode
+[ ] Map smoothly follows the bus
+[ ] No camera jumping or flicker
+[ ] Dragging map stops tracking
+[ ] Bottom sheet close stops tracking
+[ ] Selected route is highlighted
+[ ] Other routes fade
+[ ] Marker rotates (if heading available)
+[ ] Zoom only changes once (not repeatedly)
+[ ] Tracking banner appears and disappears correctly
+🎯 WHAT THIS ACHIEVES
+Before: 👉 “List + map”
+After: 👉 “Live tracking system”
+🧠 FINAL VERDICT
+After this:
+👉 Your app = Uber-level interaction quality
+Not exaggeration.
+Because:
+Movement + context + interaction = product feel

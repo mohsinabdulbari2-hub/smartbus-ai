@@ -19,12 +19,12 @@ const CONFIG: Record<
     dot: "🟢",
   },
   Medium: {
-    color: Colors.warning,
-    bg: "rgba(245,158,11,0.12)",
-    border: "rgba(245,158,11,0.35)",
+    color: "#9CA3AF",
+    bg: "rgba(156,163,175,0.10)",
+    border: "rgba(156,163,175,0.30)",
     label: "Moderate crowd",
     icon: "users",
-    dot: "🟡",
+    dot: "⚪",
   },
   High: {
     color: Colors.danger,
@@ -35,12 +35,12 @@ const CONFIG: Record<
     dot: "🔴",
   },
   VeryHigh: {
-    color: "#B91C1C",
-    bg: "rgba(185,28,28,0.18)",
-    border: "rgba(185,28,28,0.5)",
+    color: Colors.danger,
+    bg: "rgba(239,68,68,0.18)",
+    border: "rgba(239,68,68,0.5)",
     label: "Packed — try the next bus",
     icon: "alert-octagon",
-    dot: "🟥",
+    dot: "🔴",
   },
 };
 
