@@ -221,17 +221,14 @@ interface BusPanelProps {
 }
 
 function BusPanel({ bus, buses, etaMin, isFollowing, onFollow, onClose }: BusPanelProps) {
-  const { data: freqRows } = useGetRouteFrequency(bus.routeId);
+  const dayType = [0, 6].includes(new Date().getDay()) ? "weekend" : "weekday";
+  const { data: freqData } = useGetRouteFrequency(bus.routeId, { dayType });
 
   const frequencyDisplay = useMemo(() => {
     const hour = new Date().getHours();
     const slot = getTimeSlot(hour);
-    const isWeekend = [0, 6].includes(new Date().getDay());
-    const dayType = isWeekend ? "weekend" : "weekday";
-
-    const baseRow = (freqRows as Array<{ dayType: string; period: string; frequency: number }> | undefined)
-      ?.find((r) => r.dayType === dayType && r.period === slot);
-    const base = baseRow?.frequency ?? 6;
+    // freqData is a FrequencyData object {morning, afternoon, evening, night}
+    const base = (freqData as Record<string, number> | undefined)?.[slot] ?? 6;
 
     const routeBuses = buses.filter((b) => b.routeId === bus.routeId && b.speed >= 5);
     const etaSeconds = routeBuses.map((b) => {
