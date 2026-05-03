@@ -39,13 +39,17 @@ interface BusPosition {
 const busState = new Map<string, BusPosition>();
 let initialized = false;
 
+// Popularity weight per route: longer routes = busier corridors.
+// Populated during initializeBuses(); falls back to 0 if missing.
+const routePopularity = new Map<string, number>();
+
 function getCrowdLevel(routeId: string, stopIndex: number): CrowdLevel {
   const now = new Date();
   const hour = now.getHours();
   const dayOfWeek = now.getDay();
   const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
 
-  // Base "demand" varies by time of day (0..1)
+  // 1) Time-of-day demand (0..1)
   let timeFactor = 0.4;
   if (hour >= 8 && hour <= 10) timeFactor = 0.7;        // morning peak
   else if (hour >= 17 && hour <= 20) timeFactor = 0.72; // evening peak
@@ -56,20 +60,35 @@ function getCrowdLevel(routeId: string, stopIndex: number): CrowdLevel {
 
   if (isWeekend) timeFactor *= 0.75;
 
-  // Per-bus pseudo-random variation so different buses on the same route
-  // don't all show the same crowd level (wide range so all 4 levels appear).
+  // 2) Route popularity boost (longer/major corridors carry more passengers).
+  //    Normalized 0..0.18 — capped so it never overrides time-of-day.
+  const popularity = Math.min(routePopularity.get(routeId) ?? 0, 1) * 0.18;
+
+  // 3) Stop density boost: middle of the route is the busiest segment;
+  //    endpoints are quieter. Triangular weighting in 0..0.12.
+  let densityBoost = 0;
+  const len = routePopularity.get(routeId);
+  if (len && len > 1) {
+    // Use stopIndex relative to a notional length anchor — peak at midpoint.
+    const t = Math.min(1, Math.max(0, stopIndex / Math.max(1, (len * 30))));
+    densityBoost = (1 - Math.abs(0.5 - t) * 2) * 0.12;
+  } else {
+    densityBoost = 0.05;
+  }
+
+  // 4) Per-bus pseudo-random jitter so buses on the same route differ.
   let h = 0;
   const seed = `${routeId}-${stopIndex}`;
   for (let i = 0; i < seed.length; i++) {
     h = (h * 31 + seed.charCodeAt(i)) | 0;
   }
-  const jitter = ((Math.abs(h) % 100) / 100) * 0.9 - 0.45; // -0.45..+0.45
+  const jitter = ((Math.abs(h) % 100) / 100) * 0.7 - 0.35; // -0.35..+0.35
 
-  const score = timeFactor + jitter;
+  const score = timeFactor + popularity + densityBoost + jitter;
 
-  if (score >= 0.85) return "VeryHigh";
-  if (score >= 0.6) return "High";
-  if (score >= 0.32) return "Medium";
+  if (score >= 0.9) return "VeryHigh";
+  if (score >= 0.65) return "High";
+  if (score >= 0.35) return "Medium";
   return "Low";
 }
 
@@ -113,8 +132,10 @@ async function getRouteStopsCache() {
 
 // How many routes do we simulate live buses for? With 4,200+ routes, simulating
 // every one would create thousands of buses. Cap to a representative sample.
-const MAX_LIVE_ROUTES = 80;
-const BUSES_PER_ROUTE = 3;
+// 100 routes × 5 buses ≈ 500 live buses — large enough to feel like a city
+// fleet, small enough to keep payloads under ~150KB.
+const MAX_LIVE_ROUTES = 100;
+const BUSES_PER_ROUTE = 5;
 
 async function initializeBuses() {
   if (initialized) return;
@@ -129,10 +150,17 @@ async function initializeBuses() {
     .filter((x) => x.len >= 5)
     .sort((a, b) => b.len - a.len);
 
+  // Populate route popularity map (normalized stop count → 0..1).
+  // Longer routes ≈ busier corridors → higher crowd weight.
+  const maxLen = annotated.length > 0 ? annotated[0].len : 1;
+  for (const x of annotated) {
+    routePopularity.set(x.route.id, x.len / Math.max(1, maxLen));
+  }
+
   // Pick a balanced sample so every filter chip has buses to show
   const TYPES: NormalizedBusType[] = ["Ordinary", "Vajra", "Volvo", "Airport", "MetroFeeder", "Night"];
   const PER_TYPE: Record<NormalizedBusType, number> = {
-    Ordinary: 30, Vajra: 14, Volvo: 12, Airport: 8, MetroFeeder: 10, Night: 6,
+    Ordinary: 40, Vajra: 18, Volvo: 14, Airport: 10, MetroFeeder: 12, Night: 8,
   };
   const picked: Array<{ route: typeof allRoutes[number]; type: NormalizedBusType }> = [];
   for (const t of TYPES) {
@@ -158,7 +186,14 @@ async function initializeBuses() {
 
     const numBuses = BUSES_PER_ROUTE;
     for (let i = 0; i < numBuses; i++) {
-      const stopIndex = Math.floor((i / numBuses) * (stops.length - 1));
+      // Spread starting positions evenly + small per-bus jitter so two buses
+      // on the same route never start at the exact same stop.
+      const baseFrac = i / numBuses;
+      const jitterFrac = (Math.random() - 0.5) * (0.5 / numBuses);
+      const stopIndex = Math.max(
+        0,
+        Math.min(stops.length - 2, Math.floor((baseFrac + jitterFrac) * (stops.length - 1))),
+      );
       const currentStop = stops[stopIndex].stop;
       const nextStopIdx = Math.min(stopIndex + 1, stops.length - 1);
       const nextStop = stops[nextStopIdx].stop;
@@ -263,10 +298,50 @@ setInterval(async () => {
   }
 }, 2000);
 
+// Simple haversine distance in km
+function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number) {
+  const R = 6371;
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(a));
+}
+
 router.get("/live", async (req, res) => {
   try {
     if (!initialized) await initializeBuses();
-    const buses = Array.from(busState.values());
+    let buses = Array.from(busState.values());
+
+    // Optional server-side filtering (keeps payload small; backward-compatible:
+    // old clients that don't pass these get the full list as before).
+    const { busType, lat, lng, radius, limit, offset } = req.query as Record<string, string>;
+
+    if (busType && busType !== "All") {
+      buses = buses.filter((b) => b.busType === busType);
+    }
+
+    if (lat && lng) {
+      const la = parseFloat(lat);
+      const ln = parseFloat(lng);
+      const radKm = radius ? parseFloat(radius) : 8; // default 8 km
+      if (!Number.isNaN(la) && !Number.isNaN(ln)) {
+        buses = buses.filter((b) => haversineKm(la, ln, b.lat, b.lng) <= radKm);
+      }
+    }
+
+    const total = buses.length;
+
+    if (offset || limit) {
+      const off = Math.max(0, parseInt(offset ?? "0", 10) || 0);
+      const lim = Math.max(1, Math.min(200, parseInt(limit ?? "30", 10) || 30));
+      buses = buses.slice(off, off + lim);
+      // When pagination is requested, return an envelope so clients can know total.
+      res.set("X-Total-Count", String(total));
+    }
+
     res.json(buses);
   } catch (err) {
     req.log.error({ err }, "Error fetching live buses");
