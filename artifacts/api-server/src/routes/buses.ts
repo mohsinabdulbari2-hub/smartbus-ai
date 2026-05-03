@@ -157,9 +157,10 @@ function getCrowdLevel(routeId: string, stopIndex: number, direction: number = 1
     densityBoost = (1 - Math.abs(0.5 - t) * 2) * 0.06;
   }
 
-  // 5) Randomness — widened band ±0.20 for genuine spread across all tiers
+  // ── PHASE 1: ALL REALISM MULTIPLIERS (applied in full before any distribution) ──
+
+  // 5) Base load from time + popularity + stop position
   let load = (timeFactor + popularity + densityBoost) * routeDensity;
-  load += (Math.random() - 0.5) * 0.4;
 
   // 6) BMTC route-tier multiplier (named routes are busier)
   load *= getRouteFactor(routeNumber);
@@ -167,27 +168,34 @@ function getCrowdLevel(routeId: string, stopIndex: number, direction: number = 1
   // 7) Hotspot area boost (Silk Board, Majestic, etc.)
   load *= getHotspotFactor(stopName);
 
-  // 8) Rain: more crowd, validated by deterministic seed
+  // 8) Rain boost — applied after all static multipliers
   const rainy = isRaining();
   if (rainy) {
     load *= 1.15;
     if (isMorningPeak || isEveningPeak) load *= 1.1;
   }
 
-  // 9) Global downward bias — counters accumulated upward pressure from boosts
-  load *= 0.9;
+  // ── PHASE 2: DISTRIBUTION CORRECTION (must run AFTER all boosts above) ──
+  // Boosts above can push load into 0.5–0.8 range, wiping out low/very-high tiers.
+  // This block restores a realistic spread across all 4 categories.
 
-  // 10) Guaranteed low segment: ~20% of buses are near-empty (just left terminus,
-  //     contra-peak direction, low-demand spur, etc.)
-  if (Math.random() < 0.20) load *= 0.5;
+  // 9) Stronger downward pull — essential to counteract accumulated boost pressure
+  load *= 0.85;
 
-  // 11) Rare very-crowded spike: ~8% chance during any hour
-  if (Math.random() < 0.08) load *= 1.2;
+  // 10) Guaranteed low segment: ~30% of buses are near-empty
+  //     (just left terminus, contra-peak direction, low-demand spur)
+  if (Math.random() < 0.30) load *= 0.45;
 
-  // 12) Night safety cap — buses never crowded late at night
+  // 11) Rare very-crowded spike: ~10% chance (peak crush hours, Silk Board etc.)
+  if (Math.random() < 0.10) load *= 1.25;
+
+  // 12) Wide jitter ±0.20 — ensures no two buses on same route are identical
+  load += (Math.random() - 0.5) * 0.4;
+
+  // 13) Night safety cap — no "Crowded" or "Very crowded" after 9pm
   if (isNight) load = Math.min(load, 0.5);
 
-  // 13) Clamp — raised to 0.95 so very_high tier has breathing room
+  // 14) Final clamp — 0.95 ceiling gives very_high tier breathing room
   load = Math.max(0, Math.min(load, 0.95));
 
   if (load >= 0.75) return "VeryHigh";
