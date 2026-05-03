@@ -168,16 +168,15 @@ export default function LiveScreen() {
 
   const stats = useMemo(() => {
     const live = buses.filter((b) => b.isOnline !== false);
-    const sampleCrowded = live.filter(
-      (b) => b.crowdLevel === "High" || b.crowdLevel === "VeryHigh",
-    ).length;
-    const sampleEmpty = live.filter((b) => b.crowdLevel === "Low").length;
     const sampleSize = Math.max(1, live.length);
     const ratio = fleetTotal / sampleSize;
+    const count = (level: string) => Math.round(live.filter((b) => b.crowdLevel === level).length * ratio);
     return {
       total: fleetTotal,
-      crowded: Math.round(sampleCrowded * ratio),
-      empty: Math.round(sampleEmpty * ratio),
+      low: count("Low"),
+      medium: count("Medium"),
+      high: count("High"),
+      veryHigh: count("VeryHigh"),
     };
   }, [buses, fleetTotal]);
 
@@ -228,8 +227,10 @@ export default function LiveScreen() {
           ListHeaderComponent={
             <Header
               total={stats.total}
-              crowded={stats.crowded}
-              empty={stats.empty}
+              low={stats.low}
+              medium={stats.medium}
+              high={stats.high}
+              veryHigh={stats.veryHigh}
               filter={filter}
               setFilter={setFilter}
               dataUpdatedAt={dataUpdatedAt}
@@ -297,9 +298,9 @@ export default function LiveScreen() {
 }
 
 function Header({
-  total, crowded, empty, filter, setFilter, dataUpdatedAt, secondsAgo, isOffline, showFetchHint, showingCount,
+  total, low, medium, high, veryHigh, filter, setFilter, dataUpdatedAt, secondsAgo, isOffline, showFetchHint, showingCount,
 }: {
-  total: number; crowded: number; empty: number;
+  total: number; low: number; medium: number; high: number; veryHigh: number;
   filter: BusType | "All"; setFilter: (f: BusType | "All") => void;
   dataUpdatedAt: number;
   secondsAgo: number;
@@ -307,6 +308,7 @@ function Header({
   showFetchHint: boolean;
   showingCount: number;
 }) {
+  const crowded = high + veryHigh;
   const timerLabel = dataUpdatedAt ? `Updated ${secondsAgo}s ago` : "Connecting...";
   const timerColor = !dataUpdatedAt
     ? Colors.dark.textMuted
@@ -342,28 +344,20 @@ function Header({
 
       {/* Stat cards */}
       <Animated.View entering={FadeInUp.delay(80).duration(450)}>
-        <View style={styles.statsRow}>
-          <StatCard
-            label="Buses on road"
-            value={total}
-            icon="🚍"
-            gradient={Colors.gradients.primary}
-            glow={Colors.primaryGlow}
-          />
-          <StatCard
-            label="Less crowded"
-            value={empty}
-            icon="🟢"
-            gradient={Colors.gradients.success}
-            glow="rgba(34,197,94,0.3)"
-          />
-          <StatCard
-            label="Crowded"
-            value={crowded}
-            icon="🔴"
-            gradient={Colors.gradients.danger}
-            glow="rgba(239,68,68,0.3)"
-          />
+        {/* Fleet total — full-width banner */}
+        <View style={styles.statsBanner}>
+          <Text style={styles.statsBannerIcon}>🚍</Text>
+          <View>
+            <Text style={styles.statsBannerValue}>{total.toLocaleString()}</Text>
+            <Text style={styles.statsBannerLabel}>Buses on road</Text>
+          </View>
+        </View>
+        {/* 2×2 crowd grid */}
+        <View style={styles.statsGrid}>
+          <StatCard label="Seats available" value={low}     icon="🟢" color="#22c55e" glow="rgba(34,197,94,0.25)" />
+          <StatCard label="Moderate"        value={medium}  icon="🔵" color="#3b82f6" glow="rgba(59,130,246,0.25)" />
+          <StatCard label="Crowded"         value={high}    icon="🟠" color="#f97316" glow="rgba(249,115,22,0.25)" />
+          <StatCard label="Very crowded"    value={veryHigh} icon="🔴" color="#ef4444" glow="rgba(239,68,68,0.25)" />
         </View>
       </Animated.View>
 
@@ -428,20 +422,14 @@ function Header({
 }
 
 function StatCard({
-  label, value, icon, gradient, glow,
-}: { label: string; value: number; icon: string; gradient: [string, string]; glow: string }) {
+  label, value, icon, color, glow,
+}: { label: string; value: number; icon: string; color: string; glow: string }) {
   return (
-    <View style={[styles.statCard, Shadow.glow(glow)]}>
-      <LinearGradient
-        colors={gradient}
-        style={StyleSheet.absoluteFill}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-      />
-      <View style={styles.statOverlay} />
+    <View style={[styles.statCard, Shadow.glow(glow), { borderColor: color + "40" }]}>
+      <View style={[StyleSheet.absoluteFillObject, { backgroundColor: color + "18", borderRadius: Radius.lg }]} />
       <Text style={styles.statIcon}>{icon}</Text>
-      <Text style={styles.statValue}>{value}</Text>
-      <Text style={styles.statLabel}>{label}</Text>
+      <Text style={[styles.statValue, { color }]}>{value}</Text>
+      <Text style={[styles.statLabel, { color: color + "CC" }]}>{label}</Text>
     </View>
   );
 }
@@ -706,27 +694,43 @@ const styles = StyleSheet.create({
     alignItems: "center", justifyContent: "center",
   },
 
-  statsRow: { flexDirection: "row", gap: 10, marginBottom: 18 },
-  statCard: {
-    flex: 1,
+  statsBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+    backgroundColor: Colors.dark.surface,
     borderRadius: Radius.lg,
-    paddingVertical: 16,
-    paddingHorizontal: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 18,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: Colors.dark.cardBorder,
+  },
+  statsBannerIcon: { fontSize: 28 },
+  statsBannerValue: { fontSize: 30, fontFamily: "Inter_700Bold", color: Colors.dark.text, letterSpacing: -0.5 },
+  statsBannerLabel: { fontSize: 11, fontFamily: "Inter_600SemiBold", color: Colors.dark.textMuted, letterSpacing: 0.5, textTransform: "uppercase" },
+
+  statsGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginBottom: 18 },
+  statCard: {
+    width: "47.5%",
+    borderRadius: Radius.lg,
+    paddingVertical: 14,
+    paddingHorizontal: 14,
     overflow: "hidden",
-    minHeight: 110,
+    minHeight: 90,
     justifyContent: "space-between",
+    borderWidth: 1,
   },
   statOverlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: "rgba(0,0,0,0.18)",
   },
-  statIcon: { fontSize: 22 },
-  statValue: { fontSize: 32, fontFamily: "Inter_700Bold", color: "#fff", marginTop: 4, letterSpacing: -0.5 },
+  statIcon: { fontSize: 20 },
+  statValue: { fontSize: 28, fontFamily: "Inter_700Bold", marginTop: 2, letterSpacing: -0.5 },
   statLabel: {
-    fontSize: 10,
+    fontSize: 9,
     fontFamily: "Inter_700Bold",
-    color: "rgba(255,255,255,0.85)",
-    letterSpacing: 1.2,
+    letterSpacing: 1.0,
     textTransform: "uppercase",
     marginTop: 2,
   },

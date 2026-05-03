@@ -1,0 +1,180 @@
+You are a senior frontend engineer working on a live bus tracking app. Implement a realistic crowd distribution + UI + frequency + map behavior system with zero breaking changes.
+
+Do NOT change backend APIs. All logic must be additive and deterministic.
+
+---
+
+🎯 OBJECTIVES
+
+1. Fix unrealistic crowd distribution (especially night)
+2. Add full crowd categories (Low / Moderate / Crowded / Very Crowded)
+3. Ensure time-based realism (night ≠ crowded)
+4. Integrate frequency engine (baseline + live + direction + stop)
+5. Improve map UX (auto-focus + follow mode)
+6. Maintain performance and stability
+
+---
+
+1️⃣ CROWD SIMULATION (REALISTIC MODEL)
+
+Step 1 — Time-based base load
+
+function getTimeFactor(hour) {
+  if (hour >= 6 && hour < 10) return 0.55;   // morning peak
+  if (hour >= 16 && hour < 20) return 0.55;  // evening peak
+  if (hour >= 11 && hour < 15) return 0.25;  // midday
+  return 0.12;                               // night
+}
+
+👉 Night must always be lowest.
+
+---
+
+Step 2 — Direction bias
+
+if (isMorningPeak && direction === "inbound") load *= 1.2;
+if (isEveningPeak && direction === "outbound") load *= 1.2;
+
+---
+
+Step 3 — Route density factor
+
+load *= routeDensity; // 0.8–1.2 range
+
+---
+
+Step 4 — Add controlled randomness
+
+load += (Math.random() - 0.5) * 0.2;
+
+---
+
+Step 5 — Clamp values
+
+load = Math.max(0, Math.min(load, 0.92));
+
+---
+
+Step 6 — Classification (FINAL)
+
+function classifyCrowd(load) {
+  if (load < 0.35) return "low";
+  if (load < 0.7) return "medium";
+  if (load < 0.9) return "high";
+  return "very_high";
+}
+
+---
+
+2️⃣ NIGHT SAFETY RULE (CRITICAL)
+
+Prevent unrealistic crowd at night:
+
+if (hour < 6 || hour >= 21) {
+  if (load > 0.5) load = 0.5;   // cap night crowd
+}
+
+👉 This ensures:
+
+- almost no “crowded” buses at night
+- realistic distribution
+
+---
+
+3️⃣ CROWD DISTRIBUTION TARGETS
+
+Enforce expected pattern:
+
+Time| Distribution
+Night| Mostly low
+Midday| Low + Moderate
+Peak| 40–55% high
+Weekend| 30% lower
+
+---
+
+4️⃣ UI — FIXED CARDS
+
+Replace current 2-category UI with 4 categories:
+
+Seats available (green)
+Moderate (blue)
+Crowded (orange)
+Very crowded (red)
+
+---
+
+Count logic
+
+function getCrowdCounts(buses) {
+  return buses.reduce((acc, b) => {
+    acc[b.crowd]++;
+    return acc;
+  }, { low: 0, medium: 0, high: 0, very_high: 0 });
+}
+
+---
+
+5️⃣ FREQUENCY ENGINE (ALL COMBINED)
+
+Use:
+
+- backend baseline
+- live ETA gaps
+- per-stop filtering
+- direction separation
+
+(Use your existing fusion logic—DO NOT change structure)
+
+Display:
+
+~12/hr (live)
+
+---
+
+6️⃣ MAP UX
+
+Auto-focus on selection
+
+map.flyTo([bus.lat, bus.lng], 15, { duration: 0.6 });
+
+---
+
+Follow mode
+
+const [followBusId, setFollowBusId] = useState(null);
+
+Update camera:
+
+if (followBusId) map.panTo([bus.lat, bus.lng]);
+
+Exit on user interaction:
+
+map.on("dragstart", () => setFollowBusId(null));
+map.on("zoomstart", () => setFollowBusId(null));
+
+---
+
+7️⃣ NON-NEGOTIABLE RULES
+
+DO NOT:
+
+- break polling
+- change API shape
+- add heavy computations
+- introduce UI clutter
+
+---
+
+✅ SUCCESS CRITERIA
+
+- Night shows mostly low crowd
+- Moderate category visible and balanced
+- No “all crowded” scenario
+- Frequency adapts realistically
+- Map interactions feel smooth
+- UI builds user trust
+
+---
+
+Implement exactly this—clean, minimal, and production-safe.

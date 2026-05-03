@@ -80,40 +80,46 @@ function ensureInitialized(): Promise<void> {
 // Populated during initializeBuses(); falls back to 0 if missing.
 const routePopularity = new Map<string, number>();
 
-function getCrowdLevel(routeId: string, stopIndex: number): CrowdLevel {
+function getCrowdLevel(routeId: string, stopIndex: number, direction: number = 1): CrowdLevel {
   const now = new Date();
   const hour = now.getHours();
   const dayOfWeek = now.getDay();
   const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+  const isMorningPeak = hour >= 8 && hour <= 10;
+  const isEveningPeak = hour >= 17 && hour <= 20;
 
   // 1) Time-of-day demand (0..1) — calibrated so peak hours realistically
   //    produce ~40-55% High/VeryHigh, off-peak ~5-15%, night <5%.
   let timeFactor: number;
-  if (hour >= 8 && hour <= 10) timeFactor = 0.52;        // morning peak
-  else if (hour >= 17 && hour <= 20) timeFactor = 0.55;  // evening peak
-  else if (hour >= 12 && hour <= 14) timeFactor = 0.35;  // lunch
+  if (isMorningPeak) timeFactor = 0.52;                  // morning peak
+  else if (isEveningPeak) timeFactor = 0.55;             // evening peak
+  else if (hour >= 12 && hour <= 14) timeFactor = 0.25;  // lunch (midday)
   else if (hour >= 6 && hour < 8) timeFactor = 0.28;     // early morning
   else if (hour >= 21 || hour < 6) timeFactor = 0.12;    // night
-  else timeFactor = 0.25;                                  // regular off-peak
+  else timeFactor = 0.22;                                  // regular off-peak
 
   if (isWeekend) timeFactor *= 0.70; // weekends significantly quieter
 
-  // 2) Route popularity boost (longer/major corridors carry more passengers).
-  //    Capped at 0.10 so it never dominates the time signal.
-  const popularity = Math.min(routePopularity.get(routeId) ?? 0, 1) * 0.10;
+  // 2) Direction bias: inbound routes fill up at morning peak,
+  //    outbound routes at evening peak (direction: 1=inbound, -1=outbound).
+  if (isMorningPeak && direction === 1)  timeFactor *= 1.2;
+  if (isEveningPeak && direction === -1) timeFactor *= 1.2;
 
-  // 3) Stop density boost: middle of the route is the busiest segment.
-  //    Triangular weighting in 0..0.06 — kept small.
-  let densityBoost = 0;
-  const len = routePopularity.get(routeId);
-  if (len && len > 1) {
-    const t = Math.min(1, Math.max(0, stopIndex / Math.max(1, (len * 30))));
+  // 3) Route density factor (0.8–1.2 range based on route popularity/length)
+  const pop = Math.min(routePopularity.get(routeId) ?? 0, 1);
+  const routeDensity = 0.8 + pop * 0.4;
+
+  // 4) Route popularity additive boost — capped at 0.08.
+  const popularity = pop * 0.08;
+
+  // 5) Stop density boost: middle of the route is the busiest segment.
+  let densityBoost = 0.02;
+  if (pop > 0) {
+    const t = Math.min(1, Math.max(0, stopIndex / Math.max(1, (pop * 30))));
     densityBoost = (1 - Math.abs(0.5 - t) * 2) * 0.06;
-  } else {
-    densityBoost = 0.02;
   }
 
-  // 4) Per-bus deterministic jitter so buses on the same route differ,
+  // 6) Per-bus deterministic jitter so buses on the same route differ,
   //    narrowed to ±0.12 to avoid overwhelming the time-of-day signal.
   let h = 0;
   const seed = `${routeId}-${stopIndex}`;
@@ -122,11 +128,20 @@ function getCrowdLevel(routeId: string, stopIndex: number): CrowdLevel {
   }
   const jitter = ((Math.abs(h) % 100) / 100) * 0.24 - 0.12; // -0.12..+0.12
 
-  const score = timeFactor + popularity + densityBoost + jitter;
+  let load = (timeFactor + popularity + densityBoost + jitter) * routeDensity;
 
-  if (score >= 0.75) return "VeryHigh";
-  if (score >= 0.52) return "High";
-  if (score >= 0.28) return "Medium";
+  // 7) NIGHT SAFETY RULE — cap crowd at night so buses are never unrealistically
+  //    packed when demand is minimal.
+  if (hour < 6 || hour >= 21) {
+    load = Math.min(load, 0.5);
+  }
+
+  // 8) Clamp to valid range
+  load = Math.max(0, Math.min(load, 0.92));
+
+  if (load >= 0.75) return "VeryHigh";
+  if (load >= 0.52) return "High";
+  if (load >= 0.28) return "Medium";
   return "Low";
 }
 
@@ -382,7 +397,7 @@ async function updateBusPositions() {
     } else {
       bus.speed = bus.baseSpeed;
     }
-    bus.crowdLevel = getCrowdLevel(bus.routeId, currentIdx);
+    bus.crowdLevel = getCrowdLevel(bus.routeId, currentIdx, bus.direction);
     bus.status = computeStatus(bus.distanceToNextStop, bus.speed, bus.progress);
     bus.totalStops = stops.length;
     // Stops covered along the current direction of travel

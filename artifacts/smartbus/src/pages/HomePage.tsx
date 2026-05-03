@@ -41,6 +41,16 @@ export default function HomePage() {
       : undefined;
   const { data: buses, isLoading: busesLoading } = useLiveBusesPolling(liveParams);
 
+  const crowdCounts = buses
+    ? buses.reduce(
+        (acc, b) => {
+          acc[(b as any).crowdLevel as string] = (acc[(b as any).crowdLevel as string] ?? 0) + 1;
+          return acc;
+        },
+        {} as Record<string, number>,
+      )
+    : null;
+
   return (
     <div className="relative w-full h-full flex flex-col">
       {/* Floating Status Bar (Top Right) */}
@@ -114,7 +124,7 @@ export default function HomePage() {
           <div className="flex items-center gap-2 mb-4 text-muted-foreground font-medium text-sm">
             <span>📍 Bengaluru 🚌</span>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4 mb-4">
             <div>
               <div className="flex items-center gap-1.5 text-muted-foreground mb-1">
                 <RouteIcon className="w-4 h-4 text-primary" />
@@ -130,6 +140,29 @@ export default function HomePage() {
               <div className="text-3xl font-display font-black">{stops?.length || 0}</div>
             </div>
           </div>
+          {crowdCounts && (
+            <>
+              <div className="border-t border-border/40 pt-3 mb-2">
+                <span className="text-xs font-semibold uppercase text-muted-foreground tracking-wide">Live crowd</span>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { label: "Seats available", key: "Low",      dot: "#22c55e" },
+                  { label: "Moderate",        key: "Medium",   dot: "#3b82f6" },
+                  { label: "Crowded",         key: "High",     dot: "#f97316" },
+                  { label: "Very crowded",    key: "VeryHigh", dot: "#ef4444" },
+                ].map(({ label, key, dot }) => (
+                  <div key={key} className="flex items-center gap-2 bg-background/40 rounded-xl px-3 py-2">
+                    <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: dot }} />
+                    <div className="min-w-0">
+                      <div className="text-[10px] text-muted-foreground leading-none mb-0.5 truncate">{label}</div>
+                      <div className="text-base font-display font-black leading-none">{crowdCounts[key] ?? 0}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
         </div>
       </motion.div>
 
