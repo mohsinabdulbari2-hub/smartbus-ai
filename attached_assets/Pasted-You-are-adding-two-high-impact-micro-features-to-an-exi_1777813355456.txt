@@ -1,0 +1,318 @@
+You are adding two high-impact micro-features to an existing bus 
+tracking mobile app. Do NOT change layout, backend, APIs, or any 
+existing logic. These are two self-contained additions only.
+
+---
+
+## STRICT CONSTRAINTS
+
+- Do NOT modify any API endpoints or data fetching logic
+- Do NOT change card layout, FlatList, or screen structure
+- Do NOT add new dependencies
+- Do NOT touch any existing working features
+- Both patches are fully self-contained — apply independently
+- TypeScript must remain clean after changes
+
+---
+
+## PATCH 1 — ETA COUNTDOWN BETWEEN POLLS
+
+---
+
+GOAL:
+ETA currently freezes between 8-second polls — feels static.
+Make it count down every second like Uber — feels live.
+
+---
+
+STEP A — Add local ETA state per bus:
+
+Each bus needs its own countdown. Use a ref-based 
+countdown map to avoid re-render storms:
+
+  // Outside component (module level):
+  // Stores the "base" ETA at last fetch time, per bus ID
+  const etaBaseRef = useRef<Record<string, {
+    etaMinutes: number;
+    fetchedAt:  number;
+  }>>({});
+
+STEP B — On every successful fetch, record base ETA:
+
+  // Inside your existing successful fetch handler:
+  // (where you currently call setBuses or similar)
+
+  buses.forEach(bus => {
+    if (bus.eta !== null && bus.eta !== undefined) {
+      etaBaseRef.current[bus.id] = {
+        etaMinutes: bus.eta,
+        fetchedAt:  Date.now(),
+      };
+    }
+  });
+
+STEP C — Add a 1-second ticker:
+
+  const [tick, setTick] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTick(t => t + 1); // force re-render every second
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // "tick" has no value itself — it just triggers re-render
+  // so getLocalEta() is called fresh every second
+
+STEP D — Compute live ETA per bus:
+
+  function getLocalEta(busId: string): number | null {
+    const base = etaBaseRef.current[busId];
+    if (!base) return null;
+
+    const elapsedMin =
+      (Date.now() - base.fetchedAt) / 1000 / 60;
+
+    const localEta = base.etaMinutes - elapsedMin;
+
+    // Floor at 0 — never show negative
+    return Math.max(localEta, 0);
+  }
+
+STEP E — Use in card render:
+
+  // Replace existing bus.eta usage with:
+  const localEta   = getLocalEta(bus.id);
+  const isArriving =
+    bus.distanceToNextStop < 30 ||
+    (localEta !== null && localEta < 2);
+
+  // ETA display:
+  const safeEta = localEta !== null
+    ? Math.max(Math.ceil(localEta), 1)
+    : null;
+
+  const etaNextStop = isArriving
+    ? `Arriving • Next: ${nextStop}`
+    : safeEta !== null
+      ? `${safeEta} min • Next: ${nextStop}`
+      : `— min • Next: ${nextStop}`;
+
+STEP F — Clean up stale entries (memory safety):
+
+  // Run after each successful fetch:
+  const currentIds = new Set(buses.map(b => b.id));
+
+  Object.keys(etaBaseRef.current).forEach(id => {
+    if (!currentIds.has(id)) {
+      delete etaBaseRef.current[id];
+    }
+  });
+
+---
+
+RULES:
+  - ticker useEffect returns cleanup → no memory leak
+  - etaBaseRef is a ref (not state) → no extra re-renders
+  - Only the tick state triggers re-render (1/sec)
+  - Never show negative ETA — floor at 0, display as "Arriving"
+  - Never show "0 min" — Math.ceil + Math.max(1) handles this
+  - If bus.eta is null/undefined → localEta returns null → show "—"
+  - Clean up etaBaseRef entries for buses no longer in response
+  - "Arriving" triggers when localEta < 2 OR distance < 30m
+  - On next successful fetch → etaBaseRef resets for that bus
+    → countdown restarts from new server ETA
+  - Do NOT apply countdown to the sort logic —
+    sort still uses raw server bus.eta (stable, no jitter)
+
+---
+
+VERIFICATION FOR PATCH 1:
+
+  [ ] ETA counts down every second between polls
+  [ ] "Arriving" appears when local ETA drops below 2 min
+  [ ] ETA never shows 0 or negative number
+  [ ] Countdown resets correctly after each successful fetch
+  [ ] No memory leak (interval cleaned up on unmount)
+  [ ] etaBaseRef cleaned of stale bus IDs after each fetch
+  [ ] Sort order unchanged (still uses server ETA)
+  [ ] TypeScript clean
+
+---
+
+## PATCH 2 — "CATCH IT" URGENCY SIGNAL
+
+---
+
+GOAL:
+When a bus is arriving AND the user can still physically 
+reach the stop in time — show an urgent, actionable signal.
+Answers the question every transit user has:
+"Can I still catch it?"
+
+---
+
+STEP A — Walking time calculation:
+
+  // Uses existing distKm from Patch 3 of previous round
+  // (haversine distance from user to bus)
+  // Average walking speed: 5 km/h
+
+  function getWalkTimeMin(distKm: number | null): number | null {
+    if (distKm === null) return null;
+    return (distKm / 5) * 60; // minutes to walk
+  }
+
+STEP B — Catchable condition:
+
+  const localEta     = getLocalEta(bus.id);   // from Patch 1
+  const walkTimeMin  = getWalkTimeMin(distKm); // existing distKm
+
+  // Bus is catchable if:
+  // 1. We know both values
+  // 2. Walking time ≤ bus ETA + 1 min buffer
+  // 3. Bus is not already gone (eta > 0)
+  // 4. Bus is close enough to matter (eta ≤ 8 min)
+
+  const isCatchable =
+    localEta     !== null &&
+    walkTimeMin  !== null &&
+    localEta     > 0      &&
+    localEta     <= 8     &&
+    walkTimeMin  <= localEta + 1;
+
+  // "Arriving" override — if bus is already arriving
+  // and user is nearby → always show signal
+  const isUrgent =
+    isCatchable && (isArriving || localEta <= 3);
+
+STEP C — Display signal in card:
+
+  ADD below the ETA + Next Stop line:
+
+  {isCatchable && (
+    <View style={styles.catchItRow}>
+      <Text style={styles.catchItText}>
+        {isUrgent
+          ? `⚡ Move now — ${Math.ceil(walkTimeMin)}min walk`
+          : `✓ You can catch this — ${Math.ceil(walkTimeMin)}min walk`
+        }
+      </Text>
+    </View>
+  )}
+
+STEP D — Styles:
+
+  catchItRow: {
+    marginTop: 4,
+    flexDirection: "row",
+    alignItems: "center",
+  }
+
+  catchItText (urgent — isUrgent = true):
+  {
+    fontSize:   12,
+    fontWeight: "700",
+    color:      "#F97316",   // orange — urgency
+    letterSpacing: 0.1,
+  }
+
+  catchItText (catchable — isUrgent = false):
+  {
+    fontSize:   12,
+    fontWeight: "500",
+    color:      "#22C55E",   // green — reassurance
+    letterSpacing: 0.1,
+  }
+
+  // Use conditional style:
+  style={[
+    styles.catchItText,
+    isUrgent
+      ? { color: "#F97316", fontWeight: "700" }
+      : { color: "#22C55E", fontWeight: "500" }
+  ]}
+
+---
+
+DISPLAY LOGIC SUMMARY:
+
+  localEta > 8 min           → nothing shown (too far ahead)
+  localEta 3–8, catchable    → "✓ You can catch this — Xmin walk"
+                                (green, calm)
+  localEta 0–3, catchable    → "⚡ Move now — Xmin walk"
+                                (orange, urgent)
+  not catchable              → nothing shown
+  distKm null (no location)  → nothing shown (silent)
+
+---
+
+RULES:
+  - Never show signal if distKm is null (location unavailable)
+  - Never show signal if localEta > 8 min (too early, not useful)
+  - Never show signal if walkTimeMin > localEta + 1 (can't make it)
+  - walkTimeMin display: Math.ceil (round up — conservative)
+  - Do NOT show both "Good option nearby" (previous patch)
+    AND "Catch It" signal simultaneously:
+      → If isCatchable → show Catch It signal only
+      → If not catchable but isGoodOption → show "Good option nearby"
+      → Priority: Catch It > Good option
+  - Signal is informational only — no navigation, no tap action
+  - Do NOT change card height constraints —
+    signal adds one line, should fit within existing padding
+  - If card has fixed height → convert to minHeight instead
+
+---
+
+VERIFICATION FOR PATCH 2:
+
+  [ ] "⚡ Move now" appears when eta ≤ 3 and walkable
+  [ ] "✓ You can catch this" appears when eta 3–8 and walkable
+  [ ] Nothing shown when eta > 8 min
+  [ ] Nothing shown when location unavailable
+  [ ] Nothing shown when walk time exceeds eta
+  [ ] "Catch It" takes priority over "Good option nearby"
+  [ ] Walk time rounded up (Math.ceil)
+  [ ] Orange color for urgent, green for catchable
+  [ ] No layout breaking on cards with signal showing
+  [ ] TypeScript clean
+
+---
+
+## COMBINED VERIFICATION CHECKLIST
+
+  [ ] ETA counts down live every second (not just on poll)
+  [ ] "Arriving" triggers from countdown (not just server value)
+  [ ] Countdown resets on each successful fetch
+  [ ] No negative or zero ETA ever displayed
+  [ ] etaBaseRef cleaned after each fetch cycle
+  [ ] Sort still uses server ETA (stable sort order)
+  [ ] "⚡ Move now" shows correctly for urgent buses
+  [ ] "✓ You can catch this" shows for catchable buses
+  [ ] Silent when location unavailable
+  [ ] Priority: Catch It > Good option nearby
+  [ ] No memory leaks (all intervals cleaned up)
+  [ ] No new dependencies added
+  [ ] No backend changes
+  [ ] No layout restructuring
+  [ ] TypeScript clean throughout
+  [ ] All prior production rules intact:
+      → No setBuses([]) in catch blocks
+      → lastFetch only on success
+      → Offline banner after 2 failures
+      → Stale data preserved on failure
+
+---
+
+## IMPLEMENTATION ORDER
+
+  1. Patch 1 — ETA countdown (do first)
+     Reason: Patch 2 depends on getLocalEta()
+
+  2. Patch 2 — Catch It signal (do second)
+     Reason: Uses localEta + existing distKm
+
+  Both patches are independent of map, filter, 
+  and sort logic — safe to apply without touching 
+  any other component.

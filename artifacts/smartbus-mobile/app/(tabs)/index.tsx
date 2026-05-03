@@ -223,7 +223,12 @@ export default function LiveScreen() {
           }
           renderItem={({ item, index }) => (
             <Animated.View entering={FadeInDown.delay(Math.min(index * 30, 360)).springify()}>
-              <BusCard bus={item} userLocation={userLocation} isTop={item.id === bestBusId} />
+              <BusCard
+                bus={item}
+                userLocation={userLocation}
+                isTop={item.id === bestBusId}
+                dataUpdatedAt={dataUpdatedAt}
+              />
             </Animated.View>
           )}
           ListFooterComponent={
@@ -436,41 +441,89 @@ function BusCard({
   bus,
   userLocation,
   isTop,
+  dataUpdatedAt,
 }: {
   bus: LiveBus;
   userLocation: { lat: number; lng: number } | null;
   isTop: boolean;
+  dataUpdatedAt: number;
 }) {
   const config = BUS_TYPE_CONFIG[bus.busType] || BUS_TYPE_CONFIG.Ordinary;
   const gradient = getBusTypeGradient(bus.busType);
   const progress = bus.totalStops > 0 ? bus.stopsCovered / bus.totalStops : 0;
   const isOffline = bus.isOnline === false;
 
-  // "Arriving" overrides everything else when the bus is essentially at
-  // the next stop. We don't have an ETA field, so we derive purely from
-  // distanceToNextStop (meters).
-  const isArriving = (bus.distanceToNextStop ?? Number.POSITIVE_INFINITY) < 30;
+  // ---------- Live ETA countdown (Uber-style) ----------
+  // The server polls every ~12s, so a static ETA looks frozen. We snapshot
+  // the pseudo-ETA at fetch time (= dataUpdatedAt) and subtract elapsed
+  // minutes on every parent re-render. The parent already re-renders once
+  // per second via its `secondsAgo` ticker, so this gets us a smooth
+  // countdown for free — no extra timers, no module-level refs to clean.
+  // CRITICAL: sort uses raw getEtaSortKey(bus) — never the live value —
+  // so the list never reshuffles while a bus's local countdown ticks down.
+  const baseEtaMin = getEtaMinutes(bus);
+  // NOTE: do NOT wrap in useMemo — Date.now() isn't a dep, so memoizing
+  // would freeze the countdown between polls. Inline compute is cheap
+  // (a single subtraction) and runs fresh on every parent re-render,
+  // which is exactly the 1-per-second cadence we want.
+  const liveEtaMin: number | null =
+    baseEtaMin == null || !dataUpdatedAt
+      ? baseEtaMin
+      : Math.max(0, baseEtaMin - (Date.now() - dataUpdatedAt) / 60000);
+
+  // "Arriving" fires either from real proximity OR from the live countdown
+  // dropping below 2 minutes — so the card flips to "Arriving" mid-poll
+  // instead of waiting for the next fetch.
+  const isArriving =
+    (bus.distanceToNextStop ?? Number.POSITIVE_INFINITY) < 30 ||
+    (liveEtaMin != null && liveEtaMin < 2);
+
   const statusInfo = bus.status ? STATUS_CONFIG[bus.status] : null;
 
-  // Pseudo-ETA + combined "X min • Next: stop" label. Falls back to "—"
-  // when the bus is missing distance telemetry, so we never show a fake
-  // "1 min" for buses we can't actually estimate.
-  const etaMin = getEtaMinutes(bus);
   const etaText = isArriving
     ? "Arriving"
-    : etaMin == null
+    : liveEtaMin == null
       ? "— min"
-      : `${Math.max(1, Math.round(etaMin))} min`;
+      : `${Math.max(1, Math.ceil(liveEtaMin))} min`;
   const nextStopShort =
     bus.nextStop.length > 22 ? bus.nextStop.slice(0, 22) + "…" : bus.nextStop;
   const arrivingColor = "#60A5FA";
 
-  // Distance from user (memoized per render — cheap math, no need for useMemo).
-  const distLabel = useMemo(() => {
+  // Distance from user — store the raw km too so the catch-it logic can
+  // reason about walking time without re-doing the haversine.
+  const distKm = useMemo(() => {
     if (!userLocation) return null;
-    const km = getDistanceKm(userLocation.lat, userLocation.lng, bus.lat, bus.lng);
-    return km < 1 ? `${Math.round(km * 1000)} m away` : `${km.toFixed(1)} km away`;
+    return getDistanceKm(userLocation.lat, userLocation.lng, bus.lat, bus.lng);
   }, [userLocation, bus.lat, bus.lng]);
+  const distLabel = useMemo(() => {
+    if (distKm == null) return null;
+    return distKm < 1 ? `${Math.round(distKm * 1000)} m away` : `${distKm.toFixed(1)} km away`;
+  }, [distKm]);
+
+  // ---------- "Catch it" decision signal ----------
+  // Walking speed 5 km/h. Show the signal only when:
+  //   - we know both walk time + ETA
+  //   - bus hasn't already left the stop
+  //   - bus is within useful planning range (≤8 min)
+  //   - user can physically make it (walk ≤ ETA + 1 min buffer)
+  // Falls back to "Good option nearby" when the bus is close + soon but
+  // catchability can't be computed (e.g. no location). Catch-it always
+  // wins over "Good option" so we never double-stack hints.
+  const walkMin = distKm == null ? null : (distKm / 5) * 60;
+  const isCatchable =
+    liveEtaMin != null &&
+    walkMin != null &&
+    liveEtaMin > 0 &&
+    liveEtaMin <= 8 &&
+    walkMin <= liveEtaMin + 1;
+  const isUrgent =
+    isCatchable && (isArriving || (liveEtaMin != null && liveEtaMin <= 3));
+  const isGoodOption =
+    !isCatchable &&
+    liveEtaMin != null &&
+    liveEtaMin <= 5 &&
+    distKm != null &&
+    distKm <= 1.5;
 
   return (
     <Card
@@ -478,8 +531,10 @@ function BusCard({
       style={{
         marginBottom: 14,
         opacity: isOffline ? 0.55 : 1,
-        borderWidth: 0.5,
-        borderColor: "rgba(255,255,255,0.10)",
+        // Best card gets a stronger green border so the eye lands on it
+        // immediately. Other cards keep the subtle white-10% divider.
+        borderWidth: isTop ? 1 : 0.5,
+        borderColor: isTop ? "rgba(34,197,94,0.55)" : "rgba(255,255,255,0.10)",
       }}
     >
       {isTop && (
@@ -545,6 +600,23 @@ function BusCard({
             {distLabel && (
               <Text style={styles.distanceText}>{distLabel}</Text>
             )}
+            {isCatchable ? (
+              <Text
+                style={[
+                  styles.catchItText,
+                  isUrgent ? styles.catchItUrgent : styles.catchItCalm,
+                ]}
+                numberOfLines={1}
+              >
+                {isUrgent
+                  ? `⚡ Move now — ${Math.ceil(walkMin!)} min walk`
+                  : `✓ You can catch this — ${Math.ceil(walkMin!)} min walk`}
+              </Text>
+            ) : isGoodOption ? (
+              <Text style={styles.goodOptionText} numberOfLines={1}>
+                Good option nearby
+              </Text>
+            ) : null}
           </View>
           {!isArriving && (
             <View style={styles.speedPill}>
@@ -710,6 +782,25 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_700Bold",
     letterSpacing: 0.5,
     zIndex: 2,
+  },
+  catchItText: {
+    fontSize: 12,
+    marginTop: 3,
+    letterSpacing: 0.1,
+  },
+  catchItUrgent: {
+    color: "#F97316",
+    fontFamily: "Inter_700Bold",
+  },
+  catchItCalm: {
+    color: "#22C55E",
+    fontFamily: "Inter_600SemiBold",
+  },
+  goodOptionText: {
+    fontSize: 11,
+    marginTop: 3,
+    color: "#22C55E",
+    fontFamily: "Inter_500Medium",
   },
 
   busAccent: { height: 4, width: "100%" },
