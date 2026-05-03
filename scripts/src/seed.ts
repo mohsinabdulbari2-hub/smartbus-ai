@@ -181,6 +181,22 @@ async function main() {
     await db.insert(busFrequencyTable).values(freqRows.slice(i, i + FREQ_BATCH));
   }
 
+  // ── Reference stops (KGIS BMTC stops not on any modeled route) ───────────
+  // Adds extra bus stops parsed from the official KGIS bmtc_bus_stops KML so
+  // the live map looks dense and search can find every official BMTC stop,
+  // even those not on a route the GTFS feed models.
+  try {
+    const refStops: Array<{id:string;name:string;lat:number;lng:number;zone:string}> =
+      JSON.parse(readFileSync(join(DATA_DIR, "bmtc-reference-stops.json"), "utf8"));
+    console.log(`Inserting ${refStops.length.toLocaleString()} reference stops…`);
+    const REF_BATCH = 500;
+    for (let i = 0; i < refStops.length; i += REF_BATCH) {
+      await db.insert(busStopsTable).values(refStops.slice(i, i + REF_BATCH)).onConflictDoNothing();
+    }
+  } catch {
+    console.log("⚠ bmtc-reference-stops.json not found — skipping reference stops");
+  }
+
   // ── Stats ─────────────────────────────────────────────────────────────────
   const typeCounts: Record<string, number> = {};
   for (const r of routesJson) typeCounts[r.busType] = (typeCounts[r.busType] || 0) + 1;

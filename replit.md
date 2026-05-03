@@ -124,7 +124,7 @@ Run: `pnpm --filter @workspace/scripts run seed`
 - `GET /api/routes` — all routes
 - `GET /api/routes/:id` — route detail + stops
 - `GET /api/routes/:id/frequency` — frequency by day type
-- `GET /api/stops` — all stops
+- `GET /api/stops` — all stops (8,475 GTFS stops + 1,086 KGIS reference stops; reference stops have `id` prefix `kgis_` and empty `routeIds`, so they show on the map but never appear inside route details)
 - `GET /api/stops/:id/eta` — ETA per stop
 - `GET /api/stops/:id/crowd` — crowd prediction
 - `GET /api/search?source=X&destination=Y` — route search
