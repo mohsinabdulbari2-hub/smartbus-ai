@@ -53,7 +53,7 @@ export default function LiveScreen() {
 
   const { data, isLoading, refetch, isRefetching } = useQuery({
     queryKey: ["liveBuses"],
-    queryFn: api.getLiveBuses,
+    queryFn: api.getLiveBusesWithMeta,
     refetchInterval: 12000,
     placeholderData: (prev) => prev,
   });
@@ -68,7 +68,11 @@ export default function LiveScreen() {
     return () => clearInterval(t);
   }, []);
 
-  const buses = data ?? [];
+  const buses = data?.buses ?? [];
+  // Real fleet size from X-Total-Count header. The response body is
+  // server-capped at 100 — using it for "Buses on road" would have
+  // dramatically under-reported the live fleet.
+  const fleetTotal = data?.total ?? buses.length;
   const filtered = useMemo(
     () => (filter === "All" ? buses : buses.filter((b) => b.busType === filter)),
     [buses, filter],
@@ -76,13 +80,21 @@ export default function LiveScreen() {
 
   const stats = useMemo(() => {
     const live = buses.filter((b) => b.isOnline !== false);
-    const total = live.length;
-    const crowded = live.filter(
+    const sampleCrowded = live.filter(
       (b) => b.crowdLevel === "High" || b.crowdLevel === "VeryHigh",
     ).length;
-    const empty = live.filter((b) => b.crowdLevel === "Low").length;
-    return { total, crowded, empty };
-  }, [buses]);
+    const sampleEmpty = live.filter((b) => b.crowdLevel === "Low").length;
+    // Project the sample's crowd/empty ratios onto the real fleet size so
+    // the three stat cards stay coherent (you can't have 30 crowded buses
+    // out of "65 on road" when the real fleet is 700).
+    const sampleSize = Math.max(1, live.length);
+    const ratio = fleetTotal / sampleSize;
+    return {
+      total: fleetTotal,
+      crowded: Math.round(sampleCrowded * ratio),
+      empty: Math.round(sampleEmpty * ratio),
+    };
+  }, [buses, fleetTotal]);
 
   return (
     <View style={styles.root}>

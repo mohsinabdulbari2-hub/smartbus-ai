@@ -211,7 +211,30 @@ async function initializeBuses() {
       if (!used.has(x.route.id)) picked.push({ route: x.route, type: x.type });
     }
   }
-  const ranked = picked.slice(0, MAX_LIVE_ROUTES);
+  // Interleave by type so consecutive insertions cycle through the type
+  // pool. Map iteration order = insertion order, so the default /live
+  // response (capped at 100) ends up with a balanced type mix instead of
+  // 100 buses of the first type. Filter chips on the mobile client all
+  // populate, and the "All Buses" pill shows realistic variety.
+  const buckets = new Map<NormalizedBusType, typeof picked>();
+  for (const p of picked) {
+    const arr = buckets.get(p.type) ?? [];
+    arr.push(p);
+    buckets.set(p.type, arr);
+  }
+  const interleaved: typeof picked = [];
+  let stillHaveItems = true;
+  while (stillHaveItems) {
+    stillHaveItems = false;
+    for (const t of TYPES) {
+      const arr = buckets.get(t);
+      if (arr && arr.length > 0) {
+        interleaved.push(arr.shift()!);
+        if (arr.length > 0) stillHaveItems = true;
+      }
+    }
+  }
+  const ranked = interleaved.slice(0, MAX_LIVE_ROUTES);
 
   const breakdown = ranked.reduce((acc, p) => { acc[p.type] = (acc[p.type] || 0) + 1; return acc; }, {} as Record<string, number>);
   console.log(`[buses] initializing ~${ranked.length * BUSES_PER_ROUTE} live buses across ${ranked.length} routes`, breakdown);

@@ -6,6 +6,22 @@ async function get<T>(path: string): Promise<T> {
   return res.json();
 }
 
+/**
+ * Fetch live buses along with the real fleet size (from X-Total-Count
+ * header). The JSON body is server-capped at 100, so always use `total`
+ * for stat cards / counts and `buses` for actual rendering.
+ */
+export type LiveBusesPage = { buses: LiveBus[]; total: number };
+
+async function getLiveBusesWithMeta(): Promise<LiveBusesPage> {
+  const res = await fetch(`${BASE}/buses/live`);
+  if (!res.ok) throw new Error(`API error: ${res.status}`);
+  const buses = (await res.json()) as LiveBus[];
+  const headerVal = res.headers.get("X-Total-Count");
+  const total = headerVal ? parseInt(headerVal, 10) : buses.length;
+  return { buses, total: Number.isFinite(total) ? total : buses.length };
+}
+
 export type BusType = "Ordinary" | "Vajra" | "Volvo" | "Airport" | "MetroFeeder" | "Night";
 
 export type CrowdLevel = "Low" | "Medium" | "High" | "VeryHigh";
@@ -118,6 +134,7 @@ export type SearchResult = {
 
 export const api = {
   getLiveBuses: () => get<LiveBus[]>("/buses/live"),
+  getLiveBusesWithMeta,
   getRoutes: () => get<Route[]>("/routes"),
   getRoute: (id: string) => get<RouteDetail>(`/routes/${id}`),
   getRouteFrequency: (id: string, dayType: "weekday" | "weekend" = "weekday") =>
