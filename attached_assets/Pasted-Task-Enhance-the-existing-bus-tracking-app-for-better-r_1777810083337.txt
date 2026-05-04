@@ -1,0 +1,194 @@
+Task:
+Enhance the existing bus tracking app for better realism, smoothness, and clarity using minimal, safe improvements. Do NOT change architecture, APIs, endpoints, or UI layout.
+
+---
+
+STRICT CONSTRAINTS
+
+- Do NOT modify API endpoints or contracts
+- Do NOT redesign UI or layout
+- Do NOT add new dependencies
+- Only patch existing logic (frontend + backend)
+- Keep everything lightweight and stable
+
+---
+
+1. SIMULATION TICK (Backend)
+
+---
+
+- Change simulation interval from 2000ms → 5000ms
+- Do NOT change frontend polling (remains 8s)
+
+Goal:
+Reduce CPU load while maintaining smooth motion
+
+---
+
+2. COUNT TRANSPARENCY LABEL (Frontend)
+
+---
+
+Add a small label near existing filter/toggle area:
+
+"Showing X of Y buses"
+
+Where:
+
+- X = visible markers on map
+
+- Y = value from X-Total-Count header
+
+- Update on every refresh
+
+- Use small muted text (secondary color)
+
+---
+
+3. SMART MARKER PRIORITIZATION
+
+---
+
+Before rendering markers:
+
+- Sort buses by distance to map center
+- Slice to max 100
+
+const center = map.getCenter();
+
+const visible = buses
+.map(b => ({ b, d: (b.lat - center.lat)**2 + (b.lng - center.lng)**2 }))
+.sort((a, b) => a.d - b.d)
+.slice(0, 100)
+.map(x => x.b);
+
+---
+
+4. NO EMPTY STATE (IMPORTANT)
+
+---
+
+- Rely on backend fallback (already implemented)
+
+- If response < 20 buses:
+  Show message:
+  "No buses nearby • Showing nearest buses"
+
+- Do NOT trigger additional API calls
+
+- Do NOT implement new endpoints
+
+---
+
+5. SMOOTH MARKER UPDATES (NO FLICKER)
+
+---
+
+Use marker pooling:
+
+if (markerPool[id]) {
+markerPool[id].setLatLng([lat, lng]);
+} else {
+markerPool[id] = createMarker();
+}
+
+- Do NOT remove all markers before update
+- Only remove markers no longer present
+
+Optional:
+
+- Add simple 300–500ms transition (not heavy animation)
+
+---
+
+6. BUS MOVEMENT REALISM (Backend)
+
+---
+
+- If distance to next stop < 200m → reduce speed (×0.4)
+- If distance < 30m → pause (30–60s randomized)
+- Use per-bus dwellUntil timestamp
+
+Keep logic simple — no complex physics
+
+---
+
+7. CROWD VISUAL IMPROVEMENT (Frontend)
+
+---
+
+Use color-coded badges:
+
+Low       → Green
+Medium    → Yellow
+High      → Orange
+Very High → Red + subtle pulse
+
+Use lightweight CSS only (no libraries)
+
+---
+
+8. ROUTE VISUAL CLARITY
+
+---
+
+When route selected:
+
+- Highlight selected route (bold + full opacity)
+- Fade others (opacity 0.15)
+
+Stops:
+
+- Highlight current + next stop
+- Keep others visible but low opacity (do NOT hide)
+
+---
+
+9. LIGHTWEIGHT CACHING
+
+---
+
+Use in-memory cache:
+
+cache = {
+routeShapes: {},
+stopCoords: {},
+lastBusResponse: null
+}
+
+- Reuse cached shapes/stops if available
+- Use lastBusResponse if fetch fails
+
+---
+
+10. STABILITY RULES
+
+---
+
+- Do NOT reset map zoom/position on refresh
+- Ensure bus IDs are stable
+- Prevent overlapping fetch calls:
+
+if (isFetching) return;
+
+---
+
+FINAL GOAL
+
+- Smooth, flicker-free map
+- Realistic bus behavior
+- No empty screens
+- Clear and trustworthy data
+- Performance remains stable with ~700 buses
+
+---
+
+DELIVERABLE
+
+Confirm:
+
+- Simulation tick updated
+- Count label visible
+- No flicker during refresh
+- Fallback works (never empty)
+- Movement realism working

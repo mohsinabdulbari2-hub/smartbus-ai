@@ -1,0 +1,114 @@
+This is very close to a production-perfect prompt. Claude basically gave you something a senior engineer would write.
+But I’m going to tighten it just a bit so:
+it avoids 2 subtle bugs
+it becomes 100% safe for demo + examiner
+and your agent won’t misinterpret anything
+⚠️ What Needs Fixing (Small but Important)
+1. ⚠️ lastKnownBuses bug (VERY subtle)
+Claude wrote:
+JavaScript
+let lastKnownBuses = [];
+👉 Problem:
+This will reset on re-render (in React)
+Can cause unexpected empty fallback
+✅ Fix (production-safe)
+Use a ref instead:
+JavaScript
+const lastKnownBusesRef = useRef([]);
+Then:
+JavaScript
+lastKnownBusesRef.current = data;
+And in catch:
+JavaScript
+if (lastKnownBusesRef.current.length > 0) {
+  setBuses(lastKnownBusesRef.current);
+}
+2. ⚠️ Timer memory leak risk
+Claude used:
+JavaScript
+useEffect(() => {
+  const interval = setInterval(...)
+}, [lastFetchTime]);
+👉 This is OK, but can re-create intervals repeatedly
+✅ Safer version:
+JavaScript
+useEffect(() => {
+  if (!lastFetchTime) return;
+
+  const interval = setInterval(() => {
+    setSecondsAgo(Math.floor((Date.now() - lastFetchTime) / 1000));
+  }, 1000);
+
+  return () => clearInterval(interval);
+}, [lastFetchTime]);
+👉 Prevents unnecessary intervals before first fetch
+3. ⚠️ “Arriving overrides status” edge case
+Claude said:
+Arriving overrides status
+👉 But didn’t enforce it cleanly
+✅ Correct logic:
+JavaScript
+const isArriving = bus.eta < 2 || bus.distanceToNextStop < 30;
+
+let statusLabel;
+if (isArriving) {
+  statusLabel = "Arriving";
+} else {
+  statusLabel = statusConfig[bus.status]?.label || "Running";
+}
+👉 Ensures:
+No duplicate labels
+Clean UI
+4. ⚠️ Offline banner flicker
+👉 If API fails for 1 poll, banner may flicker
+✅ Improve stability:
+JavaScript
+const [offlineCount, setOfflineCount] = useState(0);
+
+catch {
+  setOfflineCount(prev => prev + 1);
+}
+
+if (offlineCount >= 2) {
+  setIsOffline(true);
+}
+👉 Only show offline after 2 consecutive failures
+🚀 FINAL POLISHED VERSION (What You Should Send)
+You don’t need to rewrite everything — just append this correction block at the end of Claude’s prompt:
+🔧 FINAL CORRECTIONS (MUST APPLY)
+1. Persist Last Known Data Safely
+JavaScript
+const lastKnownBusesRef = useRef([]);
+
+lastKnownBusesRef.current = data;
+
+catch {
+  if (lastKnownBusesRef.current.length > 0) {
+    setBuses(lastKnownBusesRef.current);
+  }
+}
+2. Safe Timer Effect
+JavaScript
+useEffect(() => {
+  if (!lastFetchTime) return;
+
+  const interval = setInterval(() => {
+    setSecondsAgo(Math.floor((Date.now() - lastFetchTime) / 1000));
+  }, 1000);
+
+  return () => clearInterval(interval);
+}, [lastFetchTime]);
+3. Clean Arriving Override Logic
+JavaScript
+const isArriving = bus.eta < 2 || bus.distanceToNextStop < 30;
+
+const etaLabel = isArriving ? "Arriving" : `${bus.eta} min`;
+const statusLabel = isArriving ? null : statusConfig[bus.status];
+4. Stable Offline Detection
+JavaScript
+const [offlineCount, setOfflineCount] = useState(0);
+
+catch {
+  setOfflineCount(prev => prev + 1);
+  if (offlineCount >= 2) setIsOffline(true);
+}

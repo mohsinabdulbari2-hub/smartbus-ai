@@ -1,0 +1,306 @@
+You are applying final production polish to an existing bus tracking 
+mobile app. Do NOT rebuild, redesign, or change any architecture, 
+APIs, or UI layout. Apply only these targeted patches in the exact 
+order listed.
+
+---
+
+## STRICT CONSTRAINTS
+
+- Do NOT modify API endpoint paths or response schemas
+- Do NOT redesign UI layout or component hierarchy  
+- Do NOT add new npm/external dependencies
+- Do NOT clear existing data on fetch failure
+- Apply changes surgically — patch only what's specified
+- Test each section independently before moving to next
+
+---
+
+## SECTION 1 — Fix Count Label (Do This First)
+
+PROBLEM:
+"Showing 700 of 700 buses" looks like a bug or placeholder.
+
+FIND:
+The existing count label near the filter/toggle area that 
+currently renders "Showing X of Y buses".
+
+REPLACE the label logic with:
+
+  const visible = filteredBuses.length;
+  const total = totalFleetCount; // from X-Total-Count header
+
+  const label =
+    visible === total
+      ? `Showing all ${total} buses`
+      : `Showing ${visible} of ${total} buses`;
+
+RESULT:
+  ✅ "Showing all 700 buses"      (no filter active)
+  ✅ "Showing 117 of 700 buses"   (filter active)
+
+STYLE:
+  - Small, muted secondary color text
+  - Same style as existing label — no visual changes
+
+---
+
+## SECTION 2 — Last Updated Timer
+
+PROBLEM:
+App looks static. No signal that data is live.
+
+ADD these two state variables near the top of the component:
+
+  const [lastFetchTime, setLastFetchTime] = useState(null);
+  const [secondsAgo, setSecondsAgo]       = useState(0);
+
+UPDATE lastFetchTime ONLY on successful fetch:
+
+  try {
+    const data = await fetchBuses();
+    setBuses(data);
+    setLastFetchTime(Date.now()); // ✅ only on success
+  } catch {
+    // Do NOT update lastFetchTime here
+    // Do NOT clear buses here
+  }
+
+ADD a 1-second interval to compute secondsAgo:
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (lastFetchTime) {
+        setSecondsAgo(Math.floor((Date.now() - lastFetchTime) / 1000));
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [lastFetchTime]);
+
+DISPLAY below the count label:
+
+  const timerLabel = lastFetchTime
+    ? `Updated ${secondsAgo}s ago`
+    : `Connecting...`;
+
+STYLE RULES:
+  - Normal state  → muted secondary color
+  - After 20s with no successful fetch → amber/warning color
+  - Tiny font, same row or directly below count label
+
+  const timerColor = secondsAgo > 20 ? "amber" : "muted";
+
+---
+
+## SECTION 3 — Offline / Stale Data Handling
+
+PROBLEM:
+If fetch fails, some implementations clear the bus list → 
+app looks empty and broken.
+
+FIND your fetch/catch block. Apply this exact pattern:
+
+  let lastKnownBuses = []; // module-level or ref, outside component
+
+  async function fetchBuses() {
+    try {
+      const response = await apiFetch("/buses");
+      const data     = await response.json();
+
+      lastKnownBuses = data;          // ✅ store on success
+      setBuses(data);
+      setIsOffline(false);
+      setLastFetchTime(Date.now());   // ✅ only on success
+
+    } catch (error) {
+      // ✅ Keep showing last known data
+      if (lastKnownBuses.length > 0) {
+        setBuses(lastKnownBuses);
+      }
+      setIsOffline(true);
+      // ✅ Do NOT update lastFetchTime
+      // ✅ Do NOT call setBuses([])
+    }
+  }
+
+ADD offline banner — display when isOffline === true:
+
+  {isOffline && (
+    <Text style={styles.offlineBanner}>
+      Offline • Showing last known data
+    </Text>
+  )}
+
+STYLE for offline banner:
+  - Amber or warning color text
+  - Small, subtle — NOT a blocking modal
+  - Appears below count label / timer
+  - Disappears automatically when next fetch succeeds
+
+---
+
+## SECTION 4 — Bus Status Field (Backend First)
+
+STEP A — Backend (do this before frontend):
+
+In your bus simulation tick, check if each bus already has 
+a "status" field in the API response.
+
+If NOT present, add this to the per-bus update logic:
+
+  // After computing distanceToNextStop:
+  
+  if (bus.dwellUntil && Date.now() < bus.dwellUntil) {
+    bus.status = "At_Stop";
+  } else if (distanceToNextStop < 200) {
+    bus.status = "Approaching";
+  } else {
+    bus.status = "Running";
+  }
+
+  // Include in API response:
+  return {
+    id:               bus.id,
+    lat:              bus.lat,
+    lng:              bus.lng,
+    route:            bus.route,
+    crowdLevel:       bus.crowdLevel,
+    eta:              bus.eta,
+    status:           bus.status,   // ← ADD THIS
+    nextStop:         bus.nextStop,
+    distanceToNextStop: distanceToNextStop
+  };
+
+STEP B — Frontend:
+
+In the bus card component, add a status label:
+
+  const statusConfig = {
+    At_Stop:    { label: "🟡 At Stop",    color: "#eab308" },
+    Approaching:{ label: "🟠 Approaching", color: "#f97316" },
+    Running:    { label: "🟢 Running",     color: "#22c55e" },
+  };
+
+  const s = statusConfig[bus.status] || statusConfig["Running"];
+
+  <Text style={{ color: s.color, fontSize: 11, fontWeight: "600" }}>
+    {s.label}
+  </Text>
+
+PLACEMENT:
+  - Below route number or beside ETA
+  - Small, inline — no layout restructuring
+
+---
+
+## SECTION 5 — "Arriving" State
+
+PROBLEM:
+Buses with ETA < 2 minutes or distance < 30m show no 
+special indicator — missed UX opportunity.
+
+FIND where ETA is displayed in the bus card.
+
+ADD this logic before rendering ETA:
+
+  const isArriving = bus.eta < 2 || bus.distanceToNextStop < 30;
+
+  const etaLabel = isArriving
+    ? "Arriving"
+    : `${bus.eta} min`;
+
+  const etaColor = isArriving ? "#3d7cff" : defaultTextColor;
+
+DISPLAY:
+
+  <Text style={{ color: etaColor, fontWeight: "700" }}>
+    {etaLabel}
+  </Text>
+
+NOTE:
+  - "Arriving" overrides the status label if both would show
+  - If bus.status is "At_Stop" AND isArriving → show "Arriving"
+  - Do not show both simultaneously
+
+---
+
+## SECTION 6 — Card Cleanup
+
+PROBLEM:
+Bus cards show too much information → looks cluttered.
+
+KEEP only these fields per card:
+  1. Route number / name
+  2. Next stop
+  3. ETA (or "Arriving")
+  4. Crowd level (color badge — already exists)
+  5. Status (At Stop / Approaching / Running)
+
+REMOVE or visually suppress:
+  - Repeated labels (e.g., "Route:" before the route number)
+  - Long descriptive text that duplicates other fields
+  - Any field that appears twice in different formats
+
+DO NOT:
+  - Change card dimensions or spacing system
+  - Remove the card component itself
+  - Restructure the FlatList
+
+---
+
+## SECTION 7 — Empty Message Copy
+
+FIND the existing empty/fallback message:
+  "No buses nearby • Showing nearest N"
+
+REPLACE text with:
+  "No buses within 5 km • Showing nearest buses"
+
+No style changes — text copy only.
+
+---
+
+## IMPLEMENTATION ORDER (Follow Exactly)
+
+  1. Section 1  — Count label fix          (2 min)
+  2. Section 2  — Last updated timer        (5 min)
+  3. Section 3  — Offline handling          (10 min)
+  4. Section 4A — Backend status field      (5 min)
+  5. Section 4B — Frontend status label     (5 min)
+  6. Section 5  — Arriving state            (5 min)
+  7. Section 6  — Card cleanup              (10 min)
+  8. Section 7  — Empty message copy        (2 min)
+
+---
+
+## CRITICAL RULES (Never Violate)
+
+  ❌ Never call setBuses([]) in a catch block
+  ❌ Never update lastFetchTime on fetch failure
+  ❌ Never reset map zoom or position on data refresh
+  ❌ Never add new API endpoints or change existing ones
+  ❌ Never install new packages
+  ✅ Always keep last known data visible on failure
+  ✅ Always update lastFetchTime only on success
+  ✅ Always show offline banner when isOffline is true
+  ✅ Always derive "Arriving" from eta OR distanceToNextStop
+
+---
+
+## FINAL VERIFICATION CHECKLIST
+
+After all sections are applied, confirm each:
+
+  [ ] "Showing all 700 buses" appears when no filter active
+  [ ] "Showing 117 of 700 buses" appears when filter active
+  [ ] "Updated Xs ago" counter increments every second
+  [ ] Counter turns amber after 20s with no successful fetch
+  [ ] Offline banner appears on fetch failure
+  [ ] Old bus data stays visible on fetch failure
+  [ ] Offline banner disappears when fetch recovers
+  [ ] Bus cards show At Stop / Approaching / Running
+  [ ] "Arriving" shows for ETA < 2 or distance < 30m
+  [ ] Cards show only 5 core fields (no clutter)
+  [ ] Empty message reads "No buses within 5 km..."
+  [ ] No setBuses([]) anywhere in catch blocks
+  [ ] lastFetchTime only updated in try block

@@ -1,0 +1,79 @@
+Upgrade the existing bus tracking app into a production-level product with high accuracy, stability, and premium user experience.
+
+IMPORTANT:
+- Do NOT rebuild from scratch
+- Improve only the existing system
+- Keep it lightweight and stable
+
+---
+
+1. Data Accuracy:
+- Use GTFS-based routes and stop sequences
+- Ensure each bus follows a valid route with correct stops
+- Remove all random or incorrect data
+
+---
+
+2. Bus System:
+- Expand buses to 500–800 using valid routes
+- Move buses step-by-step along stop sequence every 5–10 seconds
+- Avoid unrealistic jumps or teleportation
+
+---
+
+3. ETA Calculation:
+- Replace fake timing with:
+  ETA = (remaining distance / speed) × 60
+- Use consistent speeds (20–35 km/h)
+
+---
+
+4. Nearby System:
+- Show only buses within 5–10 km of user
+- If none found, suggest nearest routes instead of empty screen
+
+---
+
+5. Route Suggestion:
+- Match routes containing both source and destination stops
+- Provide best route and 1–2 alternatives
+- Rank using ETA, crowd, and route usage
+
+---
+
+6. Crowd Prediction:
+- Use simple logic:
+  - peak hours → High
+  - normal → Medium
+  - night → Low
+- Avoid random crowd values
+
+---
+
+7. Bug Fixes:
+- Fix filter mismatches (case sensitivity)
+- Ensure buses always display correctly
+- Remove blank or invalid entries
+
+---
+
+8. Performance:
+- Limit active buses to 200–500
+- Update only position, ETA, and crowd
+- Avoid heavy APIs or real-time complexity
+
+---
+
+9. UI/UX Upgrade:
+- Make map the main screen with floating panels
+- Improve bus cards with route, ETA, next stop, and crowd indicator
+- Add consistent color system (green/yellow/red)
+- Add loading skeletons and better empty states
+- Improve search with suggestions and voice input
+- Add smooth animations and transitions
+- Ensure readability with proper typography
+
+---
+
+Goal:
+Create a stable, accurate, and premium bus tracking app that feels like a real-world transport product without increasing complexity or cost.

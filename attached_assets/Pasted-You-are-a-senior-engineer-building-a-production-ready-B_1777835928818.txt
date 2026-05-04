@@ -1,0 +1,233 @@
+You are a senior engineer building a production-ready BMTC (Bangalore) live bus tracking app.
+
+The app already has:
+
+- Live buses + ETA
+- Crowd classification
+- Frequency engine (baseline + live fusion)
+- Map interactions (focus + follow)
+
+Enhance the system to behave like real Bangalore transport conditions with minimal logic and zero breaking changes.
+
+---
+
+🎯 OBJECTIVE
+
+Make the system:
+
+- Locally realistic (BMTC behavior)
+- Environment-aware (rain, peak, location)
+- Stable (no flicker, no over-simulation)
+- Lightweight (low compute, no ML)
+
+---
+
+1️⃣ TIME MODEL (CORE)
+
+function getTimeSlot(hour) {
+  if (hour >= 6 && hour < 10) return "morning_peak";
+  if (hour >= 10 && hour < 16) return "midday";
+  if (hour >= 16 && hour < 21) return "evening_peak";
+  return "night";
+}
+
+---
+
+2️⃣ BASE CROWD FACTOR (BMTC REALISTIC)
+
+function getTimeFactor(slot) {
+  if (slot === "morning_peak") return 0.55;
+  if (slot === "evening_peak") return 0.55;
+  if (slot === "midday") return 0.25;
+  return 0.12; // night
+}
+
+---
+
+🚨 3️⃣ NIGHT SAFETY (MANDATORY)
+
+if (slot === "night") {
+  load = Math.min(load, 0.5);
+}
+
+👉 Ensures:
+
+- No unrealistic crowded buses at night
+- Mostly "Seats available"
+
+---
+
+4️⃣ ROUTE-SPECIFIC TUNING
+
+const ROUTE_TIERS = {
+  HIGH: ["356M", "KBS-1", "KBS-5H", "500D"],
+  MEDIUM: ["201", "215", "600"]
+};
+
+function getRouteFactor(routeId) {
+  if (ROUTE_TIERS.HIGH.includes(routeId)) return 1.25;
+  if (ROUTE_TIERS.MEDIUM.includes(routeId)) return 1.1;
+  return 0.9;
+}
+
+Apply:
+
+load *= getRouteFactor(bus.routeId);
+baselineFreq *= getRouteFactor(routeId);
+
+---
+
+5️⃣ AREA-BASED TUNING (CITY REALISM)
+
+const AREA_FACTORS = {
+  "Silk Board": 1.25,
+  "Majestic": 1.3,
+  "KR Market": 1.2,
+  "Whitefield": 1.1,
+  "Electronic City": 1.15
+};
+
+function getAreaFactor(locationName) {
+  return AREA_FACTORS[locationName] || 1.0;
+}
+
+Apply:
+
+load *= getAreaFactor(bus.area);
+
+---
+
+6️⃣ DIRECTIONAL FLOW (CRITICAL)
+
+if (slot === "morning_peak" && direction === "inbound") {
+  load *= 1.2;
+}
+
+if (slot === "evening_peak" && direction === "outbound") {
+  load *= 1.2;
+}
+
+👉 Matches real Bangalore commute flow
+
+---
+
+7️⃣ WEATHER (RAIN AUTO-DETECTION)
+
+Use lightweight weather API (no heavy logic)
+
+const isRainy = weather?.condition === "rain";
+
+---
+
+Apply rain effects
+
+if (isRainy) {
+  load *= 1.15;     // more crowd
+  speed *= 0.85;    // slower buses
+}
+
+---
+
+Rain + peak combo
+
+if (isRainy && (slot === "morning_peak" || slot === "evening_peak")) {
+  load *= 1.1;
+}
+
+---
+
+8️⃣ RANDOMNESS (ANTI-UNIFORMITY)
+
+load += (Math.random() - 0.5) * 0.2;
+
+---
+
+9️⃣ FINAL CLAMP
+
+load = Math.max(0, Math.min(load, 0.92));
+
+---
+
+🔟 CROWD CLASSIFICATION
+
+if (load < 0.35) return "low";
+if (load < 0.7) return "medium";
+if (load < 0.9) return "high";
+return "very_high";
+
+---
+
+1️⃣1️⃣ FREQUENCY (KEEP EXISTING ENGINE)
+
+Only add caps:
+
+if (finalFreq > 30) finalFreq = 30;
+if (slot === "night" && finalFreq > 8) finalFreq = 8;
+
+---
+
+1️⃣2️⃣ EXPECTED REAL-WORLD BEHAVIOR
+
+Night:
+
+- Mostly "Seats available"
+- Very few crowded
+
+Midday:
+
+- Mix of low + moderate
+
+Peak:
+
+- 40–55% crowded (Silk Board, Majestic highest)
+
+Rain:
+
+- More crowd
+- Slower buses
+- Slight frequency drop
+
+---
+
+1️⃣3️⃣ UI REQUIREMENTS (KEEP EXISTING)
+
+Must show:
+
+- Seats available
+- Moderate
+- Crowded
+- Very crowded
+
+Frequency:
+
+- "~12/hr"
+- "live" tag when applicable
+
+---
+
+1️⃣4️⃣ NON-NEGOTIABLE RULES
+
+DO NOT:
+
+- change APIs
+- add ML/AI models
+- increase polling
+- introduce heavy state
+- break existing UI
+
+---
+
+✅ SUCCESS CRITERIA
+
+- 356M / KBS routes feel busiest
+- Silk Board & Majestic show natural congestion
+- Whitefield less dense than city center
+- Rain increases crowd realistically
+- Night never shows heavy crowd
+- Distribution feels human-real (not simulated)
+
+---
+
+Implement exactly this.
+
+Minimal code. Maximum realism. Production-safe.

@@ -1,0 +1,531 @@
+You are applying final visual refinement to an existing bus tracking 
+mobile app. This is NOT a redesign. Do NOT change layout, structure, 
+APIs, or backend. Apply only the patches below in the exact order 
+listed.
+
+---
+
+## STRICT CONSTRAINTS
+
+- Do NOT change component hierarchy or layout structure
+- Do NOT modify any API endpoints or data logic
+- Do NOT add new dependencies (check existing before assuming)
+- Do NOT change card dimensions, FlatList, or screen structure
+- Only touch: colors, typography sizes/weights, spacing tweaks,
+  map marker styles, bottom sheet display logic
+- Every existing feature must still work after changes
+
+---
+
+## ROUND 1 — QUICK WINS (Do These First)
+
+---
+
+### R1-PATCH 1 — Reduce Color Palette to 4 Colors
+
+PROBLEM:
+App currently uses 5+ active colors (blue, green, yellow, 
+orange, red) simultaneously → feels noisy, less premium.
+
+GOAL:
+Collapse to exactly 4 semantic colors:
+
+  const palette = {
+    primary:  "#3B82F6",  // Blue  — actions, ETA, primary info
+    positive: "#22C55E",  // Green — low crowd, arriving, best option
+    critical: "#EF4444",  // Red   — high crowd, very crowded
+    neutral:  "#6B7280",  // Grey  — medium crowd, secondary info
+  };
+
+FIND AND REPLACE these specific color usages:
+
+  Orange (#F97316) → replace with critical red (#EF4444)
+    - Used in: High crowd badge, Approaching status pill
+    - Change to red — "High" and "Very High" both become red
+      (differentiate by label text only, not color)
+
+  Yellow (#EAB308) → replace with neutral grey (#6B7280)
+    - Used in: Medium crowd badge, amber stale timer
+    - Exception: Keep amber ONLY for the stale timer dot
+      (it signals warning — keep it meaningful)
+    - Medium crowd badge → grey background, grey text
+
+  Keep unchanged:
+    - Blue → all primary actions, ETA, Arriving state
+    - Green → Best option badge, Low crowd, Running status
+    - Red → High + Very High crowd
+
+CROWD BADGE COLOR MAP (after change):
+
+  Low:       bg: "#14271A", text: "#22C55E"  // green
+  Medium:    bg: "#1F2937", text: "#9CA3AF"  // grey
+  High:      bg: "#2A0808", text: "#EF4444"  // red
+  Very High: bg: "#2A0808", text: "#EF4444"  // red (same)
+             + keep existing pulse animation
+
+STATUS PILL COLOR MAP (after change):
+
+  At_Stop:    bg: "#1A2E1A", text: "#22C55E"  // green
+  Approaching:bg: "#2A0808", text: "#EF4444"  // red (was orange)
+  Running:    bg: "#0A1A2E", text: "#3B82F6"  // blue
+  Arriving:   bg: "#0A1A3E", text: "#60A5FA"  // light blue
+
+RULES:
+  - Do NOT change any logic — only color values
+  - Do NOT change badge/pill shape or size
+  - Verify no orange or bright yellow remains in card UI
+  - Stale timer dot amber is the ONLY exception to keep yellow
+
+---
+
+### R1-PATCH 2 — Tighten Text Hierarchy (4 Levels)
+
+PROBLEM:
+Multiple text elements have similar visual weight →
+everything looks equally important → harder to scan.
+
+APPLY this exact 4-level hierarchy across all bus cards:
+
+  LEVEL 1 — Route Number/Name (most important):
+    fontSize: 16
+    fontWeight: "700"
+    color: theme.text          // #E8ECF4
+    letterSpacing: -0.3
+
+  LEVEL 2 — ETA / "Arriving" (time-critical):
+    fontSize: 14
+    fontWeight: "600"
+    color: theme.accent        // #3B82F6 normally
+                               // #60A5FA when Arriving
+    letterSpacing: 0
+
+  LEVEL 3 — Next Stop name (contextual):
+    fontSize: 13
+    fontWeight: "400"
+    color: theme.text          // full color but lighter weight
+    letterSpacing: 0
+
+  LEVEL 4 — Distance / secondary labels (least important):
+    fontSize: 11
+    fontWeight: "400"
+    color: theme.muted         // #6B7280
+    letterSpacing: 0
+
+RULES:
+  - Apply ONLY to bus cards — do not touch header or filter
+  - Do NOT change line spacing or card padding
+  - Route number stays on its own line (already is)
+  - ETA + Next Stop combined line: ETA part is Level 2 weight,
+    "• Next: Stop Name" part drops to Level 3 weight
+    → Achieve with nested <Text> elements:
+        <Text style={level2}>
+          {etaLabel}
+          <Text style={level3}> • Next: {nextStop}</Text>
+        </Text>
+
+---
+
+### R1-PATCH 3 — Progress Bar Percentage
+
+PROBLEM:
+"27 covered / 55 left" requires mental math to understand.
+
+FIND the progress bar / stop counter in the bus card.
+
+REPLACE the existing stop count display with:
+
+  const totalStops = bus.coveredStops + bus.remainingStops;
+  const percentage = Math.round((bus.coveredStops / totalStops) * 100);
+
+  // Display:
+  `Stop ${bus.coveredStops} of ${totalStops} • ${percentage}%`
+
+EXAMPLE OUTPUT:
+  "Stop 28 of 83 • 34%"
+
+RULES:
+  - Guard against division by zero:
+      const percentage = totalStops > 0
+        ? Math.round((bus.coveredStops / totalStops) * 100)
+        : 0;
+  - Keep existing progress bar visual — only change the text
+  - Do NOT change bar width calculation
+  - Font: Level 4 style (fontSize: 11, color: theme.muted)
+
+---
+
+## ROUND 2 — MAP WORK
+
+---
+
+### R2-PATCH 1 — Color-Coded Bus Markers by Crowd Level
+
+PROBLEM:
+All bus markers look identical → can't scan crowd level
+visually on the map.
+
+FIND where bus markers are created on the map view.
+
+REPLACE with crowd-aware marker color:
+
+  function getMarkerColor(crowdLevel) {
+    switch (crowdLevel) {
+      case "Low":       return "#22C55E";  // green
+      case "Medium":    return "#6B7280";  // grey
+      case "High":      return "#EF4444";  // red
+      case "Very High": return "#EF4444";  // red
+      default:          return "#3B82F6";  // blue fallback
+    }
+  }
+
+If using SVG/custom markers, apply color to fill.
+If using Leaflet circleMarker:
+
+  L.circleMarker([bus.lat, bus.lng], {
+    radius: 7,
+    fillColor: getMarkerColor(bus.crowdLevel),
+    fillOpacity: 0.9,
+    color: "#fff",
+    weight: 1.5,
+  })
+
+If using React Native Maps Marker, apply color to
+a small colored circle view inside the marker.
+
+RULES:
+  - Marker SIZE stays the same for all buses
+  - Only COLOR changes based on crowd level
+  - White border/stroke on all markers for visibility
+  - Do NOT change marker tap behavior
+
+---
+
+### R2-PATCH 2 — Tap Marker → Mini Bottom Sheet
+
+GOAL:
+When user taps a bus marker, show a small bottom sheet
+with key bus info — like Google Maps tapping a location.
+
+FIND the existing marker onPress / onClick handler.
+
+IF a bottom sheet component already exists in the project:
+  Use it. Do not create a new one.
+
+IF NOT, implement a lightweight inline panel:
+
+  STATE:
+    const [selectedBus, setSelectedBus] = useState(null);
+
+  ON MARKER TAP:
+    setSelectedBus(bus);
+
+  BOTTOM SHEET (renders above map, fixed to bottom):
+
+    {selectedBus && (
+      <View style={styles.bottomSheet}>
+
+        {/* Header row */}
+        <View style={styles.sheetHeader}>
+          <Text style={styles.sheetRoute}>
+            {selectedBus.route}
+          </Text>
+          <TouchableOpacity onPress={() => setSelectedBus(null)}>
+            <Text style={styles.sheetClose}>✕</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* ETA line */}
+        <Text style={styles.sheetEta}>
+          {isArriving(selectedBus)
+            ? "Arriving"
+            : `${safeEta(selectedBus)} min away`}
+        </Text>
+
+        {/* Next stop */}
+        <Text style={styles.sheetStop}>
+          Next: {selectedBus.nextStop}
+        </Text>
+
+        {/* Crowd + Status row */}
+        <View style={styles.sheetFooter}>
+          <CrowdBadge level={selectedBus.crowdLevel} />
+          <StatusPill status={selectedBus.status} />
+        </View>
+
+      </View>
+    )}
+
+  STYLES:
+
+    bottomSheet: {
+      position: "absolute",
+      bottom: 0,
+      left: 0,
+      right: 0,
+      backgroundColor: "#0F1320",
+      borderTopLeftRadius: 20,
+      borderTopRightRadius: 20,
+      borderTopWidth: 1,
+      borderColor: "#1E2440",
+      padding: 20,
+      paddingBottom: 32,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: -4 },
+      shadowOpacity: 0.4,
+      shadowRadius: 12,
+      elevation: 20,
+    }
+
+    sheetRoute: {
+      fontSize: 18,
+      fontWeight: "700",
+      color: "#E8ECF4",
+    }
+
+    sheetEta: {
+      fontSize: 15,
+      fontWeight: "600",
+      color: "#3B82F6",
+      marginTop: 4,
+    }
+
+    sheetStop: {
+      fontSize: 13,
+      color: "#6B7280",
+      marginTop: 2,
+    }
+
+    sheetClose: {
+      fontSize: 16,
+      color: "#6B7280",
+      padding: 4,
+    }
+
+    sheetFooter: {
+      flexDirection: "row",
+      gap: 8,
+      marginTop: 12,
+    }
+
+RULES:
+  - Reuse existing CrowdBadge and StatusPill components
+  - Tapping outside or pressing ✕ closes the sheet
+  - Sheet does NOT block map interaction when closed
+  - Do NOT animate — keep it instant for stability
+  - Do NOT change map zoom on marker tap
+
+---
+
+### R2-PATCH 3 — Selected Route Highlight + Others Fade
+
+GOAL:
+When a route is selected (via filter chip or marker tap),
+highlight that route's polyline and fade all others.
+
+FIND where route polylines are rendered on the map.
+
+APPLY this logic:
+
+  // When no route selected:
+  polyline.setStyle({ opacity: 1, weight: 3 });
+
+  // When a route IS selected:
+  if (polyline.routeId === selectedRouteId) {
+    polyline.setStyle({
+      opacity: 1,
+      weight: 5,
+      color: "#3B82F6",   // blue highlight
+    });
+  } else {
+    polyline.setStyle({
+      opacity: 0.15,
+      weight: 2,
+    });
+  }
+
+IF using React Native Maps Polyline:
+
+  <Polyline
+    coordinates={route.coords}
+    strokeColor={
+      selectedRouteId === route.id
+        ? "#3B82F6"
+        : "rgba(255,255,255,0.15)"
+    }
+    strokeWidth={selectedRouteId === route.id ? 5 : 2}
+  />
+
+RULES:
+  - selectedRouteId comes from existing filter state
+  - Do NOT change route fetching or caching logic
+  - Restore all routes to full opacity when filter cleared
+  - Do NOT hide any routes — only fade opacity
+
+---
+
+## ROUND 3 — MICRO POLISH
+
+---
+
+### R3-PATCH 1 — Stats Card Sublabels
+
+FIND the top stats cards showing:
+  700 / 154 / 217 (or similar numbers)
+
+ADD a small ALL CAPS label below each number:
+
+  <View style={styles.statCard}>
+    <Text style={styles.statNumber}>700</Text>
+    <Text style={styles.statLabel}>ACTIVE BUSES</Text>
+  </View>
+
+  <View style={styles.statCard}>
+    <Text style={styles.statNumber}>154</Text>
+    <Text style={styles.statLabel}>LESS CROWDED</Text>
+  </View>
+
+  <View style={styles.statCard}>
+    <Text style={styles.statNumber}>217</Text>
+    <Text style={styles.statLabel}>CROWDED</Text>
+  </View>
+
+STYLES:
+
+  statNumber: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: "#E8ECF4",
+    letterSpacing: -0.5,
+  }
+
+  statLabel: {
+    fontSize: 9,
+    fontWeight: "600",
+    color: "#6B7280",
+    letterSpacing: 1.2,
+    textTransform: "uppercase",
+    marginTop: 2,
+  }
+
+RULES:
+  - Do NOT change stat card dimensions or layout
+  - Labels are static strings — not dynamic
+  - Use ALL CAPS via letterSpacing + textTransform
+    (not by typing in caps)
+
+---
+
+### R3-PATCH 2 — Filter Chip Selected State
+
+FIND existing filter chips (All / Vajra / Volvo / Ordinary).
+
+APPLY cleaner selected vs unselected states:
+
+  // SELECTED chip:
+  {
+    backgroundColor: "#1E3A5F",   // deep blue fill
+    borderWidth: 1,
+    borderColor: "#3B82F6",       // blue border
+    borderRadius: 20,
+    paddingHorizontal: 16,        // slightly more than before
+    paddingVertical: 8,
+  }
+
+  // UNSELECTED chip:
+  {
+    backgroundColor: "#0F1320",   // surface color
+    borderWidth: 1,
+    borderColor: "#1E2440",       // subtle border
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  }
+
+  // SELECTED text:
+  { color: "#3B82F6", fontWeight: "600", fontSize: 13 }
+
+  // UNSELECTED text:
+  { color: "#6B7280", fontWeight: "500", fontSize: 13 }
+
+RULES:
+  - Increase paddingHorizontal from current value to 16
+    (only if currently less than 16)
+  - Do NOT change chip order or filter logic
+  - Do NOT add new filter options
+
+---
+
+### R3-PATCH 3 — Card Press Animation
+
+ADD a subtle press effect to bus cards.
+
+IF using TouchableOpacity (already likely):
+
+  <TouchableOpacity
+    activeOpacity={0.75}
+    style={styles.card}
+    onPress={handleCardPress}
+  >
+
+IF using Pressable:
+
+  <Pressable
+    style={({ pressed }) => [
+      styles.card,
+      pressed && { transform: [{ scale: 0.98 }] }
+    ]}
+    onPress={handleCardPress}
+  >
+
+RULES:
+  - scale: 0.98 only (subtle, not dramatic)
+  - Do NOT add spring animation — keep it native/instant
+  - Do NOT change onPress behavior or navigation
+  - If card already has TouchableOpacity, just set
+    activeOpacity={0.75} — no other changes needed
+
+---
+
+## IMPLEMENTATION ORDER
+
+  Round 1:
+    1. R1-P1 — Color palette (do first — affects everything)
+    2. R1-P2 — Text hierarchy
+    3. R1-P3 — Progress bar percentage
+
+  Round 2:
+    4. R2-P1 — Color-coded markers
+    5. R2-P2 — Tap → bottom sheet
+    6. R2-P3 — Route highlight + fade
+
+  Round 3:
+    7. R3-P1 — Stats card sublabels
+    8. R3-P2 — Filter chip states
+    9. R3-P3 — Card press animation
+
+---
+
+## FINAL VERIFICATION CHECKLIST
+
+  [ ] No orange color anywhere in card UI
+  [ ] Medium crowd badge is grey (not yellow)
+  [ ] High and Very High both show red
+  [ ] Stale timer dot still amber (only exception)
+  [ ] Route number is largest, boldest text on card
+  [ ] ETA part of combined line is heavier than stop name
+  [ ] Distance label is smallest, most muted
+  [ ] Progress bar shows "Stop 28 of 83 • 34%"
+  [ ] No division by zero in percentage calc
+  [ ] Map markers: green/grey/red by crowd level
+  [ ] Tapping marker shows bottom sheet
+  [ ] Bottom sheet shows route, ETA, next stop, crowd, status
+  [ ] ✕ closes bottom sheet
+  [ ] Selected route polyline is blue + bold
+  [ ] Other routes fade to opacity 0.15
+  [ ] Stats cards show ACTIVE BUSES / LESS CROWDED / CROWDED
+  [ ] Selected filter chip has blue fill + blue border
+  [ ] Unselected filter chip has subtle grey border
+  [ ] Card press gives scale: 0.98 feedback
+  [ ] All prior production rules intact
+  [ ] TypeScript clean
+  [ ] No new dependencies added

@@ -1,0 +1,186 @@
+You are a senior frontend engineer working on a BMTC live bus tracking app.
+
+The app already has:
+
+- Live buses + ETA
+- Crowd classification
+- Frequency engine (baseline + live fusion)
+- Map with follow mode
+
+Enhance realism using:
+
+1) Route-specific tuning
+2) Rain / traffic surge effects
+
+All changes must be:
+
+- lightweight
+- deterministic
+- no API changes
+- no heavy computation
+
+---
+
+🎯 OBJECTIVE
+
+Make the app behave like real Bangalore BMTC under:
+
+- peak hours
+- specific busy routes
+- rain conditions
+
+---
+
+1️⃣ ROUTE-SPECIFIC TUNING
+
+Define route tiers (simple mapping)
+
+const ROUTE_TIERS = {
+  HIGH: ["356M", "KBS-1", "KBS-5H", "500D", "G-2"], // Silk Board, Majestic routes
+  MEDIUM: ["201", "215", "600"],
+  LOW: []
+};
+
+---
+
+Apply route multiplier
+
+function getRouteFactor(routeId) {
+  if (ROUTE_TIERS.HIGH.includes(routeId)) return 1.25;
+  if (ROUTE_TIERS.MEDIUM.includes(routeId)) return 1.1;
+  return 0.9;
+}
+
+---
+
+Apply to crowd load
+
+load *= getRouteFactor(bus.routeId);
+
+---
+
+Apply to frequency baseline
+
+baselineFreq *= getRouteFactor(routeId);
+
+---
+
+2️⃣ HOTSPOT BOOST (LOCATION BASED)
+
+const HOTSPOTS = ["Silk Board", "Majestic", "KR Market"];
+
+if (isNearHotspot(bus.location)) {
+  load *= 1.15;
+}
+
+---
+
+3️⃣ RAIN / TRAFFIC SIMULATION
+
+Simple toggle (no API)
+
+const isRainy = weather === "rain"; // or manual toggle
+
+---
+
+Apply effects
+
+if (isRainy) {
+  load *= 1.15;        // more crowd
+  speed *= 0.85;       // slower buses
+}
+
+---
+
+Peak + rain combo
+
+if (isRainy && isPeakHour) {
+  load *= 1.1;
+}
+
+---
+
+4️⃣ NIGHT SAFETY (CRITICAL)
+
+if (hour < 6 || hour >= 21) {
+  load = Math.min(load, 0.5);
+}
+
+👉 Prevents unrealistic crowded buses at night
+
+---
+
+5️⃣ FINAL CROWD CLASSIFICATION
+
+if (load < 0.35) return "low";
+if (load < 0.7) return "medium";
+if (load < 0.9) return "high";
+return "very_high";
+
+---
+
+6️⃣ FREQUENCY LIMITS (REALISTIC CAPS)
+
+if (finalFreq > 30) finalFreq = 30;
+if (hour >= 22 && finalFreq > 8) finalFreq = 8;
+
+---
+
+7️⃣ EXPECTED BEHAVIOR
+
+Normal day
+
+- Silk Board / Majestic → busy
+- Others → moderate
+
+Peak
+
+- 40–55% crowded on major routes
+
+Night
+
+- Mostly "Seats available"
+- Very few crowded
+
+Rain
+
+- More crowded
+- Slower movement
+- Slight frequency variation
+
+---
+
+8️⃣ UI (NO CHANGES REQUIRED)
+
+Ensure:
+
+- "Seats available"
+- "Moderate"
+- "Crowded"
+- "Very crowded"
+- "~12/hr (live)" chip remains
+
+---
+
+9️⃣ NON-NEGOTIABLE RULES
+
+DO NOT:
+
+- change API
+- add ML models
+- increase polling
+- introduce complex state
+
+---
+
+✅ SUCCESS CRITERIA
+
+- 356M / KBS routes feel busiest
+- Silk Board & Majestic show congestion naturally
+- Rain increases crowd realistically
+- Night never shows heavy crowd
+- Frequency values feel believable
+
+---
+
+Implement exactly this—minimal code, maximum realism.

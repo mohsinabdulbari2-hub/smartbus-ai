@@ -1,0 +1,138 @@
+You are a senior engineer refining a BMTC (Bangalore) live bus tracking app.
+
+The system already has:
+
+- Live buses + ETA
+- Crowd classification (low / medium / high / very_high)
+- Frequency engine
+- Route + area + weather tuning
+
+Your task is ONLY to fix crowd distribution realism without changing architecture, APIs, or adding complexity.
+
+---
+
+🎯 OBJECTIVE
+
+Ensure the crowd distribution:
+
+- Matches real Bangalore patterns
+- Avoids “all moderate” clustering
+- Avoids “all crowded” scenarios
+- Always produces balanced categories
+
+---
+
+1️⃣ CORE FIX — REDISTRIBUTE LOAD
+
+Replace current randomness
+
+load += (Math.random() - 0.5) * 0.2;
+
+With:
+
+load += (Math.random() - 0.5) * 0.4;
+
+---
+
+2️⃣ DOWNWARD BIAS (ENABLE LOW CATEGORY)
+
+load *= 0.9;
+
+---
+
+3️⃣ GUARANTEED LOW SEGMENT (CRITICAL)
+
+if (Math.random() < 0.2) {
+  load *= 0.5;
+}
+
+👉 Ensures ~15–25% buses are "Seats available"
+
+---
+
+4️⃣ RARE HIGH SPIKES (ENABLE VERY CROWDED)
+
+if (Math.random() < 0.08) {
+  load *= 1.2;
+}
+
+👉 Ensures ~5–8% "Very crowded" during peak
+
+---
+
+5️⃣ FINAL CLAMP
+
+load = Math.max(0, Math.min(load, 0.95));
+
+---
+
+6️⃣ KEEP EXISTING CLASSIFICATION
+
+if (load < 0.35) return "low";
+if (load < 0.7) return "medium";
+if (load < 0.9) return "high";
+return "very_high";
+
+---
+
+7️⃣ NIGHT SAFETY (MANDATORY)
+
+if (hour < 6 || hour >= 21) {
+  load = Math.min(load, 0.5);
+}
+
+👉 Prevents unrealistic crowd at night
+
+---
+
+8️⃣ EXPECTED DISTRIBUTION (TARGET)
+
+Night:
+
+- 60–80% low
+- 20–30% medium
+
+Midday:
+
+- Balanced low + medium
+- Some high
+
+Peak:
+
+- 30–45% high
+- 5–10% very_high
+
+---
+
+9️⃣ DO NOT CHANGE
+
+- APIs
+- frequency logic
+- route tuning
+- weather logic
+- UI structure
+
+---
+
+✅ SUCCESS CRITERIA
+
+- “Seats available” is never 0
+- “Moderate” is not dominant (>70%)
+- “Very crowded” appears but stays rare
+- Night always shows mostly low
+- Distribution feels natural, not simulated
+
+---
+
+🧠 FINAL RULE
+
+This is a distribution tuning problem, not a logic problem.
+
+Do NOT add new systems.
+Do NOT over-engineer.
+
+Just fix the spread.
+
+---
+
+Implement exactly this.

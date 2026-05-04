@@ -1,0 +1,160 @@
+Task:
+Fix the bus simulation and data flow to ensure realistic fleet size, correct route distribution, and stable frontend behavior — without breaking existing architecture.
+
+---
+
+STRICT CONSTRAINTS (NON-NEGOTIABLE)
+
+- Do NOT rebuild the system
+- Do NOT change frontend UI/layout
+- Do NOT introduce heavy computation or ML
+- Keep API contracts unchanged
+- Maintain smooth performance (mobile-friendly)
+- Maintain existing polling interval (5–8 seconds)
+
+---
+
+CORE CORRECTION (CRITICAL)
+
+Routes ≠ Buses
+
+Do NOT scale buses based on total GTFS route/trip count.
+
+The system must simulate ACTIVE buses, not all possible trips.
+
+---
+
+1. BUS FLEET SIZE (FIX IMMEDIATELY)
+
+---
+
+- Set total live buses to: 600–800
+
+- Recommended default: 700 buses
+
+- Remove any logic that creates thousands of buses (e.g., 9,600)
+
+---
+
+2. SMART BUS DISTRIBUTION (VERY IMPORTANT)
+
+---
+
+Distribute buses across routes realistically:
+
+- Identify “major routes” (long routes OR high stop count OR frequently used)
+
+- Assign:
+  
+  - 2–4 buses → major routes
+  - 1 bus → minor routes
+
+- Ensure:
+  
+  - No invalid route_id
+  - No duplicate broken routes
+  - Every bus follows valid GTFS stop sequence
+
+Example distribution:
+
+- 200 major routes × 3 buses = 600
+- 100 minor routes × 1 bus = 100
+  Total ≈ 700 buses
+
+---
+
+3. BUS SIMULATION LOGIC (KEEP SIMPLE)
+
+---
+
+For each bus:
+
+- Assign:
+  - route_id
+  - trip_id
+  - current_stop_index
+  - speed (20–35 km/h fixed)
+
+Movement:
+
+- Linear interpolation between stops
+- Advance every 5–8 seconds
+- Loop route at end (or reverse direction if needed)
+
+---
+
+4. FRONTEND DATA CONSISTENCY (IMPORTANT)
+
+---
+
+- Always use backend total count (X-Total-Count)
+
+- Display:
+  “Showing X of ~700 buses”
+
+- Do NOT assume:
+  response.length === total fleet
+
+---
+
+5. VIEWPORT + PERFORMANCE (KEEP AS IS)
+
+---
+
+- Max markers on map: 50–100
+- Use existing viewport filtering
+- Backend may return subset → frontend renders subset
+
+---
+
+6. EMPTY STATE PREVENTION
+
+---
+
+- Backend must NEVER return empty list if fleet exists
+- If no buses in viewport:
+  → return nearest 20 buses
+
+Frontend:
+
+- Show message:
+  “No buses nearby • Showing nearest buses”
+
+---
+
+7. STABILITY & SMOOTHNESS
+
+---
+
+- Maintain stable bus_ids
+- Avoid teleporting/jumping buses
+- Keep consistent positions across refreshes
+- Ensure no flickering
+
+---
+
+FINAL GOAL
+
+- Realistic fleet (~700 buses)
+- Smooth UI with no lag
+- No empty states
+- Trustworthy data for demo/examiner
+- Clean separation: routes ≠ active buses
+
+---
+
+IMPORTANT NOTE
+
+We are simulating ACTIVE buses in real time, not total fleet capacity.
+
+This must reflect real-world transport behavior.
+
+---
+
+DELIVERABLE
+
+After implementation:
+
+- Share updated bus generation logic
+- Share sample /buses/live response
+- Confirm total fleet count is ~700

@@ -1,0 +1,18 @@
+packages:
+  "leaflet": "Core mapping library for live bus tracking"
+  "react-leaflet": "React components for Leaflet map integration"
+  "@types/leaflet": "Type definitions for Leaflet"
+  "recharts": "Data visualization for bus frequency charts"
+  "framer-motion": "Smooth page transitions and micro-interactions"
+  "clsx": "Utility for constructing className strings conditionally"
+  "tailwind-merge": "Utility to merge tailwind classes safely"
+  "lucide-react": "Beautiful consistent icons"
+
+images:
+  - path: "artifacts/smartbus/public/images/logo.png"
+    description: "A modern, minimalist transit app logo featuring a stylized geometric bus and smart AI network nodes. Colors: deep dark navy blue and vibrant electric orange. Transparent background."
+    aspect_ratio: "1:1"
+
+notes:
+  - "Assuming Leaflet maps can run without API keys using OpenStreetMap or CartoDB tiles."
+  - "The API provides realtime bus data that should be polled every 3 seconds."

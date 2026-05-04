@@ -1,0 +1,122 @@
+This is already a very strong, production-grade prompt. Honestly, you’re at the stage where most people start overthinking and breaking things — so I’ll refine it, not rewrite it.
+I’ll give you:
+⚠️ Critical fixes (small but important)
+🔧 Upgraded “final magic prompt” (cleaned + safer)
+🎯 What this will actually improve in your app
+⚠️ CRITICAL FIXES (Don’t skip these)
+1. ❌ “Approaching = Red” is WRONG UX
+Right now you mapped:
+Approaching → 🔴 Red
+👉 That’s misleading. Red = danger/crowded, not movement.
+✅ Fix:
+JavaScript
+Approaching → Blue (#3B82F6) or Light Blue (#60A5FA)
+Final mapping:
+At_Stop → Green
+Running → Blue
+Approaching → Light Blue
+Arriving → Bright Blue
+👉 This matches real apps (Google Maps / Uber)
+2. ⚠️ Medium = Grey is correct BUT needs contrast
+Your:
+JavaScript
+Medium → #6B7280 (grey)
+👉 Problem: On dark UI → can look “disabled” instead of “medium”
+✅ Fix:
+Use slightly brighter grey:
+JavaScript
+Medium text → #9CA3AF
+Background → #1F2937
+👉 Keeps clarity without noise
+3. ⚠️ Bottom Sheet Without Animation = Feels Cheap
+You said:
+“Do NOT animate — keep it instant”
+👉 This will feel unfinished, not stable.
+✅ Fix (safe animation):
+Use simple slide-in (150–200ms)
+NOT heavy animation.
+4. ⚠️ Marker Size Same = Missed Opportunity
+You wrote:
+Marker SIZE stays same
+👉 Slight improvement:
+✅ Fix:
+Selected marker → slightly larger (radius +2)
+This gives: 👉 instant focus + better UX
+5. ⚠️ Progress Calculation Risk
+You used:
+JavaScript
+coveredStops + remainingStops
+👉 Might break if API changes
+✅ Safer:
+JavaScript
+const totalStops = bus.totalStops || (bus.coveredStops + bus.remainingStops);
+🚀 REFINED FINAL MAGIC PROMPT (BEST VERSION)
+👉 Use THIS version (clean + corrected):
+🔥 KEY IMPROVEMENTS APPLIED
+Fixed incorrect color semantics
+Improved readability for medium state
+Added safe animation (no jank)
+Improved map interaction realism
+Made logic more robust
+🧠 ADD THIS SECTION TO YOUR PROMPT
+🔧 CRITICAL CORRECTIONS (APPLY BEFORE EVERYTHING)
+FIX 1 — Status Color Semantics
+Update status colors:
+JavaScript
+At_Stop:     { bg: "#1A2E1A", text: "#22C55E" }   // Green
+Running:     { bg: "#0A1A2E", text: "#3B82F6" }   // Blue
+Approaching: { bg: "#0A1A3E", text: "#60A5FA" }   // Light Blue
+Arriving:    { bg: "#0A1A5A", text: "#60A5FA" }   // Bright Blue
+❌ Remove red from movement states
+✅ Red ONLY for crowd severity
+FIX 2 — Medium Crowd Contrast
+JavaScript
+Medium:
+  bg: "#1F2937"
+  text: "#9CA3AF"
+FIX 3 — Safe Progress Calculation
+JavaScript
+const totalStops =
+  bus.totalStops || (bus.coveredStops + bus.remainingStops);
+
+const percentage =
+  totalStops > 0
+    ? Math.round((bus.coveredStops / totalStops) * 100)
+    : 0;
+🔥 MAP IMPROVEMENTS (IMPORTANT UX UPGRADE)
+Update Marker Interaction
+Selected marker enhancement:
+JavaScript
+radius: selectedBus?.id === bus.id ? 9 : 7
+Bottom Sheet Animation (SAFE)
+Replace instant render with:
+JavaScript
+transform: [{
+  translateY: selectedBus ? 0 : 120
+}]
+Use simple timing (150–200ms max)
+👉 No heavy libraries
+👉 No performance impact
+👉 Feels premium
+🎯 FINAL BEHAVIOR AFTER PATCH
+After applying:
+Cards
+Cleaner (less color noise)
+Easier to scan
+Better hierarchy
+Map
+Instantly readable crowd levels
+Interactive (tap → info)
+Feels like real transit app
+Overall
+👉 Moves from: “Good student project”
+👉 To: “Looks like production product”
+🧠 FINAL VERDICT (HONEST)
+Before this round:
+👉 9 / 10
+After this refined prompt:
+👉 9.7 / 10
+Remaining 0.3 gap = only:
+micro animations
+gesture polish
+real-time infra

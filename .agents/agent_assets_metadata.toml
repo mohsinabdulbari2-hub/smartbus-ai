@@ -1,0 +1,68 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "3riqRcziYObGYgf7364dX"
+uri = "file://smartbus-project.tar.gz"
+type = "unspecified"
+title = "SmartBus AI - Full Project Code"
+
+[[outputs]]
+id = "Sq0rriOVBktCfd_XnCKwu"
+uri = "file://smartbus-project.zip"
+type = "unspecified"
+title = "SmartBus AI - Full Official BMTC GTFS Dataset"
+
+[[outputs]]
+id = "OyZ9qnNpUK3TwAfY64qtu"
+uri = "file://SmartBus_AI_Research_Paper.md"
+type = "text"
+title = "SmartBus AI — Research Paper (IEEE Format)"
+
+[[outputs]]
+id = "FrbJb1Gg6L3bVKI-R6Dx0"
+uri = "file://attached_assets/paper_figures/fig_live.jpg"
+type = "image"
+title = "Fig. 1 — Live tracking screen"
+
+[[outputs]]
+id = "81NqPTwafYicgnTWoxla4"
+uri = "file://attached_assets/paper_figures/fig_search.jpg"
+type = "image"
+title = "Fig. 2 — Search screen"
+
+[[outputs]]
+id = "16_a-odicJEpGSeN2IaIu"
+uri = "file://attached_assets/paper_figures/fig_routes.jpg"
+type = "image"
+title = "Fig. 3 — Routes directory"
+
+[[outputs]]
+id = "2B1xmlNVWr50C7MaYrncj"
+uri = "file://attached_assets/paper_figures/fig_route_detail.jpg"
+type = "image"
+title = "Fig. 4 — Route Detail with SVG mini-map"
+
+[[outputs]]
+id = "7Q9S41YrhE_fliLg4_Xeq"
+uri = "file://SmartBus_AI_Research_Paper.docx"
+type = "word_document"
+title = "SmartBus AI — Research Paper (Word, IEEE author block fixed)"
+
+[[outputs]]
+id = "t1rYg_K27YMMvt4-R-DPJ"
+uri = "file://SmartBus_AI_Research_Paper.pdf"
+type = "pdf"
+title = "SmartBus AI — Research Paper (PDF, IEEE author block fixed)"
+
+[[outputs]]
+id = "rwPOME01C-s8eL5k6tWo0"
+uri = "file://smartbus-ai-full.zip"
+type = "unspecified"
+title = "SmartBus AI — Full Source + Datasets + PRD"
+
+[[outputs]]
+id = "CsIKbbPH6hn7vj10xWKYY"
+uri = "file://smartbus-ai-complete.zip"
+type = "unspecified"
+title = "SmartBus AI — Complete Implementation Package"

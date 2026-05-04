@@ -1,0 +1,406 @@
+You are enhancing the map interaction of an existing bus tracking 
+mobile app. This is NOT a redesign. Do NOT change APIs, backend, 
+data logic, or UI layout. Apply only the 6 patches below in order.
+
+---
+
+## STRICT CONSTRAINTS
+
+- Do NOT modify any API endpoints or data fetching logic
+- Do NOT redesign map UI or change existing marker structure
+- Do NOT add new dependencies
+- Do NOT change bottom sheet, filter, or list components
+- Only enhance: camera behavior, tracking state, route rendering,
+  marker rotation, and overlay display
+- All existing features must continue working after changes
+
+---
+
+## PATCH 1 — FOLLOW BUS MODE (Core Feature)
+
+GOAL:
+When user taps a bus marker, the map camera smoothly 
+follows that bus as it moves — like Uber tracking a ride.
+
+STEP A — Add tracking state:
+
+  const [trackedBusId, setTrackedBusId]   = useState(null);
+  const [hasInitialZoomed, setHasInitialZoomed] = useState(false);
+  const mapRef = useRef(null); // attach to map component if not done
+
+STEP B — On marker tap, start tracking:
+
+  onPress={() => {
+    setTrackedBusId(bus.id);
+    setHasInitialZoomed(false); // reset so zoom fires once
+    setSelectedBus(bus);        // existing bottom sheet logic
+  }}
+
+STEP C — Camera follow effect:
+
+  useEffect(() => {
+    if (!trackedBusId) return;
+
+    const trackedBus = buses.find(b => b.id === trackedBusId);
+    if (!trackedBus) return;
+
+    // Only zoom on first follow — then only pan
+    if (!hasInitialZoomed) {
+      mapRef.current?.animateCamera({
+        center: {
+          latitude:  trackedBus.lat,
+          longitude: trackedBus.lng,
+        },
+        zoom: 15,
+      }, { duration: 800 });
+      setHasInitialZoomed(true);
+    } else {
+      // Subsequent updates: move center only, no zoom change
+      mapRef.current?.animateCamera({
+        center: {
+          latitude:  trackedBus.lat,
+          longitude: trackedBus.lng,
+        },
+      }, { duration: 600 });
+    }
+
+  }, [buses, trackedBusId]);
+
+RULES:
+  - Duration 600–800ms — smooth, not instant
+  - Never call animateCamera if trackedBusId is null
+  - Never change zoom after the first follow pan
+  - If trackedBus not found in buses array → silently return
+    (bus may have left viewport — do not crash)
+  - mapRef must be attached to the map component:
+      <MapView ref={mapRef} ... />
+
+---
+
+## PATCH 2 — EXIT FOLLOW MODE
+
+GOAL:
+User can stop tracking naturally without hunting for a button.
+
+EXIT TRIGGER 1 — User drags the map:
+
+  <MapView
+    ref={mapRef}
+    onPanDrag={() => {
+      setTrackedBusId(null);
+      setHasInitialZoomed(false);
+    }}
+    ...
+  />
+
+EXIT TRIGGER 2 — User closes bottom sheet (✕ button):
+
+  onPress={() => {
+    setSelectedBus(null);
+    setTrackedBusId(null);
+    setHasInitialZoomed(false);
+  }}
+
+EXIT TRIGGER 3 — User taps a different bus marker:
+
+  // Handled automatically by Patch 1 — 
+  // new tap sets a new trackedBusId
+  // hasInitialZoomed resets to false
+
+RULES:
+  - All three exit triggers must reset both
+    trackedBusId AND hasInitialZoomed
+  - Do NOT reset map zoom position on exit —
+    leave camera where it is when user stops tracking
+  - Do NOT clear selectedBus on pan drag —
+    only clear trackedBusId (sheet can stay open)
+
+---
+
+## PATCH 3 — ROUTE AHEAD HIGHLIGHT
+
+GOAL:
+Show the tracked bus's full route highlighted,
+all other routes faded — so user sees context.
+
+FIND where route polylines are rendered on the map.
+
+CASE A — If using Leaflet / web map:
+
+  routes.forEach(route => {
+    if (
+      selectedBus &&
+      route.id === selectedBus.routeId
+    ) {
+      route.polyline.setStyle({
+        color:   "#3B82F6",
+        weight:  5,
+        opacity: 1,
+      });
+    } else {
+      route.polyline.setStyle({
+        color:   "#ffffff",
+        weight:  2,
+        opacity: selectedBus ? 0.1 : 0.6,
+      });
+    }
+  });
+
+CASE B — If using React Native Maps Polyline:
+
+  <Polyline
+    coordinates={route.coords}
+    strokeColor={
+      selectedBus?.routeId === route.id
+        ? "#3B82F6"
+        : "rgba(255,255,255,0.1)"
+    }
+    strokeWidth={
+      selectedBus?.routeId === route.id ? 5 : 2
+    }
+  />
+
+OPTIONAL ENHANCEMENT — Split into completed/upcoming:
+
+  IF route stop coordinates are available:
+
+  // Find index of bus's current stop in route
+  const currentIdx = route.stops.findIndex(
+    s => s.id === selectedBus.currentStopId
+  );
+
+  const completedCoords = route.coords.slice(0, currentIdx + 1);
+  const upcomingCoords  = route.coords.slice(currentIdx);
+
+  // Render two polylines:
+  // completed → opacity 0.25, weight 3, grey
+  // upcoming  → opacity 1.0,  weight 5, blue
+
+  // Only implement if stop coordinates are already
+  // in the API response — do NOT add new endpoints
+
+RULES:
+  - When no bus selected → all routes at default opacity
+  - When bus selected → selected route bold blue,
+    others at opacity 0.1
+  - When tracking exits → restore all routes to default
+  - Do NOT hide any route — only change opacity/weight
+
+---
+
+## PATCH 4 — BUS HEADING DIRECTION
+
+GOAL:
+Bus marker rotates to show direction of travel —
+feels like real navigation.
+
+STEP A — Check if API already returns heading/bearing field.
+  If yes: use bus.heading directly.
+  If no: compute approximate bearing from movement.
+
+COMPUTE BEARING (if not in API):
+
+  function getBearing(prevLat, prevLng, nextLat, nextLng) {
+    const dLng = (nextLng - prevLng) * (Math.PI / 180);
+    const lat1  = prevLat * (Math.PI / 180);
+    const lat2  = nextLat * (Math.PI / 180);
+
+    const y = Math.sin(dLng) * Math.cos(lat2);
+    const x =
+      Math.cos(lat1) * Math.sin(lat2) -
+      Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLng);
+
+    const bearing = Math.atan2(y, x) * (180 / Math.PI);
+    return (bearing + 360) % 360; // normalize to 0–360
+  }
+
+STORE previous position per bus to compute bearing:
+
+  const prevPositions = useRef({});
+
+  // In bus update loop:
+  const prev = prevPositions.current[bus.id];
+  const bearing = prev
+    ? getBearing(prev.lat, prev.lng, bus.lat, bus.lng)
+    : bus.heading ?? 0;
+
+  prevPositions.current[bus.id] = {
+    lat: bus.lat,
+    lng: bus.lng
+  };
+
+APPLY rotation to marker:
+
+  IF React Native Maps:
+    <Marker
+      coordinate={{ latitude: bus.lat, longitude: bus.lng }}
+      rotation={bearing}
+      anchor={{ x: 0.5, y: 0.5 }}
+    />
+
+  IF Leaflet:
+    marker.setRotationAngle(bearing); 
+    // requires leaflet-rotatedmarker if available
+    // if not available → skip rotation, do not add dependency
+
+ANTI-JITTER RULE — Smooth bearing changes:
+
+  // Only update bearing if change > 5 degrees
+  // Prevents jitter from GPS noise
+
+  const prevBearing = busMarkerState[bus.id]?.bearing ?? 0;
+  const bearingDelta = Math.abs(bearing - prevBearing);
+
+  const smoothBearing =
+    bearingDelta > 5 ? bearing : prevBearing;
+
+RULES:
+  - If heading not in API and prev position not yet stored
+    → default to 0 (pointing north) for first render
+  - Do NOT add leaflet-rotatedmarker or any plugin
+  - If rotation causes marker issues → skip this patch
+  - Anti-jitter threshold: only rotate if delta > 5 degrees
+
+---
+
+## PATCH 5 — AUTO ZOOM CONTROL
+
+GOAL:
+Zoom fires exactly once when tracking starts.
+Subsequent camera moves are pan-only — no zoom disruption.
+
+THIS IS ALREADY HANDLED IN PATCH 1 via hasInitialZoomed.
+
+Verify the logic is correct:
+
+  // On first follow:
+  if (!hasInitialZoomed) {
+    animateCamera({ center, zoom: 15 }, { duration: 800 });
+    setHasInitialZoomed(true);
+  }
+
+  // On all subsequent bus position updates:
+  else {
+    animateCamera({ center }, { duration: 600 });
+    // NO zoom property passed → camera keeps current zoom
+  }
+
+ADDITIONAL RULE:
+  - If user manually pinches to zoom while tracking,
+    do NOT override their zoom level on next update
+  - React Native Maps animateCamera without zoom param
+    preserves current zoom — verify this behavior
+    in your map library version
+
+---
+
+## PATCH 6 — TRACKING STATUS OVERLAY
+
+GOAL:
+Small floating banner tells user they are in tracking mode
+and how to exit — removes confusion.
+
+ADD above the map (absolute positioned):
+
+  {trackedBusId && (
+    <View style={styles.trackingBanner}>
+      <View style={styles.trackingDot} />
+      <Text style={styles.trackingText}>
+        Tracking {selectedBus?.route ?? "bus"} • Drag map to stop
+      </Text>
+    </View>
+  )}
+
+STYLES:
+
+  trackingBanner: {
+    position:        "absolute",
+    top:             80,           // below header/safe area
+    alignSelf:       "center",
+    flexDirection:   "row",
+    alignItems:      "center",
+    gap:             6,
+    backgroundColor: "#0F1320",
+    paddingHorizontal: 14,
+    paddingVertical:   7,
+    borderRadius:    20,
+    borderWidth:     1,
+    borderColor:     "#1E2440",
+    shadowColor:     "#000",
+    shadowOffset:    { width: 0, height: 2 },
+    shadowOpacity:   0.4,
+    shadowRadius:    8,
+    elevation:       10,
+    zIndex:          100,
+  }
+
+  trackingDot: {
+    width:           6,
+    height:          6,
+    borderRadius:    3,
+    backgroundColor: "#22C55E",   // green = live/active
+  }
+
+  trackingText: {
+    fontSize:   12,
+    fontWeight: "500",
+    color:      "#9CA3AF",
+  }
+
+RULES:
+  - Banner visible ONLY when trackedBusId is not null
+  - Shows route name if available (selectedBus?.route)
+  - Falls back to "bus" if selectedBus is null
+  - Do NOT animate banner in/out — instant show/hide
+  - zIndex must be above map but below bottom sheet
+
+---
+
+## IMPLEMENTATION ORDER
+
+  1. Patch 1 — Follow bus mode + camera effect
+  2. Patch 2 — Exit triggers (pan drag + close button)
+  3. Patch 5 — Verify zoom control (part of Patch 1)
+  4. Patch 6 — Tracking overlay banner
+  5. Patch 3 — Route highlight + fade
+  6. Patch 4 — Bearing/heading rotation (do last, skip if risky)
+
+---
+
+## CRITICAL RULES (Never Violate)
+
+  ❌ Never call animateCamera on every render unconditionally
+  ❌ Never change zoom after first follow pan
+  ❌ Never clear selectedBus when user drags map
+  ❌ Never add rotation dependency if not already installed
+  ❌ Never hide routes — only change opacity
+  ✅ Always reset hasInitialZoomed when tracking new bus
+  ✅ Always silently handle missing trackedBus in buses array
+  ✅ Always restore route opacities when tracking exits
+  ✅ Always show banner only when trackedBusId is active
+  ✅ Anti-jitter: only rotate marker if bearing delta > 5°
+
+---
+
+## FINAL VERIFICATION CHECKLIST
+
+  [ ] Tapping marker starts tracking mode
+  [ ] Camera smoothly animates to bus (800ms)
+  [ ] Camera follows bus on every data refresh (600ms)
+  [ ] Zoom only changes on first tap — not on every update
+  [ ] Dragging map stops tracking (trackedBusId → null)
+  [ ] Dragging map does NOT close bottom sheet
+  [ ] Closing bottom sheet stops tracking
+  [ ] Tapping new marker switches tracking to new bus
+  [ ] Selected route polyline: blue, weight 5, full opacity
+  [ ] Other routes: faded to opacity 0.1
+  [ ] Routes restore to default when tracking stops
+  [ ] Bus marker rotates to show direction (if API supports)
+  [ ] Bearing only updates if delta > 5 degrees
+  [ ] Tracking banner visible during tracking
+  [ ] Banner shows correct route name
+  [ ] Banner disappears when tracking stops
+  [ ] No camera jumping or flicker during updates
+  [ ] All prior production rules intact
+  [ ] TypeScript clean
+  [ ] No new dependencies added

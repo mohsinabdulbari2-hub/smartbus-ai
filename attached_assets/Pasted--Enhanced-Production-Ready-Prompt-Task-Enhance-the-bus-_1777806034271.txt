@@ -1,0 +1,48 @@
+✅ Enhanced & Production-Ready Prompt
+Task:
+Enhance the bus visibility logic with smart location-based filtering and a full fleet option, while strictly maintaining the current architecture.
+Strict Constraints (Non-Negotiable)
+Do NOT change any backend logic.
+Do NOT modify existing APIs or add new endpoints.
+Do NOT break current UI, layout, or APK behavior.
+Only add minimal frontend control and filtering logic.
+Keep everything lightweight, stable, and performant.
+Maintain full backward compatibility.
+1. Default Behavior – Nearby Mode (Recommended Default)
+On app launch / map screen entry:
+Request user location permission (proper handling with explanation if needed).
+If permission granted:
+Fetch buses within ~5 km radius of user’s current location.
+If permission denied or unavailable:
+Fall back to last known location → if none, use default city center.
+Display only nearby buses by default.
+Always apply existing viewport filtering + enforce maximum 50–100 markers rendered at any time.
+2. Minimal Toggle (UI Addition)
+Add a small, clean toggle with exactly two options:
+Nearby (default selection)
+All Buses
+Placement: Top-right corner of the map or inside the existing filter panel/section (choose the least intrusive existing area).
+Keep the toggle minimal in size, styling, and visual weight — blend with current design.
+Do not redesign any layout or add new UI screens/panels.
+3. All Active Buses Mode
+When user switches to All Buses:
+Fetch all active buses using the existing API.
+Continue applying current viewport filtering (max 100 markers).
+Show a small, unobtrusive label:
+“Showing X of Y buses”
+(X = currently visible markers, Y = total active buses returned by backend).
+4. Smart Fallbacks & Stability
+If no buses are found in Nearby mode (5 km radius):
+Automatically show the nearest 20 buses.
+Display a subtle, non-blocking message:
+“No buses nearby • Showing nearest buses”
+Stability Rules:
+Never reset map position or zoom when toggling modes.
+Prevent marker flickering during refresh or mode change.
+Ensure smooth updates every 5–8 seconds.
+Map must never appear empty.
+Maintain current performance even when showing All Buses.
+Overall Goal:
+Make the default experience feel realistic and useful (nearby buses focused on the user).
+Provide easy full-fleet visibility for demos, testing, or city-wide overview.
+Keep the app lightweight, stable, and fully backward compatible.

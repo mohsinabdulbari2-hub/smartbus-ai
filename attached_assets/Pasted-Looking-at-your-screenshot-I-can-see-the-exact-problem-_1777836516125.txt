@@ -1,0 +1,69 @@
+Looking at your screenshot, I can see the exact problem:
+Seats available: 0 ← completely broken
+Moderate: 518 ← almost everything clusters here
+Crowded: 182 ← remainder
+Very crowded: 0 ← never appears
+This means the fix wasn't actually applied, or it's being overridden downstream. Here's a detailed diagnostic prompt to find and fix the real root cause:
+🔍 BMTC Crowd Distribution — Root Cause Diagnosis & Fix
+What the Screenshot Proves
+The distribution 0 / 518 / 182 / 0 out of 700 buses tells us exactly what's happening mathematically:
+0 buses below 0.35 → load values never go low enough
+518 buses in 0.35–0.69 → load is stuck in a tight band around ~0.45–0.55
+182 buses in 0.70–0.89 → some reach high but nothing tips over 0.90
+0 buses above 0.90 → ceiling is being hit before classification
+This is a pre-classification suppression problem. The randomness fix is either not running, or something after it is re-centering the values before classifyCrowd() is called.
+Step 1 — Find Where classifyCrowd Is Actually Called
+Search your entire codebase for every call site:
+Bash
+You are looking for:
+How many places compute a crowd value
+Whether there's a second normalization happening after your fix
+Whether buses come from an API with a pre-computed crowdLevel field that bypasses your calculation entirely
+Step 2 — Check If API Is Overriding Your Calculation
+This is the most likely cause. Open your polling function and inspect the raw API response:
+Js
+If the raw bus objects already have a field like:
+Json
+Then your entire client-side load calculation is being ignored. The app is rendering the API's crowd value, not yours. This would perfectly explain 0 / 518 / 182 / 0.
+Fix if API is overriding:
+Js
+Step 3 — Verify Your Fix Is Actually In The Hot Path
+Add a temporary console log directly inside your load computation:
+Js
+Run the app and open DevTools console. You should see logs like:
+Code
+If you see NO logs → computeCrowdLoad is not being called at all. The app is using API data directly.
+If you see logs but all after= values cluster around 0.45–0.55 → something after this function is re-normalizing the value.
+If you see correct spread in logs but UI still shows wrong distribution → the UI is reading a different field than what this function returns.
+Step 4 — Find Where The UI Reads Crowd Level
+Search for where crowd tier strings are read for display:
+Bash
+Find the component that renders the 4 dashboard tiles (the grid showing 0 / 518 / 182 / 0). Trace backwards from there:
+Jsx
+Check what b.crowdLevel actually contains at this point. If it's coming directly from the API response object without going through computeCrowdLoad, that's your bug.
+Step 5 — The Definitive Fix Pattern
+Once you've confirmed the root cause, apply the correct fix based on what you found:
+Case A: API returns pre-computed crowd, app uses it directly
+Js
+Case B: computeCrowdLoad exists but isn't called during polling
+Js
+Case C: Function is called but result is overwritten later
+Js
+Case D: Multiple crowd computation functions exist, wrong one runs
+Js
+Step 6 — Verify With A Forced Test
+After applying the fix, force a known distribution test:
+Js
+If this console test shows correct distribution but your UI still shows 0 / 518 / 182 / 0, the pipeline fix is correct but the UI is reading from a different source. Follow Case A above.
+✅ Root Cause Summary
+Symptom
+Most Likely Cause
+Seats available = 0 always
+API returns pre-computed crowd, client calculation bypassed
+Everything clusters in moderate
+Load values normalized to ~0.45 somewhere downstream
+Very crowded = 0 always
+Hard ceiling applied after classification, or API caps values
+Fix applied but no change
+computeCrowdLoad not in the actual call path for displayed buses
+Run Step 2 (API inspection) and Step 3 (console log) first. One of those will pinpoint the exact cause within 5 minutes. Then apply the matching fix from Step 5.

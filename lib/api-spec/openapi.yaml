@@ -1,0 +1,466 @@
+openapi: 3.1.0
+info:
+  title: Api
+  version: 0.1.0
+  description: SmartBus AI API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: routes
+    description: Bus route operations
+  - name: buses
+    description: Live bus tracking
+  - name: stops
+    description: Bus stop operations
+  - name: search
+    description: Route search
+
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /routes:
+    get:
+      operationId: getRoutes
+      tags: [routes]
+      summary: Get all bus routes
+      responses:
+        "200":
+          description: List of routes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/BusRoute"
+
+  /routes/{routeId}:
+    get:
+      operationId: getRoute
+      tags: [routes]
+      summary: Get a specific route with stops
+      parameters:
+        - name: routeId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Route details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BusRouteDetail"
+
+  /routes/{routeId}/frequency:
+    get:
+      operationId: getRouteFrequency
+      tags: [routes]
+      summary: Get bus frequency for a route
+      parameters:
+        - name: routeId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: dayType
+          in: query
+          schema:
+            type: string
+            enum: [weekday, weekend]
+      responses:
+        "200":
+          description: Frequency data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FrequencyData"
+
+  /buses/live:
+    get:
+      operationId: getLiveBuses
+      tags: [buses]
+      summary: Get all live bus positions
+      parameters:
+        - name: lat_min
+          in: query
+          required: false
+          schema:
+            type: number
+          description: Viewport south edge — when all four bbox params are present, only buses inside the box are returned (with fallback to nearest if fewer than 20).
+        - name: lat_max
+          in: query
+          required: false
+          schema:
+            type: number
+        - name: lng_min
+          in: query
+          required: false
+          schema:
+            type: number
+        - name: lng_max
+          in: query
+          required: false
+          schema:
+            type: number
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            maximum: 100
+          description: Hard server cap is 100 buses per response.
+        - name: lat
+          in: query
+          required: false
+          schema:
+            type: number
+          description: User latitude for radius-based filtering (legacy mode). When lat/lng/radius are provided, only buses within the radius are returned, with automatic fallback to the 20 nearest if none are inside.
+        - name: lng
+          in: query
+          required: false
+          schema:
+            type: number
+          description: User longitude for radius-based filtering (legacy mode).
+        - name: radius
+          in: query
+          required: false
+          schema:
+            type: number
+          description: Radius in kilometers for nearby filtering (default 8 km on the server). Used together with lat/lng.
+      responses:
+        "200":
+          description: Live bus positions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LiveBus"
+
+  /buses/{busId}:
+    get:
+      operationId: getBus
+      tags: [buses]
+      summary: Get specific bus details
+      parameters:
+        - name: busId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Bus details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LiveBus"
+
+  /stops/{stopId}/eta:
+    get:
+      operationId: getStopEta
+      tags: [stops]
+      summary: Get ETA for buses at a stop
+      parameters:
+        - name: stopId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ETA info
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/BusEta"
+
+  /stops/{stopId}/crowd:
+    get:
+      operationId: getStopCrowd
+      tags: [stops]
+      summary: Get crowd prediction for a stop
+      parameters:
+        - name: stopId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: routeId
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Crowd prediction
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CrowdPrediction"
+
+  /search:
+    get:
+      operationId: searchRoutes
+      tags: [search]
+      summary: Search routes from source to destination
+      parameters:
+        - name: source
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: destination
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Matching routes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SearchResult"
+
+  /stops:
+    get:
+      operationId: getStops
+      tags: [stops]
+      summary: Get all bus stops
+      responses:
+        "200":
+          description: List of stops
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/BusStop"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required: [status]
+
+    BusRoute:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        number:
+          type: string
+        from:
+          type: string
+        to:
+          type: string
+        color:
+          type: string
+        totalStops:
+          type: integer
+      required: [id, name, number, from, to, color, totalStops]
+
+    BusStop:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        lat:
+          type: number
+        lng:
+          type: number
+        routeIds:
+          type: array
+          items:
+            type: string
+      required: [id, name, lat, lng, routeIds]
+
+    BusRouteDetail:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        number:
+          type: string
+        from:
+          type: string
+        to:
+          type: string
+        color:
+          type: string
+        stops:
+          type: array
+          items:
+            $ref: "#/components/schemas/BusStop"
+        lastBusTime:
+          type: string
+          nullable: true
+        isLastBus:
+          type: boolean
+        shape:
+          type: array
+          nullable: true
+          description: Simplified GTFS road polyline as [[lat, lng], ...]
+          items:
+            type: array
+            items:
+              type: number
+            minItems: 2
+            maxItems: 2
+      required: [id, name, number, from, to, color, stops, isLastBus]
+
+    LiveBus:
+      type: object
+      properties:
+        id:
+          type: string
+        routeId:
+          type: string
+        routeNumber:
+          type: string
+        routeName:
+          type: string
+        routeColor:
+          type: string
+        lat:
+          type: number
+        lng:
+          type: number
+        speed:
+          type: number
+        heading:
+          type: number
+        nextStop:
+          type: string
+        nextStopId:
+          type: string
+        currentStop:
+          type: string
+          description: Name of the most recently passed stop on the bus's current trip.
+        distanceToNextStop:
+          type: number
+        crowdLevel:
+          type: string
+          enum: [Low, Medium, High, VeryHigh]
+        status:
+          type: string
+          enum: [At_Stop, Approaching, Departed, Upcoming]
+          description: Where the bus is in its current leg. At_Stop = within 50m of next stop and speed < 5 km/h; Approaching = within 500m of next stop; Departed = just left previous stop; Upcoming = mid-leg.
+        isLastBus:
+          type: boolean
+        lastUpdated:
+          type: string
+      required: [id, routeId, routeNumber, routeName, routeColor, lat, lng, speed, heading, nextStop, nextStopId, distanceToNextStop, crowdLevel, isLastBus, lastUpdated]
+
+    BusEta:
+      type: object
+      properties:
+        busId:
+          type: string
+        routeId:
+          type: string
+        routeNumber:
+          type: string
+        routeName:
+          type: string
+        routeColor:
+          type: string
+        etaMinutes:
+          type: integer
+        crowdLevel:
+          type: string
+          enum: [Low, Medium, High]
+        isLastBus:
+          type: boolean
+      required: [busId, routeId, routeNumber, routeName, routeColor, etaMinutes, crowdLevel, isLastBus]
+
+    CrowdPrediction:
+      type: object
+      properties:
+        stopId:
+          type: string
+        routeId:
+          type: string
+        level:
+          type: string
+          enum: [Low, Medium, High]
+        estimatedPassengers:
+          type: integer
+        reason:
+          type: string
+      required: [stopId, level, estimatedPassengers, reason]
+
+    FrequencyData:
+      type: object
+      properties:
+        routeId:
+          type: string
+        dayType:
+          type: string
+        morning:
+          type: number
+          description: Buses per hour in morning (6-10am)
+        afternoon:
+          type: number
+          description: Buses per hour in afternoon (10am-5pm)
+        evening:
+          type: number
+          description: Buses per hour in evening (5-9pm)
+        night:
+          type: number
+          description: Buses per hour at night (9pm-midnight)
+      required: [routeId, dayType, morning, afternoon, evening, night]
+
+    SearchResult:
+      type: object
+      properties:
+        routeId:
+          type: string
+        routeNumber:
+          type: string
+        routeName:
+          type: string
+        routeColor:
+          type: string
+        sourceStop:
+          type: string
+        destinationStop:
+          type: string
+        etaMinutes:
+          type: integer
+        crowdLevel:
+          type: string
+          enum: [Low, Medium, High]
+        isLastBus:
+          type: boolean
+        frequency:
+          type: number
+      required: [routeId, routeNumber, routeName, routeColor, sourceStop, destinationStop, etaMinutes, crowdLevel, isLastBus, frequency]

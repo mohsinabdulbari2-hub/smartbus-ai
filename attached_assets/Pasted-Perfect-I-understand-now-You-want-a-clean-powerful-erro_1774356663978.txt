@@ -1,0 +1,158 @@
+Perfect 👍 — I understand now:
+You want a clean, powerful, error-free MASTER PROMPT that clearly focuses on:
+🧠 Crowd prediction (MAIN AIM)
+🟢🟡🔴 Bus color system
+📊 Weekday vs Weekend patterns
+📍 Area-wise crowd intelligence
+🚌 Live buses + routes FIX
+🗺️ Google Maps-like behavior
+🚏 Proper bus stop UI (like BMTC)
+❌ Fix current issue: routes not showing
+✅ FINAL CORRECTED MASTER PROMPT (READY TO USE)
+🧠 Prompt Title:
+Build an AI-Based Smart Bus Tracking and Crowd Prediction Mobile Application (Google Maps + Rapido Inspired)
+📌 Prompt:
+Design and develop a production-level mobile application using Flutter called “SmartBus AI” with the primary objective of predicting bus crowd levels and improving public transport decision-making.
+🎯 CORE OBJECTIVE (VERY IMPORTANT)
+The main goal of the application is:
+To predict how crowded a bus will be based on real-time and historical data, and visually represent it using a color-coded system (Green, Yellow, Red) while also showing live bus tracking and smart route suggestions.
+🚀 CORE FEATURES
+1. 📍 Automatic Location Detection
+Detect user’s current location using GPS
+Convert coordinates → readable location
+Auto-fill source location (like Rapido)
+2. 🔍 Destination Input with Smart Suggestions
+Auto-suggest places (Google Places API)
+Store frequently used locations
+3. 🗺️ Route Matching System (FIX EXISTING ERROR)
+👉 Ensure correct logic:
+Plain text
+A route is valid if:
+- Source stop exists in route
+- Destination stop exists in route
+- Source comes BEFORE destination in route sequence
+👉 Fix current issue:
+Your app shows “No routes found”
+Because route matching logic is incorrect
+4. 🚌 Live Bus Tracking System
+Show moving buses on map
+Each bus updates every 5–10 seconds
+Smooth animation on map
+5. ⏱️ ETA (Arrival Time Prediction)
+Based on:
+Distance
+Speed
+Traffic
+Historical data
+🧠 6. MAIN FEATURE: CROWD PREDICTION SYSTEM
+🎯 Purpose:
+Predict how crowded each bus will be.
+📊 Inputs:
+Time of day (morning/evening)
+Day type (weekday/weekend)
+Route demand
+Bus frequency
+Historical passenger data
+Area (high demand zones)
+🤖 Logic:
+Plain text
+Crowd Level = f(time, day, route, frequency, area_demand)
+🎨 Output (MANDATORY UI):
+Crowd Level
+Color
+Low
+🟢 Green
+Medium
+🟡 Yellow
+High
+🔴 Red
+📍 Apply color to:
+Bus icons on map
+Route lines
+Bus list cards
+📊 7. WEEKDAY vs WEEKEND ANALYSIS
+Weekdays:
+Peak crowd → office hours
+Weekends:
+Peak crowd → leisure areas
+Output:
+Plain text
+Weekday Crowd: HIGH (8–10 AM)
+Weekend Crowd: MEDIUM
+📍 8. AREA-BASED CROWD INTELLIGENCE
+👉 Identify:
+IT areas → morning rush
+Markets → evening rush
+Colleges → afternoon rush
+Feature:
+Plain text
+“⚠️ High crowd expected in this area”
+🚨 9. SMART SUGGESTIONS SYSTEM
+If:
+Bus is crowded
+Or waiting time is high
+👉 Suggest:
+Alternative routes
+Less crowded buses
+🚏 10. BUS STOP DESIGN (BMTC INSPIRED)
+Requirements:
+Clean, minimal UI
+Show:
+Stop name
+Next buses
+ETA
+Crowd level
+Standard design like:
+BMTC digital boards
+🗺️ 11. MAP FUNCTIONALITY (LIKE GOOGLE MAPS)
+Must include:
+Route lines
+Bus stops
+Moving buses
+User location
+🧠 12. DATA SYSTEM REQUIREMENTS
+Required Data:
+Bus routes
+Bus stops
+Bus numbers
+Timings
+GPS data
+If real data not available:
+👉 Simulate data for development
+🧠 13. MACHINE LEARNING MODELS
+1. Crowd Prediction:
+Classification model
+2. ETA Prediction:
+Regression model
+⚡ 14. REAL-TIME SYSTEM
+Use:
+Firebase OR WebSockets
+Update frequency:
+Every 5–10 seconds
+🔌 15. REQUIRED APIs
+Google Maps API
+Places API
+Geolocation API
+Backend APIs:
+/routes
+/live-buses
+/eta
+/crowd
+🧩 16. FIX EXISTING ISSUES (IMPORTANT)
+❌ Problem:
+Routes exist but not showing
+✅ Solution:
+Plain text
+1. Verify route-stop mapping
+2. Ensure correct stop sequence
+3. Check backend filtering logic
+4. Ensure API returns valid routes
+🎯 17. EXPECTED FINAL OUTPUT
+The app should:
+✔ Auto-detect location
+✔ Show routes like Google Maps
+✔ Show live buses like Rapido
+✔ Predict crowd using AI
+✔ Use Green/Yellow/Red system
+✔ Suggest better routes
+✔ Show realistic bus stop UI

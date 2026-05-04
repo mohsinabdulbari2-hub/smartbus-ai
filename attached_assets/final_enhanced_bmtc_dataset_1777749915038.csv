@@ -1,0 +1,1501 @@
+bus_id,route_id,route_name,stop_id,stop_name,hour,crowd
+BUS0,2ng,354-C,5c3,Sapthagiri Hospital,1,Medium
+BUS1,17,345 KMT-JAPC,1oi,Ashrama Ramohalli,0,Medium
+BUS2,2rm,KBS-5H SNBSTTMC-KGP,5g3,Nagadevanahalli,8,High
+BUS3,293,245-HA D35G-NMG,6ch,Devagere,8,High
+BUS4,8f,GGS-1,4ll,Kavala Hosahalli,17,High
+BUS5,8m,304-N,bh,Linganahalli,15,Low
+BUS6,2k1,251-M,5en,Agrahara Layout Cross,4,Medium
+BUS7,1oc,TEPL-1,463,Mulkattamma Temple Mallohalli,17,High
+BUS8,23y,201,1ao,Kanivemadhapura Cross,21,Medium
+BUS9,1yp,365-W,408,Nagayyana Doddy,19,High
+BUS10,12x,KBS-KMT-GAT,4pm,JC Nagara,0,Medium
+BUS11,2i,12-B,1uq,Makanahalli,5,Medium
+BUS12,nv,VLS--3,4fn,Dodda Thoguru,2,Medium
+BUS13,2qr,49 PPLO-BNR,2it,CS-Anchepalya,6,Medium
+BUS14,ke,290-EB SBS-VRP,2oo,Bommanabande,2,Medium
+BUS15,3n,CHAKRA-16A,1jo,Kannuru Junction,5,Medium
+BUS16,jb,VNS-23,55v,Ayyappa Nagara  Sadaramangala,4,Medium
+BUS17,239,316-E,57r,Sondekoppa Circle,5,Medium
+BUS18,m5,ADMC-KRPGH,2or,Whispering Meadows Patelappa Layout,17,High
+BUS19,1di,290-E STJHS-YHKOT,68r,Bhuvaneshwari Nagara Mahalakshmi Temple,15,Low
+BUS20,14h,228-H TPR-KMT-KBS,2yc,Vagdevi Vilas School,13,Low
+BUS21,yd,KLN-DAMC,1yd,Jakkur 18th Cross,5,Medium
+BUS22,13n,KLN-GNP,41r,BEML Layout 5th stage,8,High
+BUS23,1cr,HAL PV-17,1yb,Yalachenahalli Metro Station,11,Low
+BUS24,24r,VNS-21,2ms,Jalahalli West Shettyhalli Road,7,Medium
+BUS25,3w,293-R,50d,Vannarapet,21,Medium
+BUS26,1gm,80-F,x9,Podu Cross,4,Medium
+BUS27,lp,500-A PPLO-HBLB,46t,Lurdubayi Samudaya Bhavana,23,Medium
+BUS28,14y,Oasis-1B,3nc,BPL,2,Medium
+BUS29,1lp,356 ANK-D38G,29,Akkithimmanahalli 1,12,Low
+BUS30,16m,288-H KBS-AGS-TDL,2nc,Manjunatha Nagara,3,Medium
+BUS31,2jv,243-L,3rb,Bandi Reddy Circle,15,Low
+BUS32,1fq,255-B NLM-BELT,9,Channammanakere Achukattu,12,Low
+BUS33,24i,KRMTTMC-GDML,4d,Sathanur Colony,6,Medium
+BUS34,13l,210-WA,tw,Suradenapura Cross,3,Medium
+BUS35,n6,285 PTML-DBRC-KLRH,3sn,Chikka Maskal,2,Medium
+BUS36,1vt,245-M KMT-D43G,2j9,CS-JP Nagara 15th Cross,10,High
+BUS37,2pf,D42G-PESK,3j8,BGS PU College Thotagere,15,Low
+BUS38,1ll,263 KMT-NLGH-GGNH,2mo,Heelalige,23,Medium
+BUS39,25q,258-DN,2au,Basavenahalli,18,High
+BUS40,2x2,280-L YPH-PTH,5fj,Meenakunte,3,Medium
+BUS41,2w7,600CA ELC A-ANK,6a5,CS-Chikkabanavara,19,High
+BUS42,4v,ELC-PESCE,po,Bidarahalli Cross,20,High
+BUS43,5p,263 KBS-KMS,5tq,Sugaturu,5,Medium
+BUS44,238,245-M KBS-D43G,65g,Kenchanapura Cross,22,Medium
+BUS45,2gy,SET-02,56s,Honnenahalli,0,Medium
+BUS46,1a0,SCS-6,b2,Cable Factory Ittagallapura,5,Medium
+BUS47,137,K-3 BSN-MRBS,253,Depot-07 Subhashnagara,19,High
+BUS48,l9,CHLS-4,rw,Sumuka Layout,14,Low
+BUS49,1m0,286-F VSD-KNP,4ee,Bagluru Old police Station,7,Medium
+BUS50,2mb,60-A MRNB-VTN,4ec,AGS Layout Arehalli,8,High
+BUS51,22h,NICE-8,1dy,Chikkanahalli,18,High
+BUS52,h2,RBI-KBS,57p,Binnamangala Towads Nelamangala),5,Medium
+BUS53,8c,227-K,66w,NICE Road 1st Stone,11,Low
+BUS54,129,263-A,5wn,Tharabanahalli Gate,16,Low
+BUS55,2o4,231-K,3ld,Siddartha School Cross,5,Medium
+BUS56,1b9,298,3ko,Deccan,15,Low
+BUS57,22q,378-E D34-BSK,2vb,JP Nagara 15th Cross 1,1,Medium
+BUS58,1l6,290-G SBS-RSL-BTP,56d,Belagumba,13,Low
+BUS59,2t3,287-G,3g7,KTPO,14,Low
+BUS60,1di,290-E STJHS-YHKOT,1rc,Muddinapalya,14,Low
+BUS61,152,286 KMT-DSKN,1za,HSBC,1,Medium
+BUS62,1gw,330-G KVDRDO-SBS,4g,Manchanabele Dam Cross,17,High
+BUS63,1n,372,ps,Kengunte Circle,6,Medium
+BUS64,1i7,271-K VSD,2p5,Bagalur Colony,5,Medium
+BUS65,1t3,507-E,1be,Maharani College,23,Medium
+BUS66,1d3,VLS-6,2eg,Mylasandra,12,Low
+BUS67,20x,V-333E,5fh,Bhuvaneshwari Nagara,14,Low
+BUS68,2e8,285-N,4rp,Thirumala Gate,10,High
+BUS69,1p0,500-D JGS-CSB,qu,Mallasandra Bagalakunte,7,Medium
+BUS70,1ui,242-P,1s1,Channenahalli,23,Medium
+BUS71,2k2,349 D38-LMG-KBS,1dn,Nanda Gokula Nagara,22,Medium
+BUS72,1kg,213-FA,7,CS-Dhoopanahalli,23,Medium
+BUS73,ix,BTP-4,636,Mahadevapura,10,High
+BUS74,1yo,412,5tz,ARMY Public School ASC Center,20,High
+BUS75,1ak,283 PTH-SGT,141,Beguru,5,Medium
+BUS76,2oj,500-DH HSRCPWD-ATB,dg,HMT Auditorium,19,High
+BUS77,rz,291 SBS-MNP,5y5,Devasandra Chikkamaranahalli,14,Low
+BUS78,1po,211-UB JLO-KHCV,2yo,MICO Layout Checkpost Gopalan mall,16,Low
+BUS79,1jy,250-E,1v7,Halanayakanahalli,6,Medium
+BUS80,163,13-B SGH-PNNR,1ap,GBJ Colony Gate Doddanekkundi,17,High
+BUS81,2zl,KBS-1K KBS-D41G,ov,Thimmasandra Gate,1,Medium
+BUS82,1vd,290-EJ NGWJN-GKVK-YHK,2cx,Rajiv Gandhi,14,Low
+BUS83,18m,281,1iu,Hosahalli,13,Low
+BUS84,2ts,250-B,3ju,St Vincent Palloti School,6,Medium
+BUS85,31z,284-C CVB-JDLO,590,NICE Road 12th Stone,8,High
+BUS86,21p,600-KB,2ev,Kembaliganahalli Gate,14,Low
+BUS87,17j,349-C,2it,CS-Anchepalya,1,Medium
+BUS88,2d2,501-NH,3h2,Shivanapura Cross Hosakote,18,High
+BUS89,1hi,MF-11,216,Juttanapalya,5,Medium
+BUS90,242,250-SB PSS-SVG,1xx,Bhagya Nagara,11,Low
+BUS91,2l5,210-E KBS-KMTFLY-KBDA,19t,BHEL,15,Low
+BUS92,2y7,SET-1,36i,Santhe Devanagondhi,9,High
+BUS93,135,258-SA,6dt,Nagarenahalli,7,Medium
+BUS94,1hb,346-D,2fw,Mazara Hosahalli,22,Medium
+BUS95,1aj,348-C KMT-HSPK,3de,Mulakattamma Temple Mallohalli,19,High
+BUS96,z0,410-AB JBS-PSS-ADH,5tq,Sugaturu,16,Low
+BUS97,1dt,327-B DMLA-KMT,13e,Malleshwara 15th Cross(8th Main),6,Medium
+BUS98,1oe,87,5ad,Coles Park,9,High
+BUS99,ur,293-F,11w,Raghavendra Circle,23,Medium
+BUS100,qz,289-V,n0,Devanahalli Bypass NH-7,17,High
+BUS101,29n,PESCE-1N,1em,CS-ISRO Karthik Nagara,13,Low
+BUS102,149,306-T,1n0,Kammasandra Palya,1,Medium
+BUS103,86,324-A,2yx,Bannerughatta Circle,11,Low
+BUS104,2x7,226-MB,54c,Bayyandahalli Colony,7,Medium
+BUS105,1q7,OASIS-2A,3t4,Thimmegowdarapalya,17,High
+BUS106,2oa,341-A,54u,Thyagadahalli,4,Medium
+BUS107,2ci,347-N,1cw,Shamarajapura,16,Low
+BUS108,uq,398-H,327,ASC Centre,7,Medium
+BUS109,2j8,293 KMT-KLN,1ma,Double Road BEML Layout,5,Medium
+BUS110,2g4,293-B SBS-KAH,4fy,Avalahalli Electronic City,23,Medium
+BUS111,wl,502-A,4v7,Jeevanahalli Graveyard,0,Medium
+BUS112,2bp,500-DP,3ud,Chikka Madhure,12,Low
+BUS113,zb,SBS-PRTC,5wy,CPRI,8,High
+BUS114,yg,323-DN,dd,Bayyappanahalli Metro Station,15,Low
+BUS115,2mw,306-F KBS-BRH,36e,Shivanapura Colony Cross,13,Low
+BUS116,1ns,297-K VNP-KBS,1a0,Chikkanayakanahalli,9,High
+BUS117,16q,356-M KBS-ELCFLY-ANK,2yk,Mallasandra,14,Low
+BUS118,l8,MF-23,3fe,Deepak Nursing Home,6,Medium
+BUS119,2mp,CALLBUS-02,5fg,Chokkanahalli Gate,3,Medium
+BUS120,184,BMSIT-1,26l,Depot-17 Chandra Layout,6,Medium
+BUS121,2p0,D19-ELC,2gb,Gulakamale,8,High
+BUS122,115,V-328H HSK-WTTMC,4jx,LR Bande,12,Low
+BUS123,si,342-MA,3u8,Ramachandrapura Tent,14,Low
+BUS124,1k1,VLS-4,xp,Kurubarahalli,13,Low
+BUS125,2op,MF-24,93,Hejjala,3,Medium
+BUS126,2v,252-A,3y3,Kesaraguppe,9,High
+BUS127,d3,258-VG,15d,Borehalli,22,Medium
+BUS128,pa,258-VA,4oq,Jinnagara,12,Low
+BUS129,173,242-M,4aa,Gunjuru,20,High
+BUS130,1qk,45-D PPLO-GTLO,3jl,Amogha Layout,4,Medium
+BUS131,1l6,290-G SBS-RSL-BTP,20q,Kurubarahalli Cross,14,Low
+BUS132,1u5,330,39u,Gubbi Cross,6,Medium
+BUS133,2mm,298-Z,3un,Rajapura,4,Medium
+BUS134,1kq,KBS-3F,62x,JK Basavanna Nagara,9,High
+BUS135,gx,406 HBLB-NMG,4df,80 feet Road Kalyananagara,7,Medium
+BUS136,i4,223-D KGRT-DBT,3tx,Shivananda Store,19,High
+BUS137,2vm,MF-27,29o,Gottigere,9,High
+BUS138,1l6,290-G SBS-RSL-BTP,4ij,Byrathi Cross,10,High
+BUS139,2xx,345,4md,Gowdahalli,3,Medium
+BUS140,2y0,362-C BGR-ELC,4l8,Subramanyapura Police Station,15,Low
+BUS141,1c3,500-BC BEL-BTM,r1,Kacharakanahalli Cross,3,Medium
+BUS142,20d,306-D,vy,Nallur Cross,10,High
+BUS143,2pp,347-D,li,Haraluru Cross,5,Medium
+BUS144,uz,HAL PV-3,mi,Basavanahalli,9,High
+BUS145,zo,356-A,63v,Kalalughatta,20,High
+BUS146,yf,MF-304VS,4ia,Chikka Gollarahatti,10,High
+BUS147,g6,293-L,5se,Geddalapura,21,Medium
+BUS148,1jz,45-F,58r,Ankegowdana Doddy,7,Medium
+BUS149,147,231-E BDD-KMT,24u,Mahathma Vidhyalaya Muttanalluru,1,Medium
+BUS150,1ys,284-E ALS-KBS,4q2,Krishnasagara,19,High
+BUS151,nc,226-F,u1,Vijayapura Toll Gate,23,Medium
+BUS152,1x5,250-CA,wr,Ramasandra Cross,1,Medium
+BUS153,1km,V-328H,4m5,Chandapura KEB,7,Medium
+BUS154,2fd,258-F,al,NICE Road 2nd Stone,17,High
+BUS155,2mt,195,3lh,Yallammana doddi,8,High
+BUS156,2ef,500-D GKVK-CSB,2ug,Jalahalli East,15,Low
+BUS157,w6,325 D41G-HRHL,3q9,ELC NICE Road,21,Medium
+BUS158,2mb,60-A MRNB-VTN,3bi,DRDO Quarters,13,Low
+BUS159,2ja,258-YA,22j,Neeladri Nagara,15,Low
+BUS160,2nq,323 D41G-HAL-KMT,470,Kithiganahalli,5,Medium
+BUS161,9l,280,4fy,Avalahalli Electronic City,7,Medium
+BUS162,1nz,366-Z ANK-CNP,at,Tavarekatte,16,Low
+BUS163,2lz,D45G-VRP,2p2,Hennur Junction,14,Low
+BUS164,4r,MF-4,3sj,Hosahalli Cross Devanagondi,6,Medium
+BUS165,r6,316-Y,5z7,Gangenahalli,6,Medium
+BUS166,2qy,258-SB BNH-MNTK,32f,NICE Road 15th Stone,23,Medium
+BUS167,23x,505,2z4,MICO Gate Adugodi,0,Medium
+BUS168,ge,VTTMC-MDP-NBC,2dk,Krishnayyana Doddy,5,Medium
+BUS169,r7,13-C,1z6,Mount Carmel College,15,Low
+BUS170,19u,KBS-3E FLY,22m,Thirupalya,12,Low
+BUS171,2p6,411-A CSB-MVW-HALNPS,4oo,Dayananda Sagar College,8,High
+BUS172,31y,D34G-JSD-JAPC,3c7,CS-Marathahalli Bridge,23,Medium
+BUS173,28g,253-HC,2se,Depot-13 Kathriguppe,23,Medium
+BUS174,pz,314-A,59f,Marenahalli,13,Low
+BUS175,2p7,342-J,2w7,Beedi Karmikara Colony Gate,0,Medium
+BUS176,62,BELGS-22,2ws,Maruthi Nagara,4,Medium
+BUS177,158,25B-BSK-BTMS,ig,Bisanahalli,16,Low
+BUS178,7e,210-KA KBS-PPLO,hs,Sarjapura Ring Road Junction,9,High
+BUS179,2cw,306-M MDR-PURA,1,BP Indian School Nelamangala,0,Medium
+BUS180,1p,45-K,4wu,ISRO Quarters Jalahalli,5,Medium
+BUS181,31x,253-H,yh,Bettanahalli Site,18,High
+BUS182,mc,330-G,67s,New MICO Gate,10,High
+BUS183,2no,365-B,b2,Cable Factory Ittagallapura,12,Low
+BUS184,zu,252 LGR-PSS,3n0,Vasantavihar Colony Billamaranahalli,23,Medium
+BUS185,6q,345-C,5pw,Sheshadripuram College,12,Low
+BUS186,287,276-F KBS-YSTF,1au,New Baldwin International School,7,Medium
+BUS187,71,BELGS-3,151,Indlubele,0,Medium
+BUS188,2t7,284-C JLOW-VSD-KBS,5eq,Thonachinakuppe,19,High
+BUS189,aw,144-E SNBS-SPHS,67a,Devagere Cross,4,Medium
+BUS190,8m,304-N,4s1,Ambedkar Nagara,12,Low
+BUS191,1aa,500CH SJR-KRP,38o,Kamalanagara,14,Low
+BUS192,2cu,BEMLA-4,2hf,Siddapura Cross,23,Medium
+BUS193,2pl,258-J,6d2,Chokkahalli Factory Gate,22,Medium
+BUS194,2u2,290-E KMT-YHKOT,3js,Kattalepalya,2,Medium
+BUS195,hy,502-E,40i,Kasavanahalli,17,High
+BUS196,21x,271-K MTK-VSD-KBS,5qr,MR Nursing College,7,Medium
+BUS197,1f5,410K BSK-VDN,1oj,Robin Theatre,4,Medium
+BUS198,zi,269,2k6,CS-Kempegowda Institute Nursing Hostel,18,High
+BUS199,2zn,284-KA,24k,HSR Layout 2nd Sector,8,High
+BUS200,fx,289-C,2wo,Kommasandra,4,Medium
+BUS201,fw,DPJN-JJN,1pf,I Gate,4,Medium
+BUS202,2bt,293-B,2r3,Ullala Satellite Town Cross,17,High
+BUS203,134,12F-5,3la,Shobha Hills View Apartment,8,High
+BUS204,ch,V-BENGALURU DARSHINI,1lr,Chowdanahalli,3,Medium
+BUS205,157,90-E KBS-YTTMC,42f,Upkar Residency Layout,0,Medium
+BUS206,2gk,ARMY-002,41m,Life Style (Sacred Heart School),7,Medium
+BUS207,31o,312-A,2nr,Dhoopanahalli,7,Medium
+BUS208,2qf,311-J D24G-MDH,2su,Narayanapura,14,Low
+BUS209,30y,252-F IXP-KBS-PSS,5cr,Averahalli Cross,12,Low
+BUS210,1l8,355 D38-BMSV,vc,Mulluru,18,High
+BUS211,4b,MF-1F D06G-RMN,3zr,Prasanna Theatre,4,Medium
+BUS212,2ad,240-M,24f,Bharathi Nagara,17,High
+BUS213,2x,235-A SNBS-NBDA,1lf,Avalahalli,15,Low
+BUS214,1v4,410-FD D43G-BSK,46y,CPRI Quarters,15,Low
+BUS215,kt,401-N MBS-BEML5,12m,Ashwathnagara,16,Low
+BUS216,ij,D17-CLO,46f,Janatha Colony Byalalu,12,Low
+BUS217,2oy,D8-KSF,1y7,Medur Gate,13,Low
+BUS218,1z8,140-E,5gu,Gottipura Gate,11,Low
+BUS219,1mk,293 D48G-KBS,6b4,Mount Carmel,2,Medium
+BUS220,2w1,87 KBS-DPJN,5tp,Sadenahalli,3,Medium
+BUS221,t8,316-Y KRP-DVH,1uc,Koduru,8,High
+BUS222,2og,KVASC-03,hc,Rayan Circle,14,Low
+BUS223,2vf,SJBHS-9,4df,80 feet Road Kalyananagara,13,Low
+BUS224,ee,344-A,3v5,CS-Kamalanagara,17,High
+BUS225,135,258-SA,2cj,Hospital K Gollahalli,6,Medium
+BUS226,12l,303-G KLN-OST,3gp,Chokkanahali Government School,7,Medium
+BUS227,2d3,276-E KMT-MTK-VRP-D45,4nw,Kenchanakuppe Colony,22,Medium
+BUS228,2tv,256-MA D43G-TRHH,41l,Bychapura,14,Low
+BUS229,ov,79-G VSD-VSDLO,4ar,Devegowda Hospital,9,High
+BUS230,w1,285-K PTMT-CVB-KBS,43n,Indian Air Force,18,High
+BUS231,q4,266-N KMT-MLPH,5nq,Hale Ooru,1,Medium
+BUS232,9o,D34G-COAAS,1cq,Kaggalahalli,20,High
+BUS233,hi,356-M ANK-JGNAPC,1g8,Garments Factory Borugunte,9,High
+BUS234,1lc,210-B KTNR-KMT-VSD,4k7,Book Factory Thanisandra,20,High
+BUS235,2ne,304-R D24G-BGB,1pv,Razakpalya,7,Medium
+BUS236,2tn,MRTG-IIHS,2u9,Muneshwara Temple,7,Medium
+BUS237,oq,297-F,2jl,Vabasandra Gate,12,Low
+BUS238,2jh,273 KBS-HMTA-PSBS,446,Budigere Cross,15,Low
+BUS239,qe,96,6ay,1st Stage 3rd Block Nagarabhavi,23,Medium
+BUS240,2u,HAL PV-10,2rk,Mathikere Post Office,2,Medium
+BUS241,1mi,289-AA,4gy,Passport Office Koramangala,16,Low
+BUS242,kg,323DN-KHG-D41,541,KG Lakkenahalli,9,High
+BUS243,202,234-EC,5y3,Biscuits Factory,13,Low
+BUS244,22k,APS-27,5hk,Puttenahalli,0,Medium
+BUS245,35,500-BC,1lg,Bagmane Tech Park (Graphite India),5,Medium
+BUS246,22w,501-BH BSK-BELF,110,Valepura,19,High
+BUS247,2yu,201-Q,5fb,Guttepalya,20,High
+BUS248,ud,306-K,10i,Sai Lakshmi Industries,8,High
+BUS249,p,SJH-KRMTTMC,5ns,Devarabisanahalli Ring Road,18,High
+BUS250,2vj,291-L,ih,Nelaguli,19,High
+BUS251,kd,211-N,5hb,Muneshwara Layout,13,Low
+BUS252,11n,228-J,459,Bommanahalli,22,Medium
+BUS253,y6,335-G,492,Giriyamma Circle,20,High
+BUS254,1m5,401-AC BMT45-LGR,5kv,Suvarna Karnataka Bus Stand,6,Medium
+BUS255,k0,98-F YTTMC-GGP-VSL,388,Sapthagiri Convention Hall,16,Low
+BUS256,2fp,308,6c2,Geddalapura,21,Medium
+BUS257,2xu,308-B,3a8,Bhadrappa Layout,15,Low
+BUS258,4e,BELGS-23,33b,Bukkasagara,6,Medium
+BUS259,fn,245-MA,20o,CS-Vasanth Enclave,4,Medium
+BUS260,1o,UBVS-01,2wn,Ravagodlu Gate,3,Medium
+BUS261,2ni,13-H,516,Maruthi Badavane,17,High
+BUS262,np,234-E KBS-KMT-UST,1fw,BPL,19,High
+BUS263,2fx,298-MY DVH-YHKOT,1in,Koppa,4,Medium
+BUS264,1iz,315 ARMY-KMT,2m4,Mallasandra,6,Medium
+BUS265,kz,BEMLA-3,2jo,Chamarajapet,13,Low
+BUS266,d3,258-VG,4u5,Hosakote Flower Market,10,High
+BUS267,gr,MF-515,4iy,Bikkanahalli,10,High
+BUS268,9z,366-C,3v3,HAL Main Gate,0,Medium
+BUS269,24z,500-A ISROM-HBL-GGP-PSS,4lc,CWS-3 BMTC,22,Medium
+BUS270,hi,356-M ANK-JGNAPC,3hc,Prabasnagara,8,High
+BUS271,1qt,NICE-10,3t8,Channadasipalya,2,Medium
+BUS272,yd,KLN-DAMC,yy,Singaianapalya Phoenix,9,High
+BUS273,2fl,NDC-SNBS-KBS,4g6,NICE Road 17th Stone,7,Medium
+BUS274,1bo,D15-KRM,3km,Kengunte Circle,10,High
+BUS275,ei,410-K JJHC-CDSN,4b3,Hancharahalli,11,Low
+BUS276,21g,BEML A-5,9z,Bande Mutt Badavane Radiant Enclave,2,Medium
+BUS277,xj,WTTMC-KDLG-VRTKD,587,Vasantavihar Colony Billamaranahalli,19,High
+BUS278,2u5,367,1mx,Devagere Colony,4,Medium
+BUS279,132,271-B,5lc,Sonnappanahalli,6,Medium
+BUS280,1ko,289-CB,3nk,Gangasandra,15,Low
+BUS281,h9,347-F,2ad,Muthurayanapura,2,Medium
+BUS282,1z1,306-M,1cr,Jakkur Layout Double Road,14,Low
+BUS283,2o7,ITPL-4J,4ta,Patalamma Temple,11,Low
+BUS284,2yt,271-PA,2e8,Vidyanagara Cross Chikkajala,4,Medium
+BUS285,72,401-AK,697,Heggadagere Cross,18,High
+BUS286,i8,D46-PTML,2fz,Halehalli,9,High
+BUS287,2l7,143-A,2yg,Shine Bakery,14,Low
+BUS288,vk,D20-DSIT,1v6,Koraluru Railway Gate,4,Medium
+BUS289,2qa,225-G KMT FLY,116,Doddamaranahalli,22,Medium
+BUS290,1l8,355 D38-BMSV,3cl,Deepa Complex,20,High
+BUS291,kk,266 KBS-HGV,1iz,Jakkur Layout  Shanimahatma Temple,10,High
+BUS292,1hf,ITPL-8E,1yo,Canara Bank Subramanyanagara,5,Medium
+BUS293,h0,SVPS-2,567,Burumarana Doddy,20,High
+BUS294,dz,BEL GS-36,g1,Jigani Bus Stand,20,High
+BUS295,2cu,BEMLA-4,1z9,Vivekananda Vidyavardhaka School,3,Medium
+BUS296,1f8,129,4cg,Narayanakere,6,Medium
+BUS297,1db,221-J TVK-KMT-KBS,2ds,Hunasemaradapalya,18,High
+BUS298,wp,234 KMT-MRBS-CLO,2dx,Byatarayana Doddy Cross,19,High
+BUS299,1d0,280-L,4ff,Konanakunte Cross  Metro Station,23,Medium
+BUS300,2yd,318 KBS-JTP,2fi,Hotel Emerald,10,High
+BUS301,z,342-Y,44a,Aladamara Laggere,9,High
+BUS302,ul,D45-ATR,rw,Sumuka Layout,4,Medium
+BUS303,rw,329-J,gd,Kengeri Post Office,6,Medium
+BUS304,2qi,271-T,69c,Bengaluru University Gate,6,Medium
+BUS305,ax,365-J VSD-JACP,l1,Aduru,13,Low
+BUS306,1le,242-N,5ph,Nallur Cross,23,Medium
+BUS307,14h,228-H TPR-KMT-KBS,ar,Ittamadu Cross,4,Medium
+BUS308,1r1,37,196,Hosur Road junction 1,11,Low
+BUS309,8m,304-N,58y,Bilavaradahalli,2,Medium
+BUS310,2xp,D43G-ASK,36z,Gundanjaneya Swamy Temple Ravagodlu,9,High
+BUS311,2x,235-A SNBS-NBDA,41i,Kadubisanahalli,15,Low
+BUS312,dq,405 PTH-HSG,1u5,Kuvempunagara,20,High
+BUS313,1pg,317-P,3q7,Govt Soap Factory,3,Medium
+BUS314,19f,323-AK KBS-D41G,6b1,Dabaspete,1,Medium
+BUS315,10v,V-240M,5or,Gollarapalya,10,High
+BUS316,20x,V-333E,5g2,JC Nagara Kurubarahalli,19,High
+BUS317,2oq,BEMLB-9,10z,Lingenahalli,6,Medium
+BUS318,2j0,MF-29,227,Telecom Layout,8,High
+BUS319,1qu,500-D HBLB-KRM KM,1f1,Vaderahalli Cross,18,High
+BUS320,1ha,V-365,60m,CS-IIHS Sadashivanagara,13,Low
+BUS321,1ir,201 SGH-BSK-SNR,5re,Jalahalli Bakery,2,Medium
+BUS322,y8,SVM-1A,1zb,Kamadhenu Kshetra,18,High
+BUS323,29f,306-F,gx,Jangamakote Cross,15,Low
+BUS324,4b,MF-1F D06G-RMN,1vw,Monotype Corporation,17,High
+BUS325,222,89-B,1qd,Ashwathkatte Kodihalli,22,Medium
+BUS326,16s,KIA-8,4y3,Basavanna Devasthana CK Palya,22,Medium
+BUS327,30f,MF-8,7a,Rajapura,9,High
+BUS328,2eo,302-E,60t,CS-Peenya 2nd Stage,19,High
+BUS329,yn,266-C KKL-KBS,55j,Pattandur Agrahara Gate,5,Medium
+BUS330,dv,V-328HK,6cq,Jakkur Layout Double Road,23,Medium
+BUS331,vo,290-KN,1lw,Mutturu,18,High
+BUS332,el,346-G,1r1,Rock Line Studio,23,Medium
+BUS333,11,BMBS-JHC,43t,Ittamadu,13,Low
+BUS334,l,250-F PSS-SSHL,3af,Manjunatha Kalyana Mantapa,14,Low
+BUS335,9l,280,61l,Devanahalli Talluk Office,13,Low
+BUS336,1jh,319 D24G-KDG,5df,Jai Bhuvaneshwari Nagara,14,Low
+BUS337,2ym,HALPV-12,3qu,Marenahalli,12,Low
+BUS338,72,401-AK,2at,Doddaballapura Tollgate,8,High
+BUS339,279,349-A D38G-HND,1k7,Nagavarapalya,12,Low
+BUS340,14z,KVM-3,5mh,Embassy School,12,Low
+BUS341,17k,286-AA,3oz,Mysore Road TollGate,1,Medium
+BUS342,30p,V-226KBS,2ms,Jalahalli West Shettyhalli Road,23,Medium
+BUS343,119,515 KGR-UST,2ig,Srikanteshwara Park,3,Medium
+BUS344,2mw,306-F KBS-BRH,1pa,Herohalli Sunkadakatte,11,Low
+BUS345,25k,288 D45-TDL-KMT,5jm,Handenahalli,1,Medium
+BUS346,pq,D44-TLSP,453,Estate Tavarekere,20,High
+BUS347,20e,266-B,4zw,Ramaswamypalya,1,Medium
+BUS348,1d8,MF-401,1hs,lnoorDoddy,18,High
+BUS349,12k,213-E,mx,Honnasandra Cross,19,High
+BUS350,2tp,266-C D45-KKL,275,Poojena Agahara Dinne,5,Medium
+BUS351,2w3,285-ME,2wc,Platinum City Apartment SRS,13,Low
+BUS352,kn,G-4 SBS-BNP,5ra,CS-Hosakote KEB Circle,7,Medium
+BUS353,1o1,410-FA SNH-BSK,44l,Seegehalli Gate  Kadugodi,12,Low
+BUS354,31m,KMT-BCGHS,66k,Vaddarapalya (Anugraha Meadows),22,Medium
+BUS355,1sp,258-V KBS-GRH,6d9,Channadasipalya,15,Low
+BUS356,x5,D42G-HSS,67t,Bellahalli Cross,5,Medium
+BUS357,ed,500-F,4pp,Siluvepura,19,High
+BUS358,ah,301-D,12a,Anjaneya Temple Nelamangala,20,High
+BUS359,70,176-E,55c,Dwaraka Nagara,14,Low
+BUS360,21h,43-D,5x3,K Gollahalli Gate,10,High
+BUS361,qk,SCS-5,4ix,Sanjay Gandhi Hospital,7,Medium
+BUS362,5,289-V D52-BLR-DVH,54c,Bayyandahalli Colony,0,Medium
+BUS363,18p,BEMLA-29,4q6,Railway Gate Gollahalli,23,Medium
+BUS364,25y,238-UC,5ri,Singasandra FLY,18,High
+BUS365,2cw,306-M MDR-PURA,3yz,Vijaya Bank Layout Devarachikkanahalli,3,Medium
+BUS366,9n,MF-32,4h,CS-NGV Koramangala,3,Medium
+BUS367,16u,KRPGH-HSK,45f,Tharabanahalli,0,Medium
+BUS368,2hg,263,21k,Kengeri Metro Station,21,Medium
+BUS369,1f3,201 BSK-KVASC,5bs,KK School,17,High
+BUS370,16f,MF-10,s7,Bapujinagara,14,Low
+BUS371,31d,227-F,24q,Sanjay Gandhi Nagara,18,High
+BUS372,ze,298-A,5cr,Averahalli Cross,23,Medium
+BUS373,10o,225-B SBS-BEML5,1ll,Sondekoppa,10,High
+BUS374,6p,121-BA,2z4,MICO Gate Adugodi,10,High
+BUS375,2jd,D24G-SRPMS,4m9,Samanduru,8,High
+BUS376,1ru,27,6cj,Widia Factory,21,Medium
+BUS377,cr,304-X,1r1,Rock Line Studio,11,Low
+BUS378,2v5,43-B,3fm,Mylasandra Cross,18,High
+BUS379,fb,372-E,1x8,Venkatagiri Kote,0,Medium
+BUS380,1xj,248 KMT-JHC-BELF,6bj,Are Bannimangala,20,High
+BUS381,uu,MF-21,40v,Dodda Tumkur,23,Medium
+BUS382,li,297-F YHKOT-BVP,1hg,SMVIT College,0,Medium
+BUS383,191,245-DA KMT-BMTCTC,4bp,Banashankari 1st Stage Muneshwara Block KEB,2,Medium
+BUS384,1yn,144-G GPTE-NRG,e9,Bellikere,21,Medium
+BUS385,1o3,266-N,427,Gollahalli,16,Low
+BUS386,1zz,347-K CSB-AECSLS,1rv,Bettahalli Colony,14,Low
+BUS387,1vf,213-K,152,BGS School Banandur,23,Medium
+BUS388,77,KRPGH-RMB-BMS-VSD-KBS,62j,Kempapura,3,Medium
+BUS389,1c7,377-H,68v,Chowdeshwari Temple,16,Low
+BUS390,zr,APS-26,4se,Kurudu Sonnenahalli Cross,11,Low
+BUS391,2dy,RBI-01,12x,Abbigere Gate,22,Medium
+BUS392,1r1,37,mv,Malenallasandra,3,Medium
+BUS393,2am,322-M,1ea,MS Ramayya Hospital,17,High
+BUS394,1tj,364-G KBS-D34G,3d1,Aane Kempegowdana Doddy,0,Medium
+BUS395,kv,BC-7B 8thM-KMT,1ip,Gurukula School Tharahunase,19,High
+BUS396,1rh,212-C,2s8,Malleshwara 15th Cross  (8th Main),19,High
+BUS397,ix,BTP-4,5m7,Nettakallappa Circle,8,High
+BUS398,1n,372,5gb,Brundavana Nagara,9,High
+BUS399,jf,ARMY-04,py,Attivatta Gate,8,High
+BUS400,3q,289-A,2se,Depot-13 Kathriguppe,8,High
+BUS401,2kn,MF-15,1kf,Milk Booth,12,Low
+BUS402,31t,292,15m,Gopasandra Gate,11,Low
+BUS403,1ve,295-D KBS-YBD,6eo,Mathikere,15,Low
+BUS404,1wh,286-A,4hc,Rachenahalli Cross,11,Low
+BUS405,2sd,212-M,3g3,Suranjan Das Road/NGEF,4,Medium
+BUS406,1ph,323-B D41G-KGR,3o0,CS-Vidyaniketan School Hebbala,1,Medium
+BUS407,1c4,D31G-MCCVN,2x4,Bagalur Cross,8,High
+BUS408,xh,225-C BEML5-JNKLO,4bk,Krishnasagara,11,Low
+BUS409,p7,45-G KMK-KBS-BEMLF,6dl,Adakimaranahalli,7,Medium
+BUS410,1d0,280-L,3em,CS-RR Medical College,19,High
+BUS411,2ta,218-A,33q,Shivanahalli 4th Main,0,Medium
+BUS412,1av,223-F,61k,Manchappanahalli Cross,14,Low
+BUS413,1g6,CLO-BSN,4yg,Palanajogahalli Church,4,Medium
+BUS414,2a1,290-G SBS-ATR,ek,Bombay Dyeing Yashwanthapura,17,High
+BUS415,20l,305-Q,mk,Bhuvaneshwari Nagara,19,High
+BUS416,oy,161-D SBS-BTMS,4d9,Udakunte,21,Medium
+BUS417,7u,298-MP KBS-HRH-VJP,3is,Basappanapalya Cross,2,Medium
+BUS418,2h9,ABS-2,1fi,YAPB Toll,2,Medium
+BUS419,2h7,401-RA,5m9,Makali Cross,19,High
+BUS420,hv,KBS-1K KBS-HALM,64o,Sangam Circle,19,High
+BUS421,2zt,KLNB-HBRL,2gn,Glass House,10,High
+BUS422,2d6,315-J KBS-KLK-KMS,3aw,Maruthi Nagara,8,High
+BUS423,1cn,KVPTA-11,3dm,Gejjigadahalli,16,Low
+BUS424,2j5,KVPTA-7,190,Kannalli,17,High
+BUS425,25s,201-G SGH-JBN,34y,Shettigowdanahalli,15,Low
+BUS426,23x,505,zy,Madapatna Cross,0,Medium
+BUS427,js,289-R,v5,KIADB Circle Bagalur,3,Medium
+BUS428,2r3,PSS-LGR,5nc,Govindapura Cross,4,Medium
+BUS429,2d8,283,1cn,Chikka Veeraiahanapalya Cross,17,High
+BUS430,3m,412-H HBLB-ISRO,3f9,16th Main Hopcoms BTM Layout,5,Medium
+BUS431,co,3F-1,kx,Alanayakanahalli Gate,22,Medium
+BUS432,zn,296,3ha,Janthagundanahalli,7,Medium
+BUS433,1vt,245-M KMT-D43G,v6,CS-Bone Mill,3,Medium
+BUS434,277,229,1jc,Kadirenahalli,11,Low
+BUS435,d7,347-B,61g,Palya Gate,6,Medium
+BUS436,ru,15-A,2xu,Thabarahalli,23,Medium
+BUS437,2o5,211-Q,4xk,Medahalli,1,Medium
+BUS438,1hr,D6-D6G,33m,Tharabanahalli,13,Low
+BUS439,w6,325 D41G-HRHL,4mf,St Josephine School Annapoorneshwarinagara,16,Low
+BUS440,24m,282-G HBLB-KDLH,6d1,Honnenahalli,8,High
+BUS441,2d7,214,1v8,RBANMS College,7,Medium
+BUS442,17i,BEMLA-14,4u4,Kaggalipura Junction,8,High
+BUS443,c3,415-H,1zn,Lalbagh Metro Station,11,Low
+BUS444,h1,502-G D45G-ITPL,66x,CS-CBI,16,Low
+BUS445,z7,297-J DVH-DBP,1rk,Thalaghattapura Metro Station,3,Medium
+BUS446,2vv,253  SBS-HSG,6bh,Beedi Karmikara Colony,7,Medium
+BUS447,um,V-HBL-MKC-SBS,21c,Srirama Reddy Layout,10,High
+BUS448,ut,298-Y KBS-YLR-VJP,1c0,Billa Kempanahalli Gate,20,High
+BUS449,1z1,306-M,2y3,CS-FAZ FARMS,23,Medium
+BUS450,2le,YBS-INGVBS,4vq,Kere Guddadahalli,19,High
+BUS451,2qb,V-500F,19f,Hadohalli,2,Medium
+BUS452,2k1,251-M,3ru,Gubbi Cross,14,Low
+BUS453,1vp,KIA-8D,57s,Dodda Haralegere,9,High
+BUS454,gy,331-A SBS-KDG,4sd,Nanjapura Cross,5,Medium
+BUS455,ga,319-J TNF-DNR,58p,Chikka Sanne Gate,9,High
+BUS456,2n7,317-N,rz,Depot-21 BEML Layout,21,Medium
+BUS457,2jv,243-L,57n,Gidadakonenahalli Cross,11,Low
+BUS458,1n,372,1xb,St Johns Hospital,23,Medium
+BUS459,mw,227-VB,64h,Swami Narayana Gurukula,16,Low
+BUS460,1kv,306-L D41G-MSD,6dg,Cheemasandra Gate,14,Low
+BUS461,2dj,330 D6G-BSN,5el,Karlapura Gate BIT,22,Medium
+BUS462,xi,HSS-4,1fz,Hinnakki Gate,10,High
+BUS463,1hu,298-PA,1fd,Kada Agarahara Cross,8,High
+BUS464,kp,ITPL-3N,62x,JK Basavanna Nagara,3,Medium
+BUS465,19,281-H MYLH-KBS,560,Amruthanagara Canara Bank,2,Medium
+BUS466,1ah,291-LA BSF-SBS,2yr,Maharaja Signal,12,Low
+BUS467,31i,KIA-15A,2zg,Sonnenahalli,10,High
+BUS468,w0,242-B KBS-TVK-NML,i0,Doddabannahalli,3,Medium
+BUS469,10a,290-EY KBS-PTH,42z,M Medahalli,7,Medium
+BUS470,en,285-MC PTH-SBS-HAL,4jy,Karekal Cross,7,Medium
+BUS471,1je,500-Q VNSH-CJP,3r7,Ashwathnagara,6,Medium
+BUS472,o0,600-F FLYOVER,2l0,Haragadde Cross,1,Medium
+BUS473,v9,248-V KMT-D35G,7z,Khaji Hosahalli,15,Low
+BUS474,2qk,365-Z BGT-MMDH,13n,Bengaluru Central Jail,14,Low
+BUS475,2f0,415-D,53l,Seventh Day School (Coles Park),13,Low
+BUS476,2vm,MF-27,6da,BEML Complex,23,Medium
+BUS477,7,V-500CA,1n4,Lakshmipura,14,Low
+BUS478,2zj,SCS-03,4iu,Agalakote,18,High
+BUS479,126,D12G-BSVG,4kb,Beguru Nice Road Junction,8,High
+BUS480,2ec,238-US KBS-VJN-DPJN,h7,HRBR 1st Stage,22,Medium
+BUS481,ap,G-7 D31G-JPTS,2ly,Kaateramma Devasthana,18,High
+BUS482,2my,25-H NSP-SNBS,2h1,Mandur,5,Medium
+BUS483,2az,43-H ASP-PLO,4cy,Kempapura,23,Medium
+BUS484,1p6,215-NE ANP11-MNRV-VSD,co,Ganagalu Cross,13,Low
+BUS485,31u,VNS--24,31w,Poornaprajna Layout,8,High
+BUS486,1wh,286-A,3yq,Cargo Village,0,Medium
+BUS487,131,378-B,5r,Chokkasandra,9,High
+BUS488,1ac,276 KBS-VRP-D45G,39k,CS-HAL Gnanajyothi School,8,High
+BUS489,17e,KBS-13K,ra,Muthsandra,19,High
+BUS490,1xx,317-YA,3gy,CS-Viva Toyota Hunasamaranahalli,23,Medium
+BUS491,1a8,SHS-9,ja,Kempalinganahalli,13,Low
+BUS492,14x,600-FC,y1,BHEL Layout,10,High
+BUS493,1ig,BTP-5,2hn,Vinayaka Chitramandira,8,High
+BUS494,31c,D51G-KDG,4jk,Lottegollahalli,1,Medium
+BUS495,2qe,266 HGV-MTK-SBS,5le,NICE Road Veerabhadranagara,23,Medium
+BUS496,254,307-C KBS-VGBDAN,4hf,Raghavendra Layout,23,Medium
+BUS497,2xs,213-B,36b,Vinayaka Nagara Hesarghatta,13,Low
+BUS498,ob,333-F,3l4,Halasuru Police Station,20,High
+BUS499,2nc,500-A BSK-D10G,22,Papanahalli,5,Medium
+BUS500,2m8,ARMY-11,6l,Kalkere,15,Low
+BUS501,1to,258,15t,NCBS College,13,Low
+BUS502,m1,254-E,2t3,Mudalayyana Doddy,21,Medium
+BUS503,21t,254,23s,Booathanahalli,10,High
+BUS504,2li,242-H,2lw,Uttarahalli,5,Medium
+BUS505,2n0,221-G,lw,Coffee Day Hope Farm,14,Low
+BUS506,1s,323-G D41G-RMN,4md,Gowdahalli,15,Low
+BUS507,1g,507-K,51c,P and T Quarters,11,Low
+BUS508,2ym,HALPV-12,3fb,Konanakunte Reliance Fresh,21,Medium
+BUS509,2ky,146-B,p7,Thirumenahalli Gate,16,Low
+BUS510,1ix,KMT-HSC,1b2,CS-RV College,11,Low
+BUS511,jz,314-T,2rc,Yeshawanthapura New Railway Station,11,Low
+BUS512,2vg,JNSVS-3,2xe,Alphine Apartment,21,Medium
+BUS513,5g,96-B VSD,5bz,Vinayaka Nagara,7,Medium
+BUS514,2e8,285-N,5e8,Tin Factory,20,High
+BUS515,md,CALLBUS-2,1gk,Kaggalipura,7,Medium
+BUS516,qy,KINHT-2,1rl,Marigowdanapalya,9,High
+BUS517,2q8,375-D JGF-BSK,4mc,Poojena Agahara Dinne,13,Low
+BUS518,1yv,398-B,b0,Saalu Doddy,13,Low
+BUS519,28a,293-SD KBS-DVH-DBP,60v,Kamanahalli,22,Medium
+BUS520,fk,KIA-17,1eu,Kothanuru,9,High
+BUS521,2w9,284 KBS-KVRY,1j8,Bayyappanahalli Metro Station  Back Gate,21,Medium
+BUS522,1ic,243-L KMT-LDH,402,Gopalapura,13,Low
+BUS523,ij,D17-CLO,22g,Depot-44 Anjanapura,10,High
+BUS524,124,225-D BEML5-BHELC,54s,Udipalya,7,Medium
+BUS525,n3,255-C DSP-PLH,5dq,Mallasandra Poorvankara Apartment,18,High
+BUS526,1ys,284-E ALS-KBS,4y3,Basavanna Devasthana CK Palya,5,Medium
+BUS527,1q2,284-E,fo,Dinnepalya,0,Medium
+BUS528,220,401-AN,5je,Dinnur Sudhamanagara,17,High
+BUS529,1px,500-CF D41G-SJP-CKT,1gf,Lakshmidevi Nagara,12,Low
+BUS530,28f,293-BC BTM-BGR,3wg,Prashanth Nagara,14,Low
+BUS531,8s,STJHS-08,4vw,MES College Aradeshanahalli Road,7,Medium
+BUS532,21t,254,3u0,Bank Circle Bashettyhalli,22,Medium
+BUS533,ux,228-A GNP-SCS,4z1,Thagachaguppe,12,Low
+BUS534,1x3,KBS-3A KBS-SRN,3qi,Maruthi Mandira,15,Low
+BUS535,1pb,284-H PTH-GNR2,4es,Marsuru Gate,4,Medium
+BUS536,1rh,212-C,12q,Vannarapet,6,Medium
+BUS537,30r,293 SVPS-KBS,tm,Doddaballapura Railway Station,10,High
+BUS538,vz,79-G VSDLO-VSD-SBS,11a,Kudure Mukha Colony,9,High
+BUS539,ye,PTH-KVRY,1f4,Ganesha Temple Sahakara Nagara,0,Medium
+BUS540,2py,D9-KVP,ix,Budigere,20,High
+BUS541,1ai,366-R D27G-VDP,16v,Adugodi,1,Medium
+BUS542,7f,210-NH,2m,Jalige,8,High
+BUS543,164,306-Q,177,Kenchanapura,0,Medium
+BUS544,14t,89-A,54o,Choudappa Layout,3,Medium
+BUS545,2du,HALPV-11,5pf,Lakshmipura,17,High
+BUS546,1yc,328-H ATB-KDG,qc,Bisanahalli Cross,10,High
+BUS547,2d6,315-J KBS-KLK-KMS,5cy,Hulimangala,4,Medium
+BUS548,2w,305-F D24G-NDVC,1uy,Bagalur Cross,12,Low
+BUS549,1ff,288-A GPO-KDH,2qs,Hakki Pikki Colony Bannerughatta,13,Low
+BUS550,sh,210-P PPLO-CKLS,3ps,Vijayapura Kere Kodi,5,Medium
+BUS551,27y,346-CK,1oq,Basavanna Temple Hoovinayakanahalli,18,High
+BUS552,ai,89-F YTTMC-GBER,2a0,Kakolu,11,Low
+BUS553,2w9,284 KBS-KVRY,4pb,Magadi Road TollGate,12,Low
+BUS554,1hu,298-PA,4kl,Thotagere Village,7,Medium
+BUS555,15w,323-B,480,Passport Office Koramangala,23,Medium
+BUS556,9i,217-D SMP-VSD-KBS,8f,Madappanahalli,9,High
+BUS557,1ok,354-C CSB-MRS,48t,Dasanayakanahalli,14,Low
+BUS558,1y9,215-X KMT-DKMS,2hf,Siddapura Cross,11,Low
+BUS559,1w5,G-2 NGVJ-SJP,583,Halasahalli,7,Medium
+BUS560,23w,HSR FDR-1,hi,Attivatta Gate,6,Medium
+BUS561,188,MF-45,514,Cubbon Park Metro Station,9,High
+BUS562,n4,269-A KMT-RCP-VRP,20d,KG Lakkenahalli Cross,14,Low
+BUS563,w4,238-UM DPN-VJN-UST,59g,Ramohalli,23,Medium
+BUS564,16g,378-D ELC-D12G,40e,Bheemajyothi Nagara Shankara Mutt,13,Low
+BUS565,vs,285RC,4ge,KIADB Circle Bagalur,20,High
+BUS566,nm,301,4kk,STRR Devanahalli Toll,18,High
+BUS567,2r7,210-FA,2dc,Commercial Street,7,Medium
+BUS568,ui,V-360B,1mq,Vittal Nagara,17,High
+BUS569,3u,401-NY,3vz,Sonnenahalli Govt Hospital,19,High
+BUS570,2cf,139,53r,Charls School Toll Gate,1,Medium
+BUS571,2yk,258-H,13e,Malleshwara 15th Cross(8th Main),6,Medium
+BUS572,1ye,231-J D36G-GDH,mu,Gudipalya,10,High
+BUS573,r,401-N D31G-MBS,66,CS-Maruthi Mandira,18,High
+BUS574,22s,BEL GS-22,1je,Darshan Farm,12,Low
+BUS575,ou,250-DT D45G-KDGC,42w,Anjan Vidya Kendra School,14,Low
+BUS576,15i,399-F D42G-HUK-ANK,5li,BSF Yalahanka,0,Medium
+BUS577,2ca,243-A,3as,Mavinamara Vanakanahalli,6,Medium
+BUS578,235,335-E BEML-HAL-KGD,vy,Nallur Cross,3,Medium
+BUS579,f8,210-AA,2ps,Bettahalli Colony,4,Medium
+BUS580,23y,201,4n1,Juggath Pharma,15,Low
+BUS581,9n,MF-32,1i4,Sahukarapalya,17,High
+BUS582,gk,301-T,1o4,Bull Temple,14,Low
+BUS583,2qm,141-E SBS-KRM,1xh,Kundalahalli Metro Station,21,Medium
+BUS584,2jb,500-CF,4hj,Gopalapura,12,Low
+BUS585,fe,231-F,97,Kannalli,9,High
+BUS586,yn,266-C KKL-KBS,3ex,Venkateshwara Layout,11,Low
+BUS587,22r,BC-7B BDH-JHC-PSS,9i,Kodipalya,20,High
+BUS588,1qu,500-D HBLB-KRM KM,5it,Kidwai Layout,17,High
+BUS589,1u3,D42-D42G,1aj,Podu Village,0,Medium
+BUS590,19t,238-U,48l,Billa Kempanahalli Gate,20,High
+BUS591,ee,344-A,2d6,Bhuvaneshwari Nagara,12,Low
+BUS592,9i,217-D SMP-VSD-KBS,1q1,Sheshadripuram College,0,Medium
+BUS593,1a1,114-A STP-SBS-BCGHS,662,Kalya,1,Medium
+BUS594,qd,242-U,481,Dodda Byalakere,2,Medium
+BUS595,q9,346-C KMT-RYS,4s6,Kuppareddy Kere,5,Medium
+BUS596,1pd,415 BVSN-SBS,4l9,Medi Agrahara Cross,13,Low
+BUS597,1ot,ST BENEDICT-14,37f,Kogilu Cross,17,High
+BUS598,1xl,D27G-RKT-BMS,28s,CS-Muttanallur Cross,0,Medium
+BUS599,1qh,ITPL-2B,3mj,SRS Peenya,20,High
+BUS600,yb,293-E,2tv,NICE Road 7th Stone,2,Medium
+BUS601,17a,410-FC JHC-GGP-CLO,2sg,Dodda Gubbi,22,Medium
+BUS602,2t4,HAV PV-07,jq,BTL College,20,High
+BUS603,2rn,5F KGR-ANP,3l5,Bharathnagara Sunkadakatte,18,High
+BUS604,2xw,227-A BEML5-MYS,5dv,Kodimanchanahalli Gate,9,High
+BUS605,2lp,D25G-HSRBDA,cg,Muneshwara Devasthana,19,High
+BUS606,310,221-KGR-LVP,3wa,Bidadi,20,High
+BUS607,1ct,CHLS-3,5ve,Muttarayanapura,1,Medium
+BUS608,2ga,MGR-APS,3c0,Kanminake,19,High
+BUS609,2ck,378 ELC-SET,11v,K Narayanapura Cross,14,Low
+BUS610,1a1,114-A STP-SBS-BCGHS,25j,Sonnappanahalli,22,Medium
+BUS611,2xi,SHS-7,1l8,Minaznagara,15,Low
+BUS612,31b,15-E KBS-PPLO,526,Kullegowdanapalya 1,6,Medium
+BUS613,10a,290-EY KBS-PTH,5aq,CS-V CARE HOSPITAL,15,Low
+BUS614,gz,DSC HAL-CVR,5o9,Jalabhavan,21,Medium
+BUS615,4g,80-D YTTMC-RBJN,46s,ITC Factory,7,Medium
+BUS616,q2,75 DPJN-MBS,3z1,Gundur,11,Low
+BUS617,4e,BELGS-23,62r,Rajagopala Nagara Police Station,19,High
+BUS618,1z,V-500HS,1w4,Doddagattiganabbe,19,High
+BUS619,15i,399-F D42G-HUK-ANK,1ol,Dommasandra Circle,13,Low
+BUS620,2ge,YHKOT-VNC-BLR,1ks,CS-ARMY Public School ASC Center,11,Low
+BUS621,ev,507-K D45-CKB,hp,Vaddarahalli Cross,19,High
+BUS622,1pt,238-U KBS-AIT,yh,Bettanahalli Site,15,Low
+BUS623,282,211-E,9e,Gundur,2,Medium
+BUS624,16n,213-A,2yt,Thirumalashettyhalli  Cross,13,Low
+BUS625,lt,D06G-MRS,jn,Varadenahalli Handpost,23,Medium
+BUS626,o7,255-A DSP-HKV,3ha,Janthagundanahalli,18,High
+BUS627,fg,329-C D41G-KTR,4l9,Medi Agrahara Cross,9,High
+BUS628,2je,G-4 D34G-BGRD,21g,Pipeline ISRO Layout,15,Low
+BUS629,3n,CHAKRA-16A,4si,Kalenahalli Gate,7,Medium
+BUS630,2gz,BC-7A,4ww,Makkala Koota,22,Medium
+BUS631,2h9,ABS-2,27a,Navarang Theatre,0,Medium
+BUS632,19r,284 D14G-RTNPS-KBS,2u3,Hennuru Petrol Bunk,23,Medium
+BUS633,pt,500 BEML-MRTB-CSB,4s4,Sharadha Colony,19,High
+BUS634,2v1,CLO-GKWLO,d7,Hosakote Toll,2,Medium
+BUS635,1j4,335-S,5sv,Ranganathpura,5,Medium
+BUS636,26v,KMT-LMG-KRMTTMC,2kf,Marigowdanapalya,12,Low
+BUS637,2yr,215-H D-34-JPN6,ba,Indoor Stadium,2,Medium
+BUS638,2hh,361-B,sz,Channegowdana Doddy,23,Medium
+BUS639,pa,258-VA,4jr,Bidalapura Cross,7,Medium
+BUS640,nw,36-G,3tu,KR Pura Railway Station,23,Medium
+BUS641,1cw,D20-BSK,np,Bhimakanahalli Gate,18,High
+BUS642,i1,ITPB-4H,rw,Sumuka Layout,2,Medium
+BUS643,1p3,289-Y,46y,CPRI Quarters,6,Medium
+BUS644,24u,D12-RRMC,5hi,Harohalli Petrol bunk,10,High
+BUS645,2qo,245-R KBS-DJP,3kq,CS-Active Public School Hommadevanahalli,2,Medium
+BUS646,d9,D14G-AJM,3bs,Veerannapalya,16,Low
+BUS647,245,211-K,1jr,Kodalagurki,6,Medium
+BUS648,1yb,253-J VSD-HGV,tn,Kuvempunagara,3,Medium
+BUS649,21a,HALPV-16,61h,Nelamangala Hunasemara,12,Low
+BUS650,179,401-L,3n4,Mahadeshwara Nagara,15,Low
+BUS651,m7,358 KBS-MYS,4ry,Hegganahalli,23,Medium
+BUS652,26y,DMLMDA-SBS,4en,Sahakara Nagara Post Office,20,High
+BUS653,2c1,258-WA KMT-JTS,cx,Jayaram Layout (Hale Sampigehalli),13,Low
+BUS654,2u4,399-F,1wl,Kaggalipura,10,High
+BUS655,301,290-G,1q,Siddapura Nallurhalli,18,High
+BUS656,df,KRMTTMC-BGR,3x1,Graphite India,11,Low
+BUS657,wu,60A-MDP-NBC,63l,Boppanahalli Chikkapura,23,Medium
+BUS658,ao,248-AB NGSMS-CKB,4e3,Chikkamaranahalli,0,Medium
+BUS659,11g,225-C BEML5-MRBS,2nb,Lakkuppe,14,Low
+BUS660,25x,227-A SBS-MYS,5mm,Summanahalli,9,High
+BUS661,1mp,210-B KBS-KMT-CHG,1fj,CS-Kengeri Bus Stand,0,Medium
+BUS662,8r,271-B KMT-2KVP,16p,Poojena Agrahara,16,Low
+BUS663,2g2,250-A,2ke,Ganesha Temple Bettanahalli,2,Medium
+BUS664,2ga,MGR-APS,67m,Swastik Sheshadripuram,11,Low
+BUS665,28a,293-SD KBS-DVH-DBP,3nh,Moodalapalya,15,Low
+BUS666,2tf,345-F,3xq,ISRO Quarters Jalahalli,4,Medium
+BUS667,2jz,155,5k1,Sidi Hoskote,12,Low
+BUS668,2sc,286-K SNBS-SBS-HBLB,63f,CS-Vijayanagara,12,Low
+BUS669,1i3,328-H ATB-SJP-ABS,1l0,Halappanahalli,16,Low
+BUS670,2a2,399-G,1rv,Bettahalli Colony,16,Low
+BUS671,se,241-P,3pa,Saraswathi Nagara,2,Medium
+BUS672,51,315-MF CVB-KHCQ-RMN-D24,iw,Brigade Palm Springs,10,High
+BUS673,2ud,290-E KLN-YLKOT,2p4,Industrial Town Rajajinagara,13,Low
+BUS674,2q9,MRBS-BUCG-SMA,59q,Avaragere Cross,2,Medium
+BUS675,2c7,258 KBS-SMP,vi,Garudappa Circle Thigalarapalya,5,Medium
+BUS676,13v,MKT-12HK,2nv,Bamboo Bazaar,19,High
+BUS677,1i2,343-H,7t,Koyira,0,Medium
+BUS678,260,323-A,1yw,Aralimara Industrial Area  Rajajinagara,14,Low
+BUS679,2xj,245-H,5q2,Indira Nursing Home,23,Medium
+BUS680,28f,293-BC BTM-BGR,ih,Nelaguli,3,Medium
+BUS681,24j,329-C,294,Ambalagere,2,Medium
+BUS682,27r,228-H,5v,Sheshadripuram College,21,Medium
+BUS683,17i,BEMLA-14,25l,Doddy Chikkakuntanahalli,10,High
+BUS684,2yw,316-B,3ej,Water Tank Kothanur Dinne,7,Medium
+BUS685,2ru,255 MTH-DSP,2n2,CS-Bhuvaneshwari Nagar,5,Medium
+BUS686,2nz,BCGHS-13,5bw,Yarappanahalli,1,Medium
+BUS687,239,316-E,2v8,Bendiganahalli,19,High
+BUS688,2uj,HALPV-6,1j1,TISB Boys Hostel,19,High
+BUS689,1gb,89-E,vu,Arishinakunte,11,Low
+BUS690,15d,334-E DBS-KDG,493,Forum Mall,4,Medium
+BUS691,2vr,36-B,20x,Thippennahalli,17,High
+BUS692,2pr,BEML B-22,457,New Gabbadi,21,Medium
+BUS693,2lx,401-K CLO-YHKOT,5tk,Karadigowdanahalli,6,Medium
+BUS694,2g5,285 BELF-HBLB-DBP,6dx,Meda Maranahalli,19,High
+BUS695,1p7,241-D BRTN-VSD,574,Goraguntepalya,20,High
+BUS696,289,242-MA KBS-SLVR,568,Madivala,19,High
+BUS697,co,3F-1,68t,Gundenahalli Cross,2,Medium
+BUS698,1r7,323-AB,4rh,NICE Road 16th Stone,9,High
+BUS699,1jb,401-K D45G-KGR,4q2,Krishnasagara,1,Medium
+BUS700,12p,MF-30,61m,Annapoorneshwari nagara Cross,19,High
+BUS701,bv,228-G KCP-KBS,sj,Ramakrishnapura Gate,13,Low
+BUS702,1mt,269-B KBS-RCP-D45,205,Nagaruru,0,Medium
+BUS703,2dv,342-U,10w,Manjunatha Kalyana Mantapa,10,High
+BUS704,ar,KMT-KBS-VNS,1pn,Shrunga School Devangondi,10,High
+BUS705,qo,369-A,ee,Shirdi Sai Nagara,1,Medium
+BUS706,7a,289-F PTH-HSK,6d4,MTR Hotel,16,Low
+BUS707,pw,43-J VSD-HKLO,5zq,Kempapura Agarahara,20,High
+BUS708,1qg,323-H,2x3,Kamalanagara Market,14,Low
+BUS709,2ls,KBS-1K,5p6,Kotiganahalli,11,Low
+BUS710,3y,500-DP DNK-GGP,4zg,Dodda Nekkundi,12,Low
+BUS711,1op,79-J,144,Bettahalli Layout,19,High
+BUS712,cf,211-DA,1y0,NICE Road 4th Stone,15,Low
+BUS713,eh,285-MA,4ab,Balaji Layout 100ft Road,18,High
+BUS714,di,365-Q,5rw,Kodigehalli Gate,2,Medium
+BUS715,1u,251-G,14,Kannamangalapalya,5,Medium
+BUS716,19n,BELGS-9,60y,80 feet Road Kalyananagara,14,Low
+BUS717,5d,285-C,44a,Aladamara Laggere,4,Medium
+BUS718,1qv,253-D KBS-TNS,481,Dodda Byalakere,16,Low
+BUS719,1a,226-E KMT-CGD-BDD,395,Marnami Doddy,9,High
+BUS720,p0,PESCE-1H,5gp,Bisanahalli,5,Medium
+BUS721,1tn,MF-9 TNF-HDM,43q,Arishinakunte,15,Low
+BUS722,1mp,210-B KBS-KMT-CHG,533,Karenahalli,2,Medium
+BUS723,fi,279-E,5wj,Peddanapalya Cross,5,Medium
+BUS724,30l,224-C,68p,Nagarajuna College Ananthapura,17,High
+BUS725,1bi,35 VSD-KMT-KSGP,2o4,Wipro Park Koramangala,21,Medium
+BUS726,2ts,250-B,3id,Huttanahalli,4,Medium
+BUS727,2tg,223-D RRMC-DBT,15z,Kalyana Mantapa Koramangala,3,Medium
+BUS728,2cu,BEMLA-4,60r,MEI Layout Arch,8,High
+BUS729,zd,43-M,3db,Purushanahalli,16,Low
+BUS730,qx,290-EB SBS-PTH,4h8,Hebbala Bridge,16,Low
+BUS731,31e,251-D,34n,Jakkur Layout 3rd Cross.,11,Low
+BUS732,2s1,MDP-ITPB,4od,Nandidurga Road,10,High
+BUS733,2g9,311-J,660,Puttenahalli,2,Medium
+BUS734,1fr,KBS-1I KBS-KVASC,3gf,Doddamma Temple,18,High
+BUS735,1af,240-E,zl,Cambridge North Campus,7,Medium
+BUS736,1xo,KMT-BLS-YPB,3cj,Mahal Chowdadenahalli,13,Low
+BUS737,2as,228-C DKH-SBS,5tg,MVJ Medical Hospital,19,High
+BUS738,v1,342-H,15b,Chikkammanapalya,17,High
+BUS739,bd,211-NB,1tg,Pichaguntarapalya,18,High
+BUS740,1ke,223-A CLO-DBT,14q,Kacharakanahalli,4,Medium
+BUS741,21h,43-D,1l7,Ilathore Cross,5,Medium
+BUS742,2ih,ITPL-5B,ky,Shyanumangala,13,Low
+BUS743,w8,201 KRM KM-BSK,t5,Kempathimmanahalli,20,High
+BUS744,2s8,75-E,4yn,Govt School Jakkur,9,High
+BUS745,22x,279-A HBL-VSD-KMT,5oc,Bananduru,23,Medium
+BUS746,q7,255-J KBS-HNS,2eh,CS-Hado Siddapura,12,Low
+BUS747,1ud,285-MP,49,B Hosur Circle,9,High
+BUS748,1bt,368 SBS-D27G,2an,IBM Gate,10,High
+BUS749,u8,316-J,lm,Bidiganahalli Cross,2,Medium
+BUS750,2yi,285-CA,5zk,Adakimaranahalli,22,Medium
+BUS751,br,SPHS-15,2ck,Sevanayakanahalli,11,Low
+BUS752,2ga,MGR-APS,4my,Channarayapatna,10,High
+BUS753,2z0,364-C,3iv,Dodda Dunnasandra Cross,14,Low
+BUS754,1fx,2KVP-JHE,jc,Sompura Tumakur Road,9,High
+BUS755,2ez,50,3qo,Devaninjayyanapalya,11,Low
+BUS756,1me,507-PS,11z,Systems Peenya,17,High
+BUS757,gd,D19-PESCE,ot,Handigutte,20,High
+BUS758,1cz,253-W D40G-TMH,2ub,Diwanarapalya,0,Medium
+BUS759,po,284 VNS-YHKOT,2tu,Jayanagara Pump House,1,Medium
+BUS760,63,270-D,4cw,Brook Haven JP Nagara 8th Phase,23,Medium
+BUS761,2d3,276-E KMT-MTK-VRP-D45,3ne,Chowdeshwarinagara,15,Low
+BUS762,2wn,293 SBS-MYLH-HNS,3fj,Old Baiyappanahalli,3,Medium
+BUS763,19g,D4-SGH,54b,Indluvadi Cross,23,Medium
+BUS764,1cs,YHKOT-SUAP,5ta,Kannuru Junction,20,High
+BUS765,2ts,250-B,27l,Eradu Kamba,4,Medium
+BUS766,12m,MF-25,1y3,Vijayanagara,2,Medium
+BUS767,bd,211-NB,2yo,MICO Layout Checkpost Gopalan mall,0,Medium
+BUS768,2hm,BC-4A,5ay,MEI Colony Laggere,2,Medium
+BUS769,2fy,242-RA,3tc,Depot-25 Gate,21,Medium
+BUS770,6d,271-C,1tc,Nursery Nelamangala,20,High
+BUS771,52,MF-12 DPJN-BSK,289,Balaji Badavane Sulikere,16,Low
+BUS772,r8,180,5hl,Kantanakunte,6,Medium
+BUS773,uc,245-GA D31G-KDG,4zy,CS-Electronic City,4,Medium
+BUS774,1wp,KLN-UTM,22w,Pillagumpa Factory Gate,7,Medium
+BUS775,186,354-A,482,CS-Aluru,15,Low
+BUS776,2eu,323-G,5a4,Rampura,19,High
+BUS777,2ok,381-D D24G-EMTS,1ad,Gadipalya,10,High
+BUS778,1nz,366-Z ANK-CNP,3z9,Muneshwara Temple,11,Low
+BUS779,1jw,293-R SBS-LHIA,53c,Kundalahalli Metro Station,11,Low
+BUS780,28y,288-G KBS-VSD-KDHCBC,20y,Basavanahalli Cross,2,Medium
+BUS781,uq,398-H,xu,Thore Doddy High School,19,High
+BUS782,ih,306-M KMT-KDR,347,Hope Farm,23,Medium
+BUS783,fx,289-C,4np,Nagaresh Nagenahalli,1,Medium
+BUS784,1kn,505 VRK-ELCW,4t8,Bettahalasuru Village,14,Low
+BUS785,250,500-J,36r,Jagajeevanram Nagara,9,High
+BUS786,v4,VNS-8,4qh,Nelagulli Cross,1,Medium
+BUS787,15w,323-B,689,Vinayakanagara Ramohalli,21,Medium
+BUS788,1wi,242-LA,1tw,Chikkahosahalli Gate,22,Medium
+BUS789,1a9,ADITI-14,3i6,Renuka Nagara,7,Medium
+BUS790,22x,279-A HBL-VSD-KMT,j2,Jodi Ragi Thimmasandra,4,Medium
+BUS791,72,401-AK,24y,CS-Munnekolalu Cross,19,High
+BUS792,2ev,88-A BSN-GPO,di,Laggere Bridge,3,Medium
+BUS793,2mx,409,55y,Garvebhavipalya,17,High
+BUS794,1id,288-J MGRMS-CBL,1fh,Oil Mill Road Junction,12,Low
+BUS795,2iq,316-T,3rx,Kuduregere Gate,21,Medium
+BUS796,1mg,289-AB,3qi,Maruthi Mandira,16,Low
+BUS797,1w5,G-2 NGVJ-SJP,3og,Ananda Rao Circle,7,Medium
+BUS798,yk,500-CH KLN-SJP,1oo,Glass Factory,16,Low
+BUS799,1ag,MF-500EB BYPMS-ELC,38z,Kempapura,11,Low
+BUS800,1ff,288-A GPO-KDH,2np,Krishnananda Nagara,15,Low
+BUS801,1oz,D35G-YKH,42c,Ganagaluru,23,Medium
+BUS802,1n7,248-T,5ql,Jnanabharathi Metro Station,9,High
+BUS803,16u,KRPGH-HSK,2k2,Gangadaranapalya,21,Medium
+BUS804,do,290-R,z4,Kempaiahnapalya Cross,16,Low
+BUS805,1n4,238-U SBS-MDPC,4gf,Aralumallige,19,High
+BUS806,1t6,APS-20,5tv,Ananthapura Gate,9,High
+BUS807,1z7,401-B HPN-MSP-YHKOT,5s2,Carmelram Railway Station,4,Medium
+BUS808,2tn,MRTG-IIHS,nm,Pandithana Agrahara,8,High
+BUS809,1uh,248-Z,65z,Kapayana Doddy,9,High
+BUS810,gp,228-G,26m,Metrocorp Nirvana Layout,21,Medium
+BUS811,1mt,269-B KBS-RCP-D45,35d,Adugodi,4,Medium
+BUS812,8v,280-A AGLO-KBS,w,Tharabanahalli,3,Medium
+BUS813,gs,282-F HBLB-MNH,654,Huskur Cross,1,Medium
+BUS814,ik,45-E,zh,Sophiya School (KIA),19,High
+BUS815,25g,L & T-04,2zz,RC College,7,Medium
+BUS816,ky,D50-DVHOBS,3x1,Graphite India,1,Medium
+BUS817,2gh,82-AR,2kg,Koramangala Water Tank,1,Medium
+BUS818,1i3,328-H ATB-SJP-ABS,6d,Depot-46 Gate,22,Medium
+BUS819,1dy,TEPL-2,4ja,AGS Layout Cross,19,High
+BUS820,1ch,500-LA,2j8,Nanjappa Circle,23,Medium
+BUS821,298,213-H,5fo,Havanur Circle,7,Medium
+BUS822,176,10-J CLO-NDH-KBS,27j,Konasandra Cross,2,Medium
+BUS823,5i,250-DT,3z0,B Krishnappa Nagara,12,Low
+BUS824,16d,500-D MRHB-RTNP,4ev,Kalamandira  Marathahalli Bridge,13,Low
+BUS825,m4,500-CS,1je,Darshan Farm,0,Medium
+BUS826,yb,293-E,35e,Kumaraswamy Layout Police Station,1,Medium
+BUS827,az,241-D VSD-BDG,43j,Gandhi Bazaar,10,High
+BUS828,e,227-R,541,KG Lakkenahalli,10,High
+BUS829,2xb,211-P,3p3,Subramanyanagara Thyamagondlu,10,High
+BUS830,2v5,43-B,tb,Nrithyagrama,15,Low
+BUS831,2op,MF-24,1ui,Shilpa Bakery Horamavu Road,6,Medium
+BUS832,15r,79-G,1yv,Bikkanahalli,14,Low
+BUS833,1cw,D20-BSK,5o6,Bommasandra,20,High
+BUS834,1yc,328-H ATB-KDG,52d,MICO Shramajeevi Colony Arakere,21,Medium
+BUS835,mo,2,9l,Dasanapura,7,Medium
+BUS836,1x,225-C BEML5-JNSVS,278,Ankanahalli,14,Low
+BUS837,2od,242-B D31G-TVK,3jq,Basavanapalya,8,High
+BUS838,lk,365 KBS-JRML,4nk,Ganjalahalli,13,Low
+BUS839,md,CALLBUS-2,257,CS-Swastik Sheshadripuram,6,Medium
+BUS840,30w,285-X DBR-KBS,3q4,Timber Yard Layout,14,Low
+BUS841,cw,254-D KBS-KMP,2i9,Geddalahalli,6,Medium
+BUS842,4p,500-QD YBS-CSB,3bd,Town Hall,12,Low
+BUS843,1y6,214-G D44-SMH-GTH,1e7,Vinayakanagara Varthur,6,Medium
+BUS844,jb,VNS-23,1w7,Chambenahalli,5,Medium
+BUS845,1j5,354,23p,RV College,8,High
+BUS846,2at,214-L,4r9,Mugaluru,3,Medium
+BUS847,206,255-N,2p0,Navodaya School Bagalur,14,Low
+BUS848,116,144-E,401,MS Palya,21,Medium
+BUS849,2vw,335-E,323,Gangamma Circle,9,High
+BUS850,2sa,VNS-2,4x8,Addiganahalli,6,Medium
+BUS851,1ow,HSS-7,am,Dommasandra,6,Medium
+BUS852,2zd,300-MV,3vj,Johnson Market,21,Medium
+BUS853,qc,253,521,Poultry Farm,7,Medium
+BUS854,3l,281-F KBS-MYH-HNS,3bw,Malleshwara Railway Station,4,Medium
+BUS855,ao,248-AB NGSMS-CKB,2k,Agrahara Layout,14,Low
+BUS856,pq,D44-TLSP,5ww,Chikka Basti,21,Medium
+BUS857,17x,BEML5-KSLOW,60a,Jayasuryanagara Kogilu,3,Medium
+BUS858,14y,Oasis-1B,x8,NR Colony,2,Medium
+BUS859,2wn,293 SBS-MYLH-HNS,5bx,Mata Mallasandra,20,High
+BUS860,gy,331-A SBS-KDG,13w,Ganesha Temple Tavarekere,4,Medium
+BUS861,12m,MF-25,2oh,Chikka Tumkur Cross,19,High
+BUS862,234,272-B,1fb,CK Thandya,22,Medium
+BUS863,y1,298-MK,4rp,Thirumala Gate,8,High
+BUS864,z7,297-J DVH-DBP,1tj,Kamblipura Gate,2,Medium
+BUS865,1wr,242 D31G-KMT,1fl,Haldenahalli,16,Low
+BUS866,2tp,266-C D45-KKL,3sq,Karahalli,11,Low
+BUS867,16g,378-D ELC-D12G,76,Kuppa SiddanaDoddy,6,Medium
+BUS868,2ej,333-H D41G-MKO,1vx,Ganagaluru Circle,2,Medium
+BUS869,11q,D45-MSP,18,CS-Thataguni Sai Garden,15,Low
+BUS870,2ci,347-N,9x,Binnamangala,4,Medium
+BUS871,1mw,281-F,3dl,RMS Sanjayanagara,6,Medium
+BUS872,2cx,258-SB,1yy,Machohalli,15,Low
+BUS873,161,ST BENEDICT-10,5ht,Mavallipura,17,High
+BUS874,13k,305-P,1ee,Sorahunse Gate,21,Medium
+BUS875,2gs,328-H HSK-D41G,5ay,MEI Colony Laggere,18,High
+BUS876,2ur,294-A SBS-KSHH,4wp,Kuvempu Circle,23,Medium
+BUS877,4w,266-Q KMT-LXP,397,Rajajinagara Old Police Station,18,High
+BUS878,11d,282-B,5qm,Koli Farm,4,Medium
+BUS879,2zy,MBS-12 PSS-ANP,wn,Hadripura,23,Medium
+BUS880,2qu,BEML-33A,6ba,Muthsandra,7,Medium
+BUS881,1lg,VNS-04,39h,Nayandahalli Junction,20,High
+BUS882,bv,228-G KCP-KBS,cd,Hampinagara RPC Layout,15,Low
+BUS883,tl,352-B,tw,Suradenapura Cross,4,Medium
+BUS884,2ae,215 KMT-D44G,nt,Akkayammana Betta Huttanahalli Cross,19,High
+BUS885,16y,96-G D31G-SNB,r0,Sanjay Gandhi Hospital,14,Low
+BUS886,2n0,221-G,520,CS-Pottery Town,23,Medium
+BUS887,17d,D24G-TNF,1pw,Ganesha Temple Vasanthanagara,0,Medium
+BUS888,1j1,171 KBS-SNCA,2fb,Vaddarapalya,8,High
+BUS889,2kx,356-M KBS-D32,22y,Bandapura Gate,0,Medium
+BUS890,2rn,5F KGR-ANP,5wj,Peddanapalya Cross,2,Medium
+BUS891,we,MF-45 VTTMC-ABG,um,Hullahalli Cross,18,High
+BUS892,2dq,266-G D45-MTGHL,jq,BTL College,5,Medium
+BUS893,yw,304-E,1ii,Yadalam Nagara,21,Medium
+BUS894,28p,KIA-6,4uu,Indira Canteen (DESI MASALA),8,High
+BUS895,bc,MDR-AVLH-RMP,1j4,Bellikere Cross,6,Medium
+BUS896,1or,D43-VNC,63x,Kuppemala,12,Low
+BUS897,16v,238-D DPJN-NBV1S,6dc,Kachamaranahalli,8,High
+BUS898,1s3,375 JBS-BEML5,45t,Banandur Circle,2,Medium
+BUS899,17d,D24G-TNF,52a,Museum,15,Low
+BUS900,1s9,298-AP,44j,Om Shakthi Temple,1,Medium
+BUS901,2v6,285-MA SNBS-DBP,33p,Devinagara Cross,23,Medium
+BUS902,18z,251-C,1ap,GBJ Colony Gate Doddanekkundi,20,High
+BUS903,2a3,VLO1-KGR,4p4,Chokkanahali Government School,12,Low
+BUS904,1nk,250-S PSS-GLB,g,Chinnakurchi,12,Low
+BUS905,11m,201-R CSB-BEMLF,37v,2nd Stage  H B R Layout (2nd Cross),10,High
+BUS906,30j,300-DA,1xc,Muneshwara Swamy Temple,7,Medium
+BUS907,e0,SBS-1K SBS-D41G,54p,Shankarnagh Bus Stand,3,Medium
+BUS908,2vf,SJBHS-9,6dk,Mahadevapura,21,Medium
+BUS909,2rb,258 SNBS-NMG,29z,Hejjala Cross,12,Low
+BUS910,1ts,18,x8,NR Colony,21,Medium
+BUS911,1zj,508 D45G-HSK,ax,Sajjan Rao Circle,7,Medium
+BUS912,2y3,227-H,69p,Anchipura Cross,12,Low
+BUS913,1lc,210-B KTNR-KMT-VSD,2d2,Indiranagara 100ft Road,15,Low
+BUS914,2fe,306-MB,4u6,Kamblipura Cross,9,High
+BUS915,jb,VNS-23,37v,2nd Stage  H B R Layout (2nd Cross),17,High
+BUS916,1dm,242-MA,5ve,Muttarayanapura,21,Medium
+BUS917,nu,291,266,Hesaraghatta,11,Low
+BUS918,i8,D46-PTML,2ht,Patel Pillegowda Layout,19,High
+BUS919,2ri,D41G-CKTP,3b1,Thippasandra,6,Medium
+BUS920,27a,314-T RMN-VSD-KBS,3y0,Pothalappa Garden,16,Low
+BUS921,22f,KBS-1I D6G-KDG,3ts,Goravanahalli Cross,15,Low
+BUS922,17m,CALLBUS KWS-7,5cq,Vishwanath Nagenahalli,12,Low
+BUS923,2oi,25-A,4qr,Bande Maramma Bus Station,6,Medium
+BUS924,13d,SVH4M-BEMLKML,3xi,Yelahanka Santhe Circle,5,Medium
+BUS925,1j9,380 SBS-MVJ,581,HSR Layout Bescom Office,23,Medium
+BUS926,295,289-F YST-HSK,4ql,Govardhan Talkies,20,High
+BUS927,h0,SVPS-2,52g,Koramangala Water Tank,5,Medium
+BUS928,2wm,MF-1GA ITPLMS-WTTMC,6d4,MTR Hotel,17,High
+BUS929,1z1,306-M,1a8,Sheshadri Nagara,6,Medium
+BUS930,2n3,112,c4,Pallavi Talkies,6,Medium
+BUS931,2ai,360-K KSR-ATB,wp,BDA Flats Kommaghatta,15,Low
+BUS932,cc,248-BA,3nb,CS-Arishinakunte,6,Medium
+BUS933,2ic,242-CB D35G-TGP,4dv,Nisarga Badavane Cross,6,Medium
+BUS934,kl,MF-1K MDR-KDGMS,xr,LTG Aishwarya,9,High
+BUS935,26w,271-F,xv,Krishna Garden BHEL Layout,15,Low
+BUS936,16m,288-H KBS-AGS-TDL,1i8,HAL Kalyana Mantap,0,Medium
+BUS937,1f3,201 BSK-KVASC,lx,Kumaraswamy Layout 2nd Stage,2,Medium
+BUS938,2mu,BEL GS-30,ch,C R P F Kaggalipura Main Road,6,Medium
+BUS939,2gw,KRM-GPTE,15q,Thirumalashettyhalli  Cross,7,Medium
+BUS940,22o,D6G-NRG,1kh,Nagasandra Circle,6,Medium
+BUS941,2mf,MF-47,3r5,Sonnenahalli,16,Low
+BUS942,2ss,330-G SBS-MRHB-DDNK,gx,Jangamakote Cross,2,Medium
+BUS943,ji,326-E,17s,Naganayakanahalli,4,Medium
+BUS944,1zh,342-Q KMT-D42G,4ml,Solur Hassan Road,1,Medium
+BUS945,2g1,226-P,hb,Muddanahalli,0,Medium
+BUS946,mx,112-A,2nj,Upkar Layout Cross,23,Medium
+BUS947,sn,285-AA,3n9,Jalli Machine,21,Medium
+BUS948,2s1,MDP-ITPB,4r8,Kempalinganahalli,18,High
+BUS949,gs,282-F HBLB-MNH,65l,CS-Bhattarahalli Bank Of India,10,High
+BUS950,2u,HAL PV-10,2t4,Seegehalli Gate,3,Medium
+BUS951,2lh,YTTMC-YPRS,3in,Vishwa Chethana College,7,Medium
+BUS952,29d,282B KBS-MSGH,4r3,Kalkere School,18,High
+BUS953,162,228-A,5js,Jalavayu Vihara,7,Medium
+BUS954,1tj,364-G KBS-D34G,1bp,Lingarajapura Bridge,16,Low
+BUS955,wg,227-L,gb,K Dommasandra,21,Medium
+BUS956,6i,340-K,cd,Hampinagara RPC Layout,9,High
+BUS957,15j,V-342F,2fj,Kolipura,9,High
+BUS958,1ep,300-E KRPGH-SMVR,32l,Devanahalli Cross Sulibele,9,High
+BUS959,d2,372-C D34G-NSB,4fy,Avalahalli Electronic City,9,High
+BUS960,272,D43-ASK,3fs,Chinnakurchi,12,Low
+BUS961,ah,301-D,4zv,Ramakrishna Nagara,22,Medium
+BUS962,315,211,3iq,Heggadagere Cross,16,Low
+BUS963,13s,95,5h9,Chikka Adugodi,14,Low
+BUS964,75,114-C,5l0,Marison Factory,15,Low
+BUS965,1r2,215-KA,3sw,Bhovipalya,19,High
+BUS966,2b1,SCS-7,2e7,Madappanahalli,6,Medium
+BUS967,16m,288-H KBS-AGS-TDL,4yu,Yale Kodigehalli,11,Low
+BUS968,1bj,BEMLA-12,5cn,HMT Layout 8th Mile,1,Medium
+BUS969,2hd,507-D,48m,Chikkabanavara Railway Station,7,Medium
+BUS970,tc,253-F,3kx,Thindlu,0,Medium
+BUS971,31w,V-500DF KDG-HBLB,1dd,PVP School,14,Low
+BUS972,4s,407 NMG-NES-PTH,2ys,Cantonment Railway Station,8,High
+BUS973,mr,316-C,5bg,Gollarahatti,10,High
+BUS974,2e1,317-K,4v4,Dalmia Circle,7,Medium
+BUS975,1r3,210-E,ks,Ramapura Cross,21,Medium
+BUS976,rz,291 SBS-MNP,zp,10th Cross Magadi Road,5,Medium
+BUS977,2pn,MF-1C,31l,Kengeri Club,12,Low
+BUS978,1lk,360-D,54r,Devasandra,21,Medium
+BUS979,30q,ITPL-7B,128,Electronic City East Phase-II,9,High
+BUS980,b1,500-L BSK-TNF-KRPGH,325,Devalapura,5,Medium
+BUS981,mb,328-F,2vk,Milk Booth JP Nagara,2,Medium
+BUS982,en,285-MC PTH-SBS-HAL,40x,Choodasandra Circle,12,Low
+BUS983,k2,235-L,7e,Weavers Colony Nelamangala,0,Medium
+BUS984,2us,238-U VTTMC-JNM,5ix,Kammasandra Gate,13,Low
+BUS985,l6,226-E,1v7,Halanayakanahalli,17,High
+BUS986,88,114,2lz,Ramachandrapura,8,High
+BUS987,1z0,500-HG,nx,Escorts,6,Medium
+BUS988,192,BEL GS-39,56m,Peenya Satellite Bus Station,8,High
+BUS989,ih,306-M KMT-KDR,4pm,JC Nagara,17,High
+BUS990,2t5,BEML A-21,2na,Ramakrishnapura Circle,8,High
+BUS991,23r,295-B,1z0,Ramohalli,15,Low
+BUS992,2nb,242-JK,30r,NICE Office,5,Medium
+BUS993,mi,227-GA STBEN-KMT-KBS,58x,Jayanagara 40th Cross,17,High
+BUS994,c2,250-L,4s4,Sharadha Colony,18,High
+BUS995,2uo,K-2,4c,Koshys Hospital Kalkere,10,High
+BUS996,2we,365,2lw,Uttarahalli,16,Low
+BUS997,2yh,MF-48,5o7,Chikka Mariyappanapalya,18,High
+BUS998,mo,2,e8,Shankanipura Gate,22,Medium
+BUS999,1fw,ITPB-4N,43s,Brahma Devara Gudda,15,Low
+BUS1000,2,600-G,1u6,Pipeline Vasanthapura,17,High
+BUS1001,1d4,289-B PTH-KYH,4xl,Byrapura,23,Medium
+BUS1002,2zu,335-E SNBS-KDG,3t1,TCI,18,High
+BUS1003,wh,298-M KMT-DVH,41u,Mallapura,14,Low
+BUS1004,267,258-P,mg,Kengeri Satellite Town,19,High
+BUS1005,m4,500-CS,3aq,Kotalammana Devasthana,21,Medium
+BUS1006,2kt,342-H STJN-GGSK,2hw,Kranthiveera Sangolli Rayanna Railway Station,8,High
+BUS1007,yw,304-E,1gj,Gunjurpalya,12,Low
+BUS1008,1tg,79-A,jy,Hunasuru Junction,16,Low
+BUS1009,hv,KBS-1K KBS-HALM,lo,CS-Bhoopasandra,16,Low
+BUS1010,1pm,369-K KBS-DLF,45j,GTRE Engine Division,6,Medium
+BUS1011,1cz,253-W D40G-TMH,5re,Jalahalli Bakery,11,Low
+BUS1012,2p5,79-F,2ps,Bettahalli Colony,17,High
+BUS1013,1un,401-BB,10z,Lingenahalli,19,High
+BUS1014,xx,507-C VRP-KRPMS,1qq,Kadusiddanapalya,14,Low
+BUS1015,2j9,399-D ANK-DMS,3nf,Broad Casting Compound Kadanur,16,Low
+BUS1016,15d,334-E DBS-KDG,493,Forum Mall,9,High
+BUS1017,1g9,MVSM-01,4ap,Banashankari Hunasemara,23,Medium
+BUS1018,2ls,KBS-1K,2br,AIR FORCE Quarters,18,High
+BUS1019,1oq,DBS-APS,3a2,Kamakya Talkies,2,Medium
+BUS1020,2l8,285-YA,4t5,Singena Agrahara Cross,13,Low
+BUS1021,zi,269,4vj,Ashwathkatte Sultanpalya,13,Low
+BUS1022,1ks,343-N,1n8,BEL Market 1,7,Medium
+BUS1023,2xi,SHS-7,63a,Gubbalala,16,Low
+BUS1024,5x,V-500E,3f9,16th Main Hopcoms BTM Layout,17,High
+BUS1025,2w,305-F D24G-NDVC,1jg,Sarakari Guttahalli Cross,18,High
+BUS1026,n0,342-H D42-BLH,2jo,Chamarajapet,15,Low
+BUS1027,cs,285-MN,5jp,Maruthi Temple Kamalanagara,22,Medium
+BUS1028,19w,228-C,4ag,Hoodi,12,Low
+BUS1029,1yl,335-H,5mq,Gowrenahalli,18,High
+BUS1030,r7,13-C,yw,Shivananda Store,15,Low
+BUS1031,1v1,BMSIT-8,4me,Depot-31 Summanahalli,23,Medium
+BUS1032,w5,242-T,3tn,Muneshwara Nagara,7,Medium
+BUS1033,1p2,258-VC,1r6,Basavanagudi Police Station,4,Medium
+BUS1034,11l,KMT-KRC-RTN-VNS,nd,Ramamurthy Nagara Police Station,1,Medium
+BUS1035,2yd,318 KBS-JTP,1ve,Krishnaraja Pura Govt Hospital,17,High
+BUS1036,hc,328,35y,3rd Block Jn Banashankari 6th Phase,8,High
+BUS1037,21l,332 D41G-BLG,50q,Bidaraguppe,3,Medium
+BUS1038,2t7,284-C JLOW-VSD-KBS,5lf,Pipe Line Park,0,Medium
+BUS1039,2ik,213-V SGH-HRH,5co,Achyuthanagara Gate,5,Medium
+BUS1040,zi,269,ac,Sudduguntepalya,16,Low
+BUS1041,28h,289-D HSK-BYRTH-YHKOT,2o5,Ramadevanahalli Cross,12,Low
+BUS1042,s3,378-D,38,Harohalli,0,Medium
+BUS1043,di,365-Q,36u,Canara Bank Tannery Road,10,High
+BUS1044,1xt,253-R,4po,Nandaramaiahna Palya,9,High
+BUS1045,xa,VMH-D34G,1qu,Konanakunte,21,Medium
+BUS1046,uf,600-G ATB-ISRLO,5pj,Chikka Indluwadi,10,High
+BUS1047,1n1,298-C KMT-AGO-KLP,2ya,Ravagodlu Gate,19,High
+BUS1048,2b5,267-A,5xv,KRB Indian Oil Petrol Bunk Kembathalli,4,Medium
+BUS1049,11f,215-H KBS-ANJ10,372,B Narayanapura,4,Medium
+BUS1050,190,600-F ATB-KRM,5qh,Hosakote Toll,2,Medium
+BUS1051,18s,215-BA,66v,Chikka Byalakere,10,High
+BUS1052,ii,ST BEN-10,4pv,Devagere,19,High
+BUS1053,1kw,290-E ARMY-SBS-YHKOT,7u,Tavarekere Mori,4,Medium
+BUS1054,1l6,290-G SBS-RSL-BTP,56n,Somathanahalli Gate,14,Low
+BUS1055,1jq,284-C KBS-KRC-JLOW,3kt,Double Road,1,Medium
+BUS1056,1qo,399-F D27G-ANK-HSK,4xg,Lakshmipura,20,High
+BUS1057,3a,401-A D43G-YHKOT,2nt,Jakkur Layout,13,Low
+BUS1058,1hk,D33G-BSK3,55k,Ayyappa Temple Yashawanthapura,13,Low
+BUS1059,d7,347-B,55i,Singarahalli,18,High
+BUS1060,2q4,PTPL-3R,1,BP Indian School Nelamangala,0,Medium
+BUS1061,252,SJBHS-4A,4uu,Indira Canteen (DESI MASALA),4,Medium
+BUS1062,2tz,36 VSD-KMTFLY-SRN,2uj,Raghuvanahalli Cross,4,Medium
+BUS1063,2gn,346-M CSB-GLH,55,Geddalahalli,7,Medium
+BUS1064,2tc,304-K,51g,Tin Factory,16,Low
+BUS1065,1nb,307-A,11p,Siddaiah Puranik Road Junction,10,High
+BUS1066,68,285-RB,1hy,CS-Dayananda Sagar College Banashankari,6,Medium
+BUS1067,1ff,288-A GPO-KDH,3h8,Bagalagunte,4,Medium
+BUS1068,1kd,365-S MRD-D34G,63n,Bettahalasuru Cross,11,Low
+BUS1069,ah,301-D,178,Guduvanahalli Gate,22,Medium
+BUS1070,2dv,342-U,430,Carmelaram Railway Station,14,Low
+BUS1071,1tz,231-B BNKP-KBS,mg,Kengeri Satellite Town,15,Low
+BUS1072,2ou,284-D,579,Hosahalli,14,Low
+BUS1073,1pa,BEL GS-1,cl,RV Dental College,4,Medium
+BUS1074,2re,335-M,4c8,BEL Layout Dasanapura,6,Medium
+BUS1075,w4,238-UM DPN-VJN-UST,4p8,Bettahalli Gate,8,High
+BUS1076,2nr,285-MA -DBP-KBS,33z,Nagadenahalli,20,High
+BUS1077,4e,BELGS-23,co,Ganagalu Cross,10,High
+BUS1078,2qf,311-J D24G-MDH,1jf,Nagarabhavi Vishweshwaraiah Sports Club,7,Medium
+BUS1079,uw,MF-250AC,5bj,Gongatipura,9,High
+BUS1080,1q5,364-A,47z,Chandrappa Circle,22,Medium
+BUS1081,2rw,KBS-12HK HSK-CVRNRG,2yq,Amrutha Engineering College,17,High
+BUS1082,198,306-G,5ub,Kaggalahalli Gate,20,High
+BUS1083,2ci,347-N,2c1,Veeranahalli,1,Medium
+BUS1084,1in,D34G-BGR,2hy,Kurubara Karenahalli,14,Low
+BUS1085,14k,221-J,54w,Manganahalli,2,Medium
+BUS1086,4p,500-QD YBS-CSB,51w,Singapura,17,High
+BUS1087,2s,YTTMC-VYKVLP,db,Yadala,7,Medium
+BUS1088,2vg,JNSVS-3,4de,Byatarayana Doddy Cross,11,Low
+BUS1089,10x,ELC-PESK,34r,Harohalli,18,High
+BUS1090,2ia,D51G-KDMS-KDG,29z,Hejjala Cross,14,Low
+BUS1091,30a,D39-HSK,it,Nelagadarenahalli,13,Low
+BUS1092,8j,269-B,2uu,Widia School,8,High
+BUS1093,1go,VNS-3,5dz,Bhoopasandra Ayyappa Bakery,13,Low
+BUS1094,gz,DSC HAL-CVR,5db,Devanahalli Old Bus Stand,7,Medium
+BUS1095,2m2,SBS-13K DML-KDG,107,Kotur,5,Medium
+BUS1096,rz,291 SBS-MNP,4yr,Mulluru,2,Medium
+BUS1097,qk,SCS-5,1s,Chikka Adugodi,2,Medium
+BUS1098,7w,500-DG,27s,Bingipura,13,Low
+BUS1099,2kv,242-TA KBS-MTK,48r,Chowdeshwari Temple,19,High
+BUS1100,1j4,335-S,67o,Shri Vidhyanagara,7,Medium
+BUS1101,1b8,266-K,nq,CS-Domlur Marriad Accomadation,18,High
+BUS1102,2z0,364-C,2db,Cipla Avalahalli,16,Low
+BUS1103,2si,227-ZA KMT-KGLHL,s8,Bhadrappa Layout,10,High
+BUS1104,3h,344-F,pp,Nanjapura,7,Medium
+BUS1105,12t,KDGC-PTML,22b,Vinayaka Layout,22,Medium
+BUS1106,1y3,SBS-SJHSTMS,1bc,Thigalarapalya,12,Low
+BUS1107,dq,405 PTH-HSG,5ks,Ravi Tent,19,High
+BUS1108,m3,500-Q D10G-TNF-KRPGH,21c,Srirama Reddy Layout,23,Medium
+BUS1109,1i9,501-NH BEML5-HBLB,2fd,Kebbahaala,21,Medium
+BUS1110,1y0,211-J,59g,Ramohalli,20,High
+BUS1111,h1,502-G D45G-ITPL,19j,Domlur,13,Low
+BUS1112,2v7,314-FA,7h,Kempegowda International Airport Back Gate,8,High
+BUS1113,24c,245-M,1hi,Acharya Institute of Technology,18,High
+BUS1114,wp,234 KMT-MRBS-CLO,692,Managanahalli Kankapura Road,15,Low
+BUS1115,4c,356-CW UFLY,3x0,Mestripalya,11,Low
+BUS1116,1cy,25,2od,Hasiruvalli,6,Medium
+BUS1117,17m,CALLBUS KWS-7,223,Challeghatta,15,Low
+BUS1118,2d7,214,bt,Venkateshwara College,4,Medium
+BUS1119,4n,ST BEN-19,3au,BHEL,11,Low
+BUS1120,2mv,225-AB,39p,Gidadapalya,1,Medium
+BUS1121,10e,356-ZA D38G-KDMS,5z,Masthenahalli,9,High
+BUS1122,1j0,BSK-NRC,561,Bengaluru Central Jail,22,Medium
+BUS1123,24i,KRMTTMC-GDML,1m4,Parvathi Nagara,7,Medium
+BUS1124,14h,228-H TPR-KMT-KBS,ef,Kattalepalya,6,Medium
+BUS1125,15c,PESCE-5,5um,Uttarahalli Bus Stand,18,High
+BUS1126,7n,227-C,ig,Bisanahalli,5,Medium
+BUS1127,1vs,238-U SPHS-MDPC,gb,K Dommasandra,20,High
+BUS1128,x5,D42G-HSS,4cs,Sarakki Signal,14,Low
+BUS1129,22w,501-BH BSK-BELF,1en,Chikka Tumkur Lake,17,High
+BUS1130,38,293-A,gh,Pillahalli Colony,7,Medium
+BUS1131,2bd,227-T,18w,Nursery Farm,15,Low
+BUS1132,1jl,ABS-1,xo,Skylark Arcadia Sadaramangala,0,Medium
+BUS1133,1u4,280-F OASIS-YHKOT,2bn,New Baldwin School,13,Low
+BUS1134,18y,345-E D34G-BGR-ANK,1rp,Maruthi School,11,Low
+BUS1135,1s8,267-A SBS-D45G,64s,Vishwapriya Layout Cross,15,Low
+BUS1136,2fk,SCS-10,l,Benniganahalli Bridge,9,High
+BUS1137,nv,VLS--3,4qz,Vijayanagara Garage,15,Low
+BUS1138,1bz,BELGS-4,2sc,Seegehalli Gate  Kadugodi,23,Medium
+BUS1139,lx,D41-D41G,2y,IBM Gate,7,Medium
+BUS1140,1z0,500-HG,2pn,Nobel Residency,21,Medium
+BUS1141,pa,258-VA,1qu,Konanakunte,2,Medium
+BUS1142,7z,216-B,40t,Guddadahalli Dinne,15,Low
+BUS1143,2e0,230-A,25x,Mylanahalli Bare,19,High
+BUS1144,1gl,352-A,48i,Shivanahalli,10,High
+BUS1145,300,252-RA,5ay,MEI Colony Laggere,23,Medium
+BUS1146,2e3,D38G-ELC-PESK,5bx,Mata Mallasandra,23,Medium
+BUS1147,1y,360-K Fly KBS-ATB,2ag,K Karenahalli Cross,5,Medium
+BUS1148,ok,399 MVSM-KDG,2ce,Karekalpalya Cross,0,Medium
+BUS1149,151,399-C,27l,Eradu Kamba,11,Low
+BUS1150,2sh,347-C KMT-CKBR,21s,Thippasandra Gate,6,Medium
+BUS1151,2js,286-F,2lm,Chenuvalli,14,Low
+BUS1152,2bj,8THM-D315,4ks,Subramanyapura Post Office,8,High
+BUS1153,2x7,226-MB,5yi,Nelamangala Hunasemara,17,High
+BUS1154,nb,354-B KBS-KMT-STH,2qx,Huskur Bare,20,High
+BUS1155,2m1,213-Q HRH-MTRPR,4bi,Kencharayana Doddy,17,High
+BUS1156,1qd,319 KRPGH-TNF-KDG,33e,Bidadi Railway Station,14,Low
+BUS1157,1b1,KANGOVI-1,2ig,Srikanteshwara Park,11,Low
+BUS1158,zg,213-WA,1j0,Sir M Vishweshwaraiah Railway Station,2,Medium
+BUS1159,1zs,D16-DPJN,b1,Ramanjaneya Layout Chikkallasandra,10,High
+BUS1160,pz,314-A,dd,Bayyappanahalli Metro Station,5,Medium
+BUS1161,1bi,35 VSD-KMT-KSGP,2nr,Dhoopanahalli,4,Medium
+BUS1162,x5,D42G-HSS,3x,Siddartha International School,16,Low
+BUS1163,2gv,271 KBS-BELF,jc,Sompura Tumakur Road,15,Low
+BUS1164,14z,KVM-3,2x3,Kamalanagara Market,17,High
+BUS1165,20l,305-Q,4c,Koshys Hospital Kalkere,9,High
+BUS1166,202,234-EC,1q6,State Bank of India,18,High
+BUS1167,1jt,248-BB,3nl,Motaganahalli Bishop Cotton School,19,High
+BUS1168,1yv,398-B,5l3,Chandapura KEB,15,Low
+BUS1169,1a2,APS-15,1fv,Rajajinagara Entrance,5,Medium
+BUS1170,2k6,321-D,5mq,Gowrenahalli,7,Medium
+BUS1171,1mv,KLNB-BNWD-SMVT-BEML,68s,Kadugodi Bridge,9,High
+BUS1172,2ya,BMSIT-7,5kg,Rangappanapalya Gate,22,Medium
+BUS1173,2c1,258-WA KMT-JTS,6ai,Brundavana Nagara,12,Low
+BUS1174,l5,D27G-ANKL,1yx,Mutturu,15,Low
+BUS1175,13z,D4-JBS4T,3xm,Maruru,13,Low
+BUS1176,1kb,285 BMSITY-YHKOT,1w7,Chambenahalli,12,Low
+BUS1177,sk,285-JC,2cp,Hebbala,7,Medium
+BUS1178,2i7,282B YHKOT-MSGH,2kk,Kannamangala Gate,6,Medium
+BUS1179,1vn,IIHS-02,5z,Masthenahalli,4,Medium
+BUS1180,26l,347-G,1q8,Kannamangala Gate,9,High
+BUS1181,308,225-C CLO-BEML5,332,HMT Club House,19,High
+BUS1182,21q,MF-211AC VSD-KGP,45e,Indluvadi,3,Medium
+BUS1183,2o5,211-Q,4os,Lakshmidevi Nagara,16,Low
+BUS1184,11p,289-B YHK-KDYPH,d6,Agara Cross,12,Low
+BUS1185,pn,258-VF,21c,Srirama Reddy Layout,20,High
+BUS1186,2tb,372-B,1hf,Sony World 80ft Road Koramangala,18,High
+BUS1187,hn,ARMY-6A,4ey,Vishwanathapura,6,Medium
+BUS1188,29q,356-Z,1jy,Jalli Machine,12,Low
+BUS1189,cy,380-E,fw,Hosapalya,14,Low
+BUS1190,25h,271-PA YTTMC-CKB,3zj,Mathikere,3,Medium
+BUS1191,xh,225-C BEML5-JNKLO,1b1,Cambridge Public School Yalahanka,21,Medium
+BUS1192,12q,256-MB YTTMC-KDH,391,Bhuvaneshwari Nagara 1st Stage,19,High
+BUS1193,1ev,501-CH YTTMC-KMG,3vv,Iggluru,17,High
+BUS1194,1kr,317-SA,24q,Sanjay Gandhi Nagara,0,Medium
+BUS1195,1pb,284-H PTH-GNR2,1n7,Crystal Apartment Sarjapura Road,1,Medium
+BUS1196,2fz,255-E KBS-NSP,n8,Appasandra,12,Low
+BUS1197,2rf,MF-26,4pf,S Medahalli,8,High
+BUS1198,o2,ST BENEDICT-11.,1gu,Manchanabele,13,Low
+BUS1199,1t3,507-E,2qz,National Cricket Academy,1,Medium
+BUS1200,1g8,286-B,5ji,Karekalpalya Cross,0,Medium
+BUS1201,2p3,V-500DP,4b2,Ramanahalli,14,Low
+BUS1202,2dp,401-AE,1i1,Jeevan Bheemanagara Cross,18,High
+BUS1203,2zj,SCS-03,3pm,ITI Colony Gate,1,Medium
+BUS1204,16j,JINDAL-1,ac,Sudduguntepalya,3,Medium
+BUS1205,1ag,MF-500EB BYPMS-ELC,4xy,GTRE Engine Division,12,Low
+BUS1206,nd,276-C,vg,Gejjagadahalli Cross,14,Low
+BUS1207,1k4,247,5gv,Harapanahalli Village,4,Medium
+BUS1208,ot,410,28z,Bommanahalli,11,Low
+BUS1209,t6,D49-BDD,53s,CS-Christal House Learning School,7,Medium
+BUS1210,1zs,D16-DPJN,287,Ayyappa Nagara Muneshwara Temple Sadaramangala,13,Low
+BUS1211,84,SCS-2,sb,Dodda Cheemanahalli,11,Low
+BUS1212,24v,304-VB,447,Reva College Gate,8,High
+BUS1213,g9,251-C PSS-RPS-LGR,3ge,Gangamma Temple Maralawadi Road,20,High
+BUS1214,1e,75-F,244,CS-Shilp Bekary,18,High
+BUS1215,w7,258-YA KMT-HCP,4do,Gollahalli,18,High
+BUS1216,2uv,UPLO-MDP-CLO,629,Ambedkar Medical College Shampura,1,Medium
+BUS1217,17o,356-CW CSB-ELCW FLY,us,School Manchanayakanahalli,4,Medium
+BUS1218,1y1,212-D,5ic,Hosapalya Colony,17,High
+BUS1219,gy,331-A SBS-KDG,49w,Sir M Vishweshwaraiah Railway Station,9,High
+BUS1220,1lk,360-D,4u9,Fairland Shop,20,High
+BUS1221,1io,V-171,4b,Nellukunte,5,Medium
+BUS1222,199,316-A,53w,Honnavara,14,Low
+BUS1223,28k,SNBS-HSKPB,60k,Thalagattapura Metro Station,9,High
+BUS1224,1z5,212-B KMT-KRH,1a6,Kannurahalli,21,Medium
+BUS1225,2oa,341-A,14f,Papanahalli Gate,18,High
+BUS1226,1cv,D45-D45G,6cw,Loyola School,4,Medium
+BUS1227,1gj,362-C SBS-YLH,3a6,Kempapura,9,High
+BUS1228,1k,222-A,4td,Jyothi Farm,22,Medium
+BUS1229,28n,MF-20,5me,Stone Factory,22,Medium
+BUS1230,1za,500-QG PTH-HBL-KRPGH,5lm,Nayanahalli,8,High
+BUS1231,2zo,369-J,6cy,Boorugunte,10,High
+BUS1232,1cp,210-A,1ft,Harohalli Depot,2,Medium
+BUS1233,29e,G-6,wp,BDA Flats Kommaghatta,18,High
+BUS1234,2o7,ITPL-4J,5jw,Patelappa Layout,20,High
+BUS1235,2mk,284-A,i7,Halasuru Police Station,16,Low
+BUS1236,10z,228-K SBS-KMTFLY-BDD,qk,Ragihalli Gate,20,High
+BUS1237,2l6,290,53y,Chikka Beguru,13,Low
+BUS1238,2ql,JHC-CKB-VRP,3yw,Basavanapura,18,High
+BUS1239,1g2,282-G,66u,KHB Colony Dodda Aladamara,12,Low
+BUS1240,q1,D31G-BMBS,41j,Rupesh Hotel,9,High
+BUS1241,1pk,334-EA,5a0,UjinappanaDoddy,16,Low
+BUS1242,j3,ST BEN-20,2rp,Thabarahalli Gate,17,High
+BUS1243,td,242-ZD,5n2,BCMC Layout Raghuvanahalli,5,Medium
+BUS1244,2rp,G-3,22d,Apollo Hospital,12,Low
+BUS1245,1zw,304-T,267,JP Nagara 5th Phase,1,Medium
+BUS1246,nq,369-A D34-HLM,1ai,Nursery Maragondanahalli,21,Medium
+BUS1247,2k1,251-M,5u,Jodi Ragi Thimmasandra,21,Medium
+BUS1248,qn,45-B BSK-BVN,no,Mallasandra Health Center,1,Medium
+BUS1249,8c,227-K,3af,Manjunatha Kalyana Mantapa,12,Low
+BUS1250,27j,298-ME KMT-AGO-NLR,54r,Devasandra,5,Medium
+BUS1251,wp,234 KMT-MRBS-CLO,1st,Begihalli,9,High
+BUS1252,t5,243-D,4a1,ITI Colony Gate,9,High
+BUS1253,1x1,321-G,2xe,Alphine Apartment,9,High
+BUS1254,2o8,263-C,5y7,Kundana Cross,2,Medium
+BUS1255,31e,251-D,av,Doddaballapura KEB Circle,3,Medium
+BUS1256,16a,415-H KBS-VSD-AJB,n0,Devanahalli Bypass NH-7,19,High
+BUS1257,11,BMBS-JHC,24x,Geleyara Balaga Layout,11,Low
+BUS1258,1n1,298-C KMT-AGO-KLP,4gh,Chambenahalli,2,Medium
+BUS1259,u7,362-CA,4dj,GKVK GATE,3,Medium
+BUS1260,25g,L & T-04,1rv,Bettahalli Colony,11,Low
+BUS1261,220,401-AN,2vz,Kariyappana Doddy,15,Low
+BUS1262,1gv,238-W,6g,Kateramma Temple Makanahalli,22,Medium
+BUS1263,lb,263-R,3wg,Prashanth Nagara,11,Low
+BUS1264,2d0,258-C KBS-GDP,3dw,PES College Kasavanahalli,12,Low
+BUS1265,30j,300-DA,48s,Surya Nagara,20,High
+BUS1266,1wu,382-C KBS-DNH,2ja,CS-K Narayanapura,23,Medium
+BUS1267,1r0,ITPB-9A,3mn,Vinayaka Nagara JP Nagara,22,Medium
+BUS1268,1fs,291-D,cz,Shastri Bakery,20,High
+BUS1269,2ev,88-A BSN-GPO,1zf,Rampura Cross,11,Low
+BUS1270,82,D24-D24G,3se,Bychapura Appartment,6,Medium
+BUS1271,16m,288-H KBS-AGS-TDL,2e1,Sarala Birla Academy,12,Low
+BUS1272,7u,298-MP KBS-HRH-VJP,4qs,NICE Road Tumkur Road Junction,11,Low
+BUS1273,5q,267-A D45G-HSG,3fd,RR Medical College,18,High
+BUS1274,2ze,305-M,2ow,Jandemara,7,Medium
+BUS1275,9y,315-J,5d8,Jakkur 18th Cross,12,Low
+BUS1276,2vg,JNSVS-3,2w8,Coca Cola Byramangala,12,Low
+BUS1277,1wx,VNS-16,143,Honnasandra,1,Medium
+BUS1278,111,305-G,4t5,Singena Agrahara Cross,21,Medium
+BUS1279,z7,297-J DVH-DBP,2yn,Mylappanahalli,5,Medium
+BUS1280,1vc,80-A D31G-KBS,4rg,Sollepura,20,High
+BUS1281,2zz,CLO-BMBS,1vl,Varthuru Govt College,18,High
+BUS1282,2tm,285-YA HHP-KBS,540,MS Ramaiah Hospital,23,Medium
+BUS1283,1cr,HAL PV-17,176,Kateramma Temple Kambalipura,6,Medium
+BUS1284,g5,139 SBS-KFC-SVM,5mh,Embassy School,11,Low
+BUS1285,229,253-A,2jv,Karlapura Gate,20,High
+BUS1286,kc,211-A VLS-BSK-KMT,3o1,Malenallasandra Junction,12,Low
+BUS1287,25q,258-DN,2ct,Byadarahalli,1,Medium
+BUS1288,6l,360 CPR-KRM,67n,Patalamma Temple,19,High
+BUS1289,2qh,285-CB KKH-KBS,25k,Maligenahalli Bidaluru,18,High
+BUS1290,l2,V-300MV,5w,Muttanalluru Cross,18,High
+BUS1291,99,210-X BSK-CNDRN,19p,Thippasandra Market,3,Medium
+BUS1292,1br,370-B D34G-KRTD,5u8,Varthuru,0,Medium
+BUS1293,2gp,170,81,KHB Colony,12,Low
+BUS1294,25j,361-K,5a3,Elmeasure KIADB,5,Medium
+BUS1295,2ma,D44-ANP10BLK,3k8,Basavanna Devasthana CK Palya,3,Medium
+BUS1296,in,D34G-DCH,3g5,Yarthiganahalli,8,High
+BUS1297,mo,2,ug,Baladimmanahalli,0,Medium
+BUS1298,1ob,500-CA ITPL-PPLO,1j7,Jeevanahalli Water Tank,0,Medium
+BUS1299,9e,12,45e,Indluvadi,17,High
+BUS1300,10v,V-240M,10g,Kengeri Church,19,High
+BUS1301,233,290-S D45G-TDL-SBS,52l,Balluru,4,Medium
+BUS1302,zf,BELGS-35,4a8,AECS Dental College,17,High
+BUS1303,wu,60A-MDP-NBC,60h,Kodihalli Motaganahalli,22,Medium
+BUS1304,bq,KVUL-01,6a1,Ragihalli Gate,3,Medium
+BUS1305,i1,ITPB-4H,4m,Karenahalli,9,High
+BUS1306,2l5,210-E KBS-KMTFLY-KBDA,3gi,Wind Tunnel Road (Murugeshpalya),22,Medium
+BUS1307,1mf,266-E,512,Bhattarahalli,23,Medium
+BUS1308,22c,240-H,2th,Brigade Omega Apartment,18,High
+BUS1309,16,241-N D31G-BDG,1rk,Thalaghattapura Metro Station,6,Medium
+BUS1310,2uj,HALPV-6,2jf,RR School,11,Low
+BUS1311,16v,238-D DPJN-NBV1S,1s0,Bittasandra,5,Medium
+BUS1312,29a,282-A,399,Kammasandra Gate,11,Low
+BUS1313,2gj,316-D,5nv,South End Circle,9,High
+BUS1314,2g5,285 BELF-HBLB-DBP,3q0,Peenya Metro Station,18,High
+BUS1315,g5,139 SBS-KFC-SVM,kp,CS-Kacharakanahalli,13,Low
+BUS1316,307,240-F,5ri,Singasandra FLY,3,Medium
+BUS1317,e6,MF-5,3hy,Nyaya Degula,16,Low
+BUS1318,of,500-Y SRPMS-KDG,50h,Senior Officers Quaters,17,High
+BUS1319,nl,MF-25 TPH-JHMS,68n,Nimbekaipura Gate,7,Medium
+BUS1320,2rj,D14G-ALP,h9,Kadasonnappanahalli Gate,2,Medium
+BUS1321,ge,VTTMC-MDP-NBC,3ax,Nagawara Junction,19,High
+BUS1322,24b,349-K,1ry,Mestripalya,5,Medium
+BUS1323,1vy,D32-SRN,41i,Kadubisanahalli,8,High
+BUS1324,2fl,NDC-SNBS-KBS,4z3,TISB Boys Hostel,22,Medium
+BUS1325,au,285-MJ,67i,Dhaba Gate,1,Medium
+BUS1326,23x,505,699,Manjunatha Nagara,20,High
+BUS1327,12f,279-H,42d,Narasipura,10,High
+BUS1328,2uf,201 SRN-VVKN,1wy,1st Stage 3rd Block Nagarabhavi (Nayandahalli),8,High
+BUS1329,1v5,SCS-9,5c,Dodda Nagamangala,18,High
+BUS1330,2fg,252-A SBS-PSB,1s7,Singahalli,0,Medium
+BUS1331,1wd,D6G-KVB,5ql,Jnanabharathi Metro Station,6,Medium
+BUS1332,2bh,253-K KMT- MLHP,1tb,Aerospace Bagalur,22,Medium
+BUS1333,29x,402-D KBS-MADT,46t,Lurdubayi Samudaya Bhavana,9,High
+BUS1334,2li,242-H,6da,BEML Complex,11,Low
+BUS1335,2ix,231-D,37o,Sangam Circle,0,Medium
+BUS1336,14d,300-H,2n,Naganayakanakote Cross,14,Low
+BUS1337,g1,238-UM DPN-UST,391,Bhuvaneshwari Nagara 1st Stage,5,Medium
+BUS1338,305,SBS-HAL-BEMLG,3li,R V Metro Station,3,Medium
+BUS1339,ad,273-H SBS-SDN,3v1,Chandra Layout Circle,13,Low
+BUS1340,s8,221-E,3xn,Konanakunte Reliance Fresh,8,High
+BUS1341,2c4,215-N,4l3,Nammura Sarkari School,0,Medium
+BUS1342,2vs,13 SNBS-BGRD,36k,Ashwathkatte Manorayanapalya,6,Medium
+BUS1343,145,CLO-RPCLO,2fu,Basavapatna,0,Medium
+BUS1344,25c,227-ZA,55r,Hosahalli,10,High
+BUS1345,25z,MF-510,1yn,ITPL Back Gate Big Bazzar,6,Medium
+BUS1346,1rz,398-H D27G-HSK,hj,Himagiri,19,High
+BUS1347,gx,406 HBLB-NMG,31e,Rani Circle,6,Medium
+BUS1348,267,258-P,2wg,CK Thandya Cross,1,Medium
+BUS1349,3g,210-D KMT-CEC,3ky,Yeshawanthapura,11,Low
+BUS1350,2mu,BEL GS-30,67w,Dabbaguli Gate,8,High
+BUS1351,lo,600-F BEML5-ATB,28t,Mantri Alpyne Apartment,10,High
+BUS1352,2e4,283-B ARS-HBL,2fy,Anjanapura 10th Block,3,Medium
+BUS1353,z5,45-B VSD-BVN,326,KIADB Area,7,Medium
+BUS1354,1d0,280-L,zg,Maniksha Parade Ground,7,Medium
+BUS1355,2oe,328-H D41G-HSK,4gk,Immadihalli,5,Medium
+BUS1356,1hf,ITPL-8E,4ft,Anchipura Colony,9,High
+BUS1357,m9,235-K BSN-DBT,1dy,Chikkanahalli,17,High
+BUS1358,j5,D27-JAPC,4ll,Kavala Hosahalli,2,Medium
+BUS1359,1m4,276-E SBS-D45G,214,Hommadevanahalli,11,Low
+BUS1360,12h,MF-410FC,1bf,Tubagere,7,Medium
+BUS1361,xc,328-G,26t,Radhareddy Layout,1,Medium
+BUS1362,12r,G-3 D6G-BGR,63w,Lakshmipura,22,Medium
+BUS1363,1ka,303-G,5c2,Basaveshwara College,14,Low
+BUS1364,267,258-P,4pv,Devagere,2,Medium
+BUS1365,18q,221-J KBS-GGH,2su,Narayanapura,5,Medium
+BUS1366,13x,VKN-D34G,1zo,Marathahalli,6,Medium
+BUS1367,b5,365-H,xf,Parvatapura Devanahalli,18,High
+BUS1368,1vr,319 SVM-KDGB,5lm,Nayanahalli,16,Low
+BUS1369,3j,ALP-SBS,ck,Sonnenahalli Bridge,21,Medium
+BUS1370,nx,D8-YBS,271,Bettenahalli,17,High
+BUS1371,1qs,302 KLN-OBH,5zf,Kondashettyhalli,17,High
+BUS1372,z5,45-B VSD-BVN,5y4,Jaraganahalli Cross,14,Low
+BUS1373,90,273-B KMT-ABG,5o5,CS-HAL ARDC,19,High
+BUS1374,1od,APS-4,698,CS-HAL Museum,23,Medium
+BUS1375,2cz,227-P,60i,Haraluru,7,Medium
+BUS1376,16t,500-CT,3i4,K Narayanapura Main Bus Stand,21,Medium
+BUS1377,1nw,502-PS,1uf,Deepanjalinagara,12,Low
+BUS1378,og,GGP-RMSP,4ie,Karapanahalli Gate,12,Low
+BUS1379,1qe,SBS-MKC-D14G,em,Jakkur Layout,23,Medium
+BUS1380,25h,271-PA YTTMC-CKB,2ye,Museum,8,High
+BUS1381,2vw,335-E,5mz,Shankar Mutt,3,Medium
+BUS1382,q8,402-C,5yp,Sidedahalli,10,High
+BUS1383,2i9,251-G KBS-MTKR,4og,Akshayanagara,14,Low
+BUS1384,r3,MF-253HE,4zk,Karpura Gate,4,Medium
+BUS1385,1kg,213-FA,46w,Magadi Road TollGate,12,Low
+BUS1386,151,399-C,s0,Byalalu,7,Medium
+BUS1387,2ag,227-P KBS-KSP,3is,Basappanapalya Cross,16,Low
+BUS1388,k3,298-M DVH-HRH-VJP,6al,Multiplex Marathahalli,19,High
+BUS1389,1v8,305-A,58y,Bilavaradahalli,13,Low
+BUS1390,1j0,BSK-NRC,2jp,Sonare Doddy,0,Medium
+BUS1391,2t0,360-S D38G-ANK-RMH,2e0,Hittarahalli Gate,0,Medium
+BUS1392,209,241-C,sh,Byatha Cross,20,High
+BUS1393,hf,80-B,3id,Huttanahalli,20,High
+BUS1394,2w,305-F D24G-NDVC,62l,Nitte International School,18,High
+BUS1395,15o,225-CB,5hv,CS-Whispering Meadows Patelappa Layout,10,High
+BUS1396,2k0,ITPL-2D,ly,Nagavarapalya,11,Low
+BUS1397,1xs,174,63i,Sapthagiri Convention Hall,16,Low
+BUS1398,1c7,377-H,o4,Malagala,2,Medium
+BUS1399,en,285-MC PTH-SBS-HAL,1p3,Kasthurinagara,2,Medium
+BUS1400,172,365-K,4ju,Indiranagara Police Station/KFC,16,Low
+BUS1401,1ne,TR-4,1lt,Nisarga Badavane East Gate,8,High
+BUS1402,17r,347-C,5dw,5th Stone NICE Road,3,Medium
+BUS1403,1d,231-B,5xn,Byrasandrapalya Gate,11,Low
+BUS1404,18q,221-J KBS-GGH,1sz,Kuduregere Gate,2,Medium
+BUS1405,2vv,253  SBS-HSG,2kh,Brooke Bond,14,Low
+BUS1406,n2,276-A SBS-VRP-D45,5en,Agrahara Layout Cross,23,Medium
+BUS1407,1xg,234-E,31,Kotur Gate,9,High
+BUS1408,1l7,C-365,4wa,Amruthahalli,0,Medium
+BUS1409,2le,YBS-INGVBS,19d,Hilal Nagara Cross HBR Layout,9,High
+BUS1410,aj,293-N,2an,IBM Gate,10,High
+BUS1411,19o,MF-502F,446,Budigere Cross,20,High
+BUS1412,1gn,MF-39 RMS-JBMS,5bb,Sowthegowdanahalli,2,Medium
+BUS1413,1na,285-M PTLM-DBP,4dl,Mayasandra Gate,9,High
+BUS1414,2zw,290 SBS-RSL-TNS,1qf,Binny Mill ETA Garden,23,Medium
+BUS1415,245,211-K,1y4,Gaviyanapalya,2,Medium
+BUS1416,6,SHGS-DAMC,5sn,Swabiman Park,3,Medium
+BUS1417,f3,329-M,69g,Patel Thota Aluru,17,High
+BUS1418,tw,350-B KBS-MTN,1gm,CS-Sri Sai Packaging Company,17,High
+BUS1419,2x6,KRM-CPWD,3ac,Echalamara Vidyaranyapura,10,High
+BUS1420,12h,MF-410FC,375,South End Circle,23,Medium
+BUS1421,139,226-SB,134,CS-SDM Hospital Anchepalya,3,Medium
+BUS1422,1gz,500-A YTTMC-GGP-CSB,3k,Rajanukunte,20,High
+BUS1423,2eb,283-B,2hl,Hennagara Gate,2,Medium
+BUS1424,3u,401-NY,l4,Kogilu Cross,15,Low
+BUS1425,1oa,KBS-5H,15n,HMT Club House,12,Low
+BUS1426,2la,271-F KMT-HGV,hc,Rayan Circle,18,High
+BUS1427,1em,SPHS-14,3ix,Nallur Cross,20,High
+BUS1428,2mw,306-F KBS-BRH,2tj,Neeleri Cross,3,Medium
+BUS1429,2i2,201-G,1hp,Manchanabele Dam Cross,9,High
+BUS1430,av,282-D KBS-VVC,6b2,NICE Road 17th Stone,1,Medium
+BUS1431,ad,273-H SBS-SDN,21t,Kakkehalli,23,Medium
+BUS1432,wg,227-L,3ph,Modern Food Goraguntepalya,3,Medium
+BUS1433,1vx,238-U KBS-SMH,2hs,Devaiah Park,13,Low
+BUS1434,122,139-MRS-SBS,4d0,Dodda Nagamangala,0,Medium
+BUS1435,27y,346-CK,5lr,Ashwath Nagara Cross,14,Low
+BUS1436,31b,15-E KBS-PPLO,22h,Provident Sunworth Apartment,1,Medium
+BUS1437,2s,YTTMC-VYKVLP,2pi,Lingapura,12,Low
+BUS1438,dp,CHLS-6,5lt,Sriramapura Bommasandra Road,18,High
+BUS1439,1bt,368 SBS-D27G,15s,Madhugirihalli,16,Low
+BUS1440,1jb,401-K D45G-KGR,2pa,B Narayanapura Ring Road,18,High
+BUS1441,2pr,BEML B-22,53o,Agrahara Layout,7,Medium
+BUS1442,o1,300-E,45c,Venkatala,16,Low
+BUS1443,1j0,BSK-NRC,os,Deva Machohalli Cross,16,Low
+BUS1444,2a3,VLO1-KGR,5lq,Geetanjali Layout,2,Medium
+BUS1445,1ej,BELGS-27,5jk,Sundaram Estate,0,Medium
+BUS1446,xr,KVPTA-10,3s,Sathanur,1,Medium
+BUS1447,2og,KVASC-03,3n7,Devinagara Cross,6,Medium
+BUS1448,2pu,306-MA,6cs,Sriramapura Colony,18,High
+BUS1449,kt,401-N MBS-BEML5,9u,Byalahalli,22,Medium
+BUS1450,232,CLO-NBC-KTP,1a3,CS-Jai Bharath Nagar,18,High
+BUS1451,mk,265-E,5bo,Chikka Basti,10,High
+BUS1452,1qg,323-H,2oe,Yelahanka Old Town,16,Low
+BUS1453,1xw,255-AE ALRB2-VSD-KBS,3eq,Marenahalli Gate,13,Low
+BUS1454,dx,317 HSK-BEML,33j,Bandaiahanapalya,23,Medium
+BUS1455,2rb,258 SNBS-NMG,z6,Hale Chandapura,11,Low
+BUS1456,2ni,13-H,24j,Kengal Kempohalli,1,Medium
+BUS1457,2kp,361-C,tz,Lakkenahalli Junction Sondekoppa Road,7,Medium
+BUS1458,ek,D34G-KCH,2ac,Doddakallasandra Metro Station,21,Medium
+BUS1459,1sw,V-500CK,29,Akkithimmanahalli 1,22,Medium
+BUS1460,2qn,355-C KBS-D27G,5wx,Vijayapura Cross,19,High
+BUS1461,2ov,MBS-12 ANP-VSD-KBS,595,Shivajinagara Bus Station,17,High
+BUS1462,1z1,306-M,1sv,Adarshanagara,4,Medium
+BUS1463,2hb,258-F D43G-SVP,4tj,Chokkasandra Gate,17,High
+BUS1464,dl,295,t9,Lakkondahalli Gate,10,High
+BUS1465,ml,345-C SNBS-NJP,51g,Tin Factory,1,Medium
+BUS1466,156,225-P BRN-JNK-KMT,4fq,JP Nagara 1st Phase,23,Medium
+BUS1467,13n,KLN-GNP,1ox,TG Halli Quarters,14,Low
+BUS1468,199,316-A,44o,18th Main Jayanagara,2,Medium
+BUS1469,1bt,368 SBS-D27G,7,CS-Dhoopanahalli,14,Low
+BUS1470,31l,MF-248G,445,Dharmapura Gate,0,Medium
+BUS1471,l3,315,4mf,St Josephine School Annapoorneshwarinagara,3,Medium
+BUS1472,2k9,349-A,1fm,Honnavara Gate,6,Medium
+BUS1473,1a,226-E KMT-CGD-BDD,5dn,Solur,3,Medium
+BUS1474,2i8,MF-39 JBMS-UBD,5ie,Hebbagodi,17,High
+BUS1475,qu,TR-4A CLO-RKHN,1zn,Lalbagh Metro Station,15,Low
+BUS1476,1ua,BEL GS-37,4a1,ITI Colony Gate,16,Low
+BUS1477,21u,222 SCS-KGR,38k,Arivesandra,1,Medium
+BUS1478,jl,227-M,3f1,Konappana Agrahara,10,High
+BUS1479,p9,D12-BSN,2te,Rajanukunte,12,Low
+BUS1480,k5,285 SRN-KBS-GKVK,rk,Janaki Rama Layout,7,Medium
+BUS1481,150,346-J,4so,Gopal Estate,5,Medium
+BUS1482,ot,410,99,Ashwath Nagara Cross,8,High
+BUS1483,2sb,282 HBLB-VNC-D52G,1q6,State Bank of India,9,High
+BUS1484,1ve,295-D KBS-YBD,2jq,Telecom Layout,4,Medium
+BUS1485,2z9,215-U,358,Hoovinayakanahalli,5,Medium
+BUS1486,18i,258-C VSD FLY,5ri,Singasandra FLY,18,High
+BUS1487,31u,VNS--24,4no,Nettigere Cross,17,High
+BUS1488,2zw,290 SBS-RSL-TNS,4ha,Akshayanagara New Town,0,Medium
+BUS1489,2so,500-A BSK-BELF,1ns,Deva Machohalli Cross,1,Medium
+BUS1490,1m7,216,js,RMG Factory,9,High
+BUS1491,1ci,381-G,3yd,Thomas Cafe,8,High
+BUS1492,163,13-B SGH-PNNR,3ef,BMSIT College Campous Yelahanka,20,High
+BUS1493,b3,NP-03A,17l,Hosapalya,5,Medium
+BUS1494,3g,210-D KMT-CEC,r7,Raghuvanahalli Cross,17,High
+BUS1495,1bk,252 PSS-KGVP,2ah,Jayanagara Pump House,6,Medium
+BUS1496,1q0,258-S KBS-RDH,2xc,Madhura Nagara Hostel,16,Low
+BUS1497,21z,502-CT YTTMC-GGP-KRPMS,271,Bettenahalli,13,Low
+BUS1498,no,VNS-6,4z9,Udhbhava School,13,Low
+BUS1499,2qa,225-G KMT FLY,2vo,CS-Thanisandra,3,Medium
